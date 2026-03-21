@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { UploadResumeModal } from './UploadResumeModal'
 
-const defaultState = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const defaultState: any = {
   apiKey: 'test-key',
   addResume: vi.fn(),
   setActiveResumeId: vi.fn(),
@@ -11,7 +12,7 @@ const defaultState = {
 
 // Mock the store
 vi.mock('../../stores/useAppStore', () => ({
-  useAppStore: vi.fn((selector: (s: typeof defaultState) => unknown) =>
+  useAppStore: vi.fn((selector: (s: unknown) => unknown) =>
     selector(defaultState)
   ),
 }))
@@ -30,7 +31,7 @@ describe('UploadResumeModal', () => {
     // Restore default mock implementation
     const { useAppStore } = await import('../../stores/useAppStore')
     vi.mocked(useAppStore).mockImplementation(
-      (selector: (s: typeof defaultState) => unknown) => selector(defaultState)
+      (selector: (s: unknown) => unknown) => selector(defaultState)
     )
   })
 
@@ -70,13 +71,13 @@ describe('UploadResumeModal', () => {
 
   it('shows error when no API key is set', async () => {
     const { useAppStore } = await import('../../stores/useAppStore')
-    vi.mocked(useAppStore).mockImplementation((selector) => {
+    vi.mocked(useAppStore).mockImplementation((selector: (s: unknown) => unknown) => {
       const state = {
         apiKey: '',
         addResume: vi.fn(),
         setActiveResumeId: vi.fn(),
       }
-      return selector(state)
+      return selector(state as unknown)
     })
 
     const user = userEvent.setup()

@@ -75,8 +75,9 @@ describe('parseResumeWithClaude', () => {
 
     const experience = resume.sections.find((s) => s.content.type === 'experience')
     expect(experience).toBeDefined()
-    expect(experience!.content.data.items).toHaveLength(1)
-    expect(experience!.content.data.items[0].company).toBe('Acme Corp')
+    const expData = experience!.content.data as { items: Array<{ company: string }> }
+    expect(expData.items).toHaveLength(1)
+    expect(expData.items[0].company).toBe('Acme Corp')
   })
 
   it('throws when no tool_use block is returned', async () => {
