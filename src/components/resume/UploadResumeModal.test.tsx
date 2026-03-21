@@ -3,16 +3,17 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { UploadResumeModal } from './UploadResumeModal'
 
+const defaultState = {
+  apiKey: 'test-key',
+  addResume: vi.fn(),
+  setActiveResumeId: vi.fn(),
+}
+
 // Mock the store
 vi.mock('../../stores/useAppStore', () => ({
-  useAppStore: vi.fn((selector) => {
-    const state = {
-      apiKey: 'test-key',
-      addResume: vi.fn(),
-      setActiveResumeId: vi.fn(),
-    }
-    return selector(state)
-  }),
+  useAppStore: vi.fn((selector: (s: typeof defaultState) => unknown) =>
+    selector(defaultState)
+  ),
 }))
 
 // Mock the resume parser
@@ -24,8 +25,13 @@ vi.mock('../../services/resumeParser', () => ({
 describe('UploadResumeModal', () => {
   const onClose = vi.fn()
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+    // Restore default mock implementation
+    const { useAppStore } = await import('../../stores/useAppStore')
+    vi.mocked(useAppStore).mockImplementation(
+      (selector: (s: typeof defaultState) => unknown) => selector(defaultState)
+    )
   })
 
   it('renders nothing when closed', () => {
@@ -84,6 +90,50 @@ describe('UploadResumeModal', () => {
 
     expect(
       await screen.findByText(/Please set your Anthropic API key/)
+    ).toBeInTheDocument()
+  })
+
+  it('shows extracting then parsing states on successful upload', async () => {
+    const { extractText, parseResumeWithClaude } = await import(
+      '../../services/resumeParser'
+    )
+    vi.mocked(extractText).mockResolvedValue('Resume text content')
+    vi.mocked(parseResumeWithClaude).mockResolvedValue({
+      id: 'test-id',
+      name: 'Test Resume',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      templateId: 'classic',
+      sections: [],
+    })
+
+    const user = userEvent.setup()
+    render(<UploadResumeModal open={true} onClose={onClose} />)
+
+    const file = new File(['resume content'], 'resume.txt', {
+      type: 'text/plain',
+    })
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    await user.upload(input, file)
+
+    expect(
+      await screen.findByText('Resume imported successfully!')
+    ).toBeInTheDocument()
+  })
+
+  it('shows error when extractText returns empty string', async () => {
+    const { extractText } = await import('../../services/resumeParser')
+    vi.mocked(extractText).mockResolvedValue('   ')
+
+    const user = userEvent.setup()
+    render(<UploadResumeModal open={true} onClose={onClose} />)
+
+    const file = new File([''], 'resume.txt', { type: 'text/plain' })
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    await user.upload(input, file)
+
+    expect(
+      await screen.findByText(/Could not extract text/)
     ).toBeInTheDocument()
   })
 })
