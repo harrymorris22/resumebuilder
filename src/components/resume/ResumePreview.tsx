@@ -20,6 +20,7 @@ import type { ResumeSection, SectionContent } from '../../types/resume';
 import { SectionRenderer } from './SectionRenderer';
 import { SectionDragHandle } from './SectionDragHandle';
 import { ContentBankDrawer } from '../contentBank/ContentBankDrawer';
+import { UploadResumeModal } from './UploadResumeModal';
 import { ExportMenu } from '../export/ExportMenu';
 import { ModernTemplate } from '../templates/modern/ModernTemplate';
 import { MinimalTemplate } from '../templates/minimal/MinimalTemplate';
@@ -57,6 +58,7 @@ export function ResumePreview() {
   const updateResume = useAppStore((s) => s.updateResume);
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const [bankOpen, setBankOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -167,11 +169,18 @@ export function ResumePreview() {
           >
             Content Bank
           </button>
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="text-xs text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
+          >
+            Upload Resume
+          </button>
         </div>
         <ExportMenu />
       </div>
 
       <ContentBankDrawer open={bankOpen} onClose={() => setBankOpen(false)} />
+      <UploadResumeModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </div>
   );
 }
