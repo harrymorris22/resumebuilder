@@ -224,6 +224,31 @@ export const resumeTools: ToolDefinition[] = [
     },
   },
   {
+    name: 'suggest_actions',
+    description:
+      'Suggest 1-3 next actions for the user based on the current resume state. Call this after making resume modifications to guide the user on what to improve next. Each suggestion should be specific to THIS resume (e.g. "Your bullet about the deployment pipeline has no metrics — want me to help quantify it?").',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        suggestions: {
+          type: 'array',
+          maxItems: 3,
+          items: {
+            type: 'object',
+            properties: {
+              text: { type: 'string', description: 'Short display text shown on the suggestion card' },
+              prompt: { type: 'string', description: 'Full prompt to send when the user clicks "Try this"' },
+              sectionId: { type: 'string', description: 'Optional resume section ID this relates to' },
+            },
+            required: ['text', 'prompt'],
+          },
+          description: 'Array of 1-3 suggested next actions',
+        },
+      },
+      required: ['suggestions'],
+    },
+  },
+  {
     name: 'generate_cover_letter',
     description:
       'Generate a cover letter for the current job description. Call this after all resume suggestions have been resolved.',

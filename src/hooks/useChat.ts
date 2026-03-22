@@ -6,7 +6,7 @@ import { resumeTools } from '../services/tools';
 import { buildSystemPrompt } from '../services/systemPrompt';
 import { handleToolCall } from '../services/toolHandler';
 import { generateId } from '../utils/id';
-import type { ChatMessage, StarSuggestion } from '../types/chat';
+import type { ChatMessage, StarSuggestion, ActionSuggestion } from '../types/chat';
 import type { ToolCallResult } from '../types/chat';
 
 const MAX_TOOL_ITERATIONS = 10;
@@ -16,6 +16,8 @@ export function useChat() {
   const [streamingText, setStreamingText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [starSuggestions, setStarSuggestions] = useState<StarSuggestion[]>([]);
+  const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
+  const [missedSuggestionCount, setMissedSuggestionCount] = useState(0);
   const abortRef = useRef(false);
 
   const apiKey = useAppStore((s) => s.apiKey);
@@ -134,7 +136,12 @@ export function useChat() {
 
           const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
 
+          let hadSuggestActions = false;
+          const RESUME_MODIFYING_TOOLS = ['update_contact', 'set_summary', 'add_experience', 'update_experience_bullets', 'add_education', 'add_skills', 'add_certification', 'add_project'];
+
           for (const toolUse of finalToolUses) {
+            if (toolUse.name === 'suggest_actions') hadSuggestActions = true;
+
             const result = handleToolCall(
               toolUse.name,
               toolUse.input as Record<string, unknown>,
@@ -143,6 +150,15 @@ export function useChat() {
                 updateResume,
                 addContentBankItem,
                 onStarSuggestion: (s) => setStarSuggestions((prev) => [...prev, s]),
+                onActionSuggestion: (suggestions) => {
+                  setActionSuggestions(suggestions);
+                  if (suggestions.length > 0) {
+                    useAppStore.getState().setLatestCoachSuggestion({
+                      text: suggestions[0].text,
+                      prompt: suggestions[0].prompt,
+                    });
+                  }
+                },
               }
             );
 
@@ -157,6 +173,14 @@ export function useChat() {
               tool_use_id: toolUse.id,
               content: result,
             });
+          }
+
+          // Update fallback counter: increment if resume was modified but no suggest_actions
+          const hadResumeModification = finalToolUses.some((t) => RESUME_MODIFYING_TOOLS.includes(t.name));
+          if (hadResumeModification && !hadSuggestActions) {
+            setMissedSuggestionCount((c) => c + 1);
+          } else if (hadSuggestActions) {
+            setMissedSuggestionCount(0);
           }
 
           // Continue conversation with tool results
@@ -266,6 +290,8 @@ export function useChat() {
     starSuggestions,
     acceptStarSuggestion,
     rejectStarSuggestion,
+    actionSuggestions,
+    missedSuggestionCount,
     messages: activeSession?.messages ?? [],
   };
 }

@@ -8,6 +8,7 @@ const defaultState: any = {
   apiKey: 'test-key',
   addResume: vi.fn(),
   setActiveResumeId: vi.fn(),
+  setPendingAutoMessage: vi.fn(),
 }
 
 // Mock the store
@@ -76,6 +77,7 @@ describe('UploadResumeModal', () => {
         apiKey: '',
         addResume: vi.fn(),
         setActiveResumeId: vi.fn(),
+        setPendingAutoMessage: vi.fn(),
       }
       return selector(state as unknown)
     })

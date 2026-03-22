@@ -35,3 +35,9 @@ export interface StarSuggestion {
   bulletIndex?: number;
   status: 'pending' | 'accepted' | 'rejected';
 }
+
+export interface ActionSuggestion {
+  text: string;
+  prompt: string;
+  sectionId?: string;
+}
