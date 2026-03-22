@@ -36,8 +36,17 @@ export interface StarSuggestion {
   status: 'pending' | 'accepted' | 'rejected';
 }
 
+export type ActionStatus = 'pending' | 'executing' | 'completed' | 'dismissed';
+export type ActionCategory = 'content' | 'metrics' | 'structure' | 'missing' | 'question';
+export type ActionPriority = 'high' | 'medium' | 'low';
+
 export interface ActionSuggestion {
+  id: string;
   text: string;
   prompt: string;
+  preview?: string;
   sectionId?: string;
+  category: ActionCategory;
+  priority: ActionPriority;
+  status: ActionStatus;
 }

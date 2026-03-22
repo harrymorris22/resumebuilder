@@ -238,12 +238,23 @@ export function handleToolCall(
 
     case 'suggest_actions': {
       if (onActionSuggestion) {
-        const suggestions = (input.suggestions as Array<{ text: string; prompt: string; sectionId?: string }>)
-          .map((s) => ({
-            text: s.text,
-            prompt: s.prompt,
-            sectionId: s.sectionId,
-          }));
+        const suggestions = (input.suggestions as Array<{
+          text: string;
+          prompt: string;
+          preview?: string;
+          sectionId?: string;
+          category?: string;
+          priority?: string;
+        }>).map((s) => ({
+          id: generateId(),
+          text: s.text,
+          prompt: s.prompt,
+          preview: s.preview,
+          sectionId: s.sectionId,
+          category: (s.category || 'content') as ActionSuggestion['category'],
+          priority: (s.priority || 'medium') as ActionSuggestion['priority'],
+          status: 'pending' as const,
+        }));
         onActionSuggestion(suggestions);
       }
       return 'Action suggestions presented to user.';
