@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0.0] - 2026-03-22
+
+### Changed
+- **Replaced chat interface with action-list UI** — AI suggests specific fixes as clickable cards instead of open-ended conversation
+- Left panel is now ActionPanel with three zones: Resume Score + progress bar, scrollable action cards, compact freeform input
+- System prompt rewritten for action-list paradigm — AI generates categorized, prioritized suggestions with previews
+- `suggest_actions` tool now supports up to 5 items with priority (high/medium/low), category (content/metrics/structure/missing/question), and preview text
+
+### Added
+- ActionCard component with 4 states (pending → executing → completed → dismissed) and category-colored borders
+- Undo system — 5-second undo window after each AI fix, with resume state snapshot/restore
+- Progress bar showing "N of M suggestions addressed"
+- Inline preview — expand action cards to see what the AI will change before clicking Fix
+- AiBanner — temporary AI text responses shown as dismissable banners (auto-dismiss after 10s, questions stay pinned)
+- FreeformInput — compact "Ask anything..." input for secondary chat
+- Job Match mode toggle and job description input restored in new ActionPanel header
+
+### Removed
+- Chat bubbles / conversational message display (ChatPanel archived, not deleted)
+- CoachNote component (absorbed into ActionCard)
+- Static ActionSuggestions chips (replaced by AI-driven action cards)
+
 ## [0.1.1.0] - 2026-03-22
 
 ### Added

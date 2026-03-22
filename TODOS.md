@@ -14,4 +14,10 @@ Toggle button in resume preview showing visual diff of AI rewrites (original cro
 - **Effort:** S (CC: ~15 min)
 - **Depends on:** Sections must store original text alongside current text
 
+**Priority:** P3
+### Completed Actions Log
+Collapsible "Completed (N)" section at bottom of action panel showing what the AI already fixed. Users can expand to see history and re-open any action. Gives sense of accomplishment and answers "what did it change?"
+- **Effort:** S (CC: ~10 min)
+- **Depends on:** Action-list UI (shipped)
+
 ## Completed
