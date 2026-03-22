@@ -226,23 +226,34 @@ export const resumeTools: ToolDefinition[] = [
   {
     name: 'suggest_actions',
     description:
-      'Suggest 1-3 next actions for the user based on the current resume state. Call this after making resume modifications to guide the user on what to improve next. Each suggestion should be specific to THIS resume (e.g. "Your bullet about the deployment pipeline has no metrics — want me to help quantify it?").',
+      'Suggest 1-5 next actions the user should take to improve their resume. You are powering an action-list interface — each suggestion becomes a card the user can click "Fix" to execute or dismiss. Be specific to THIS resume. Include a preview showing what the improvement would look like.',
     input_schema: {
       type: 'object' as const,
       properties: {
         suggestions: {
           type: 'array',
-          maxItems: 3,
+          maxItems: 5,
           items: {
             type: 'object',
             properties: {
-              text: { type: 'string', description: 'Short display text shown on the suggestion card' },
-              prompt: { type: 'string', description: 'Full prompt to send when the user clicks "Try this"' },
-              sectionId: { type: 'string', description: 'Optional resume section ID this relates to' },
+              text: { type: 'string', description: 'Short display text for the action card (1-2 sentences)' },
+              prompt: { type: 'string', description: 'Full prompt to execute when the user clicks "Fix this"' },
+              preview: { type: 'string', description: 'Short preview of what the fix would look like (e.g. the rewritten bullet text, the new section content). Shows before the user commits.' },
+              sectionId: { type: 'string', description: 'Resume section ID this relates to' },
+              category: {
+                type: 'string',
+                enum: ['content', 'metrics', 'structure', 'missing', 'question'],
+                description: 'Category: content (rewrite/improve), metrics (add numbers), structure (reorder/format), missing (add section), question (probe for more info)',
+              },
+              priority: {
+                type: 'string',
+                enum: ['high', 'medium', 'low'],
+                description: 'Priority: high (critical improvement), medium (notable improvement), low (nice to have)',
+              },
             },
-            required: ['text', 'prompt'],
+            required: ['text', 'prompt', 'category', 'priority'],
           },
-          description: 'Array of 1-3 suggested next actions',
+          description: 'Array of 1-5 suggested next actions, ordered by priority',
         },
       },
       required: ['suggestions'],
