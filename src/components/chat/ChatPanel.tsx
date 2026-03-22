@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import { useChat } from '../../hooks/useChat';
 import { MessageBubble } from './MessageBubble';
@@ -17,7 +17,7 @@ export function ChatPanel() {
   const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
   const isJobMode = activeSession?.mode === 'job-customisation';
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     sendMessage,
@@ -35,11 +35,22 @@ export function ChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingText, starSuggestions]);
 
+  const resizeTextarea = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
   const handleSend = () => {
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
     setInput('');
     sendMessage(trimmed);
+    // Reset textarea height after clearing
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -152,19 +163,22 @@ export function ChatPanel() {
 
       <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="flex gap-2">
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
+            rows={1}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              resizeTextarea();
+            }}
             onKeyDown={handleKeyDown}
             placeholder={
               apiKey
-                ? 'Type a message...'
+                ? 'Type a message... (Shift+Enter for new line)'
                 : 'Set your API key in Settings to start'
             }
             disabled={!apiKey || isStreaming}
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none min-h-[72px] max-h-[192px] overflow-y-auto"
           />
           <button
             onClick={handleSend}
