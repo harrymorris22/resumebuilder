@@ -58,6 +58,8 @@ export function ResumePreview() {
   const resumes = useAppStore((s) => s.resumes);
   const activeResumeId = useAppStore((s) => s.activeResumeId);
   const updateResume = useAppStore((s) => s.updateResume);
+  const coachSuggestion = useAppStore((s) => s.latestCoachSuggestion);
+  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const [bankOpen, setBankOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -119,9 +121,6 @@ export function ResumePreview() {
       updatedAt: new Date().toISOString(),
     });
   };
-
-  const coachSuggestion = useAppStore((s) => s.latestCoachSuggestion);
-  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900">
