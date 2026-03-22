@@ -182,29 +182,42 @@ export const useAppStore = create<AppState>()(
         }
 
         const state = get();
+        const activeResumeId = state.activeResumeId ?? resumes[0]?.id ?? null;
         set({
           resumes,
           chatSessions,
           contentBankItems,
           hydrated: true,
-          activeResumeId: state.activeResumeId ?? resumes[0]?.id ?? null,
+          activeResumeId,
         });
 
-        // Create a default chat session if none exist for active resume
-        const activeId = get().activeResumeId;
-        if (activeId && !chatSessions.some((s) => s.resumeId === activeId)) {
-          const newSession: ChatSession = {
-            id: generateId(),
-            resumeId: activeId,
-            messages: [],
-            mode: 'general',
-          };
-          get().addChatSession(newSession);
-          set({ activeChatSessionId: newSession.id });
-        } else if (activeId) {
-          const existing = chatSessions.find((s) => s.resumeId === activeId);
-          if (existing && !state.activeChatSessionId) {
-            set({ activeChatSessionId: existing.id });
+        // Restore or create a chat session for the active resume
+        if (activeResumeId) {
+          const sessionsForResume = chatSessions.filter(
+            (s) => s.resumeId === activeResumeId
+          );
+
+          if (sessionsForResume.length === 0) {
+            // No sessions exist for this resume — create a default one
+            const newSession: ChatSession = {
+              id: generateId(),
+              resumeId: activeResumeId,
+              messages: [],
+              mode: 'general',
+            };
+            get().addChatSession(newSession);
+            set({ activeChatSessionId: newSession.id });
+          } else {
+            // Sessions exist — restore the active one, or pick the first match
+            const savedId = state.activeChatSessionId;
+            const validSession = sessionsForResume.find(
+              (s) => s.id === savedId
+            );
+            set({
+              activeChatSessionId: validSession
+                ? validSession.id
+                : sessionsForResume[0].id,
+            });
           }
         }
       },
