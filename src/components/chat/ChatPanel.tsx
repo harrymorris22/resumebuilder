@@ -3,16 +3,23 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useChat } from '../../hooks/useChat';
 import { MessageBubble } from './MessageBubble';
 import { StarSuggestionCard } from './StarSuggestionCard';
+import { ActionSuggestionCard } from './ActionSuggestionCard';
+import { ActionSuggestions } from './ActionSuggestions';
+import { OnboardingFlow } from './OnboardingFlow';
 import { ModeToggle } from './ModeToggle';
 import { JobDescriptionInput } from './JobDescriptionInput';
+import { UploadResumeModal } from '../resume/UploadResumeModal';
 
 export function ChatPanel() {
   const apiKey = useAppStore((s) => s.apiKey);
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
   const chatSessions = useAppStore((s) => s.chatSessions);
   const activeChatSessionId = useAppStore((s) => s.activeChatSessionId);
+  const pendingAutoMessage = useAppStore((s) => s.pendingAutoMessage);
+  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
   const [input, setInput] = useState('');
   const [jdSubmitted, setJdSubmitted] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
   const isJobMode = activeSession?.mode === 'job-customisation';
@@ -29,11 +36,21 @@ export function ChatPanel() {
     starSuggestions,
     acceptStarSuggestion,
     rejectStarSuggestion,
+    actionSuggestions,
+    missedSuggestionCount,
   } = useChat();
+
+  // Auto-send pending message (from upload, etc.)
+  useEffect(() => {
+    if (pendingAutoMessage && !isStreaming && apiKey) {
+      sendMessage(pendingAutoMessage);
+      setPendingAutoMessage(null);
+    }
+  }, [pendingAutoMessage, isStreaming, apiKey, sendMessage, setPendingAutoMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingText, starSuggestions]);
+  }, [messages, streamingText, starSuggestions, actionSuggestions]);
 
   const resizeTextarea = useCallback(() => {
     const el = inputRef.current;
@@ -42,15 +59,15 @@ export function ChatPanel() {
     el.style.height = `${el.scrollHeight}px`;
   }, []);
 
-  const handleSend = () => {
-    const trimmed = input.trim();
-    if (!trimmed || isStreaming) return;
-    setInput('');
-    sendMessage(trimmed);
-    if (inputRef.current) {
+  const handleSend = useCallback((text?: string) => {
+    const toSend = text || input.trim();
+    if (!toSend || isStreaming) return;
+    if (!text) setInput('');
+    sendMessage(toSend);
+    if (inputRef.current && !text) {
       inputRef.current.style.height = 'auto';
     }
-  };
+  }, [input, isStreaming, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -58,6 +75,17 @@ export function ChatPanel() {
       handleSend();
     }
   };
+
+  const handleTailor = useCallback(() => {
+    // Switch to job-customisation mode
+    if (activeSession) {
+      const updateChatSession = useAppStore.getState().updateChatSession;
+      updateChatSession({ ...activeSession, mode: 'job-customisation' });
+    }
+  }, [activeSession]);
+
+  const hasAISuggestions = actionSuggestions.length > 0;
+  const showFallbackChips = missedSuggestionCount >= 3;
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
@@ -98,12 +126,10 @@ export function ChatPanel() {
             </button>
           </div>
         ) : messages.length === 0 && !isStreaming ? (
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 max-w-[85%] text-sm text-gray-700 dark:text-gray-300">
-            <p>
-              Hi! I'm your AI career coach. Let's build your resume together.
-              What's your name and current role?
-            </p>
-          </div>
+          <OnboardingFlow
+            onSend={(prompt) => handleSend(prompt)}
+            onUpload={() => setUploadOpen(true)}
+          />
         ) : (
           <>
             {messages.map((msg) => (
@@ -118,6 +144,20 @@ export function ChatPanel() {
                 onReject={() => rejectStarSuggestion(i)}
               />
             ))}
+
+            {/* AI-driven action suggestion cards */}
+            {actionSuggestions.length > 0 && !isStreaming && (
+              <div className="space-y-2 mb-3" role="list" aria-label="Suggested actions">
+                {actionSuggestions.map((suggestion, i) => (
+                  <ActionSuggestionCard
+                    key={i}
+                    suggestion={suggestion}
+                    onTry={() => handleSend(suggestion.prompt)}
+                    disabled={isStreaming}
+                  />
+                ))}
+              </div>
+            )}
 
             {isStreaming && streamingText && (
               <div className="flex justify-start mb-3">
@@ -160,34 +200,49 @@ export function ChatPanel() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <div className="flex gap-2">
-          <textarea
-            ref={inputRef}
-            rows={1}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              resizeTextarea();
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              apiKey
-                ? 'Type a message... (Shift+Enter for new line)'
-                : 'Set your API key in Settings to start'
-            }
-            disabled={!apiKey || isStreaming}
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none min-h-[72px] max-h-[192px] overflow-y-auto"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!apiKey || isStreaming || !input.trim()}
-            className="px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Send
-          </button>
+      {/* Action chips + input area */}
+      <div className="border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+        {apiKey && messages.length > 0 && (
+          <div className="px-3 pt-2">
+            <ActionSuggestions
+              onSend={(prompt) => handleSend(prompt)}
+              onUpload={() => setUploadOpen(true)}
+              onTailor={handleTailor}
+              collapsed={hasAISuggestions && !showFallbackChips}
+            />
+          </div>
+        )}
+        <div className="p-3">
+          <div className="flex gap-2">
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                resizeTextarea();
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                apiKey
+                  ? 'Type a message... (Shift+Enter for new line)'
+                  : 'Set your API key in Settings to start'
+              }
+              disabled={!apiKey || isStreaming}
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none min-h-[72px] max-h-[192px] overflow-y-auto"
+            />
+            <button
+              onClick={() => handleSend()}
+              disabled={!apiKey || isStreaming || !input.trim()}
+              className="px-4 py-2 text-sm rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
+
+      <UploadResumeModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </div>
   );
 }

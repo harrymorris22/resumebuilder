@@ -34,6 +34,8 @@ interface AppState {
   settingsOpen: boolean;
   atsKeywords: string[];
   activeCoverLetter: CoverLetter | null;
+  pendingAutoMessage: string | null;
+  latestCoachSuggestion: { text: string; prompt: string } | null;
 
   // Actions — settings
   setApiKey: (key: string) => void;
@@ -64,6 +66,10 @@ interface AppState {
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
 
+  // Actions — auto-message & coach
+  setPendingAutoMessage: (msg: string | null) => void;
+  setLatestCoachSuggestion: (s: { text: string; prompt: string } | null) => void;
+
   // Hydration
   hydrateFromIdb: () => Promise<void>;
 }
@@ -86,6 +92,8 @@ export const useAppStore = create<AppState>()(
       hydrated: false,
       atsKeywords: [],
       activeCoverLetter: null,
+      pendingAutoMessage: null,
+      latestCoachSuggestion: null,
       settingsOpen: false,
 
       // Settings
@@ -165,6 +173,10 @@ export const useAppStore = create<AppState>()(
 
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
+
+      // Auto-message & coach
+      setPendingAutoMessage: (msg) => set({ pendingAutoMessage: msg }),
+      setLatestCoachSuggestion: (s) => set({ latestCoachSuggestion: s }),
 
       // Hydration
       hydrateFromIdb: async () => {

@@ -1,5 +1,5 @@
 import type { Resume, ResumeSection, ExperienceItem, EducationItem, CertificationItem, ProjectItem, SkillCategory, ContentBankItem, CoverLetter, JobDescription } from '../types/resume';
-import type { StarSuggestion, BankItemSuggestion } from '../types/chat';
+import type { StarSuggestion, BankItemSuggestion, ActionSuggestion } from '../types/chat';
 import { generateId } from '../utils/id';
 
 type ToolInput = Record<string, unknown>;
@@ -12,6 +12,7 @@ interface ToolHandlerContext {
   onBankItemSuggestion?: (suggestion: BankItemSuggestion) => void;
   onJobAnalyzed?: (job: JobDescription) => void;
   onCoverLetterGenerated?: (letter: CoverLetter) => void;
+  onActionSuggestion?: (suggestions: ActionSuggestion[]) => void;
 }
 
 function findSection(resume: Resume, type: string): ResumeSection | undefined {
@@ -33,7 +34,7 @@ export function handleToolCall(
   input: ToolInput,
   ctx: ToolHandlerContext
 ): string {
-  const { resume, updateResume, addContentBankItem, onStarSuggestion, onBankItemSuggestion, onJobAnalyzed, onCoverLetterGenerated } = ctx;
+  const { resume, updateResume, addContentBankItem, onStarSuggestion, onBankItemSuggestion, onJobAnalyzed, onCoverLetterGenerated, onActionSuggestion } = ctx;
 
   switch (toolName) {
     case 'update_contact': {
@@ -233,6 +234,19 @@ export function handleToolCall(
         });
       }
       return 'Bank item suggestion presented to user.';
+    }
+
+    case 'suggest_actions': {
+      if (onActionSuggestion) {
+        const suggestions = (input.suggestions as Array<{ text: string; prompt: string; sectionId?: string }>)
+          .map((s) => ({
+            text: s.text,
+            prompt: s.prompt,
+            sectionId: s.sectionId,
+          }));
+        onActionSuggestion(suggestions);
+      }
+      return 'Action suggestions presented to user.';
     }
 
     case 'generate_cover_letter': {
