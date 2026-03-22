@@ -4,7 +4,7 @@ import { MobileGate } from './components/layout/MobileGate';
 import { Header } from './components/layout/Header';
 import { SplitPane } from './components/layout/SplitPane';
 import { SettingsModal } from './components/settings/SettingsModal';
-import { ChatPanel } from './components/chat/ChatPanel';
+import { ActionPanel } from './components/actions/ActionPanel';
 import { RightPanel } from './components/resume/RightPanel';
 
 function AppContent() {
@@ -35,7 +35,7 @@ function AppContent() {
     <div className={`flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}>
       <Header />
       <SplitPane
-        left={<ChatPanel />}
+        left={<ActionPanel />}
         right={<RightPanel />}
       />
       <SettingsModal />

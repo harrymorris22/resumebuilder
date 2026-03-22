@@ -25,8 +25,6 @@ import { ExportMenu } from '../export/ExportMenu';
 import { ModernTemplate } from '../templates/modern/ModernTemplate';
 import { MinimalTemplate } from '../templates/minimal/MinimalTemplate';
 import { CreativeTemplate } from '../templates/creative/CreativeTemplate';
-import { ResumeScore } from './ResumeScore';
-import { CoachNote } from './CoachNote';
 
 function SortableSection({
   section,
@@ -58,8 +56,6 @@ export function ResumePreview() {
   const resumes = useAppStore((s) => s.resumes);
   const activeResumeId = useAppStore((s) => s.activeResumeId);
   const updateResume = useAppStore((s) => s.updateResume);
-  const coachSuggestion = useAppStore((s) => s.latestCoachSuggestion);
-  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const [bankOpen, setBankOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -124,11 +120,6 @@ export function ResumePreview() {
 
   return (
     <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900">
-      <ResumeScore />
-      <CoachNote
-        suggestion={coachSuggestion}
-        onFix={(prompt) => setPendingAutoMessage(prompt)}
-      />
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
         <div className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-gray-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
           {activeResume.templateId === 'modern' ? (

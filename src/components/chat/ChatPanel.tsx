@@ -37,7 +37,6 @@ export function ChatPanel() {
     acceptStarSuggestion,
     rejectStarSuggestion,
     actionSuggestions,
-    missedSuggestionCount,
   } = useChat();
 
   // Auto-send pending message (from upload, etc.)
@@ -85,7 +84,7 @@ export function ChatPanel() {
   }, [activeSession]);
 
   const hasAISuggestions = actionSuggestions.length > 0;
-  const showFallbackChips = missedSuggestionCount >= 3;
+  const showFallbackChips = false;
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800">
