@@ -8,8 +8,10 @@ import { handleToolCall } from '../services/toolHandler';
 import { generateId } from '../utils/id';
 import type { ChatMessage, StarSuggestion, ActionSuggestion } from '../types/chat';
 import type { ToolCallResult } from '../types/chat';
+import type { Resume } from '../types/resume';
 
 const MAX_TOOL_ITERATIONS = 10;
+const UNDO_TIMEOUT_SECONDS = 5;
 
 export function useChat() {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -17,8 +19,10 @@ export function useChat() {
   const [error, setError] = useState<string | null>(null);
   const [starSuggestions, setStarSuggestions] = useState<StarSuggestion[]>([]);
   const [actionSuggestions, setActionSuggestions] = useState<ActionSuggestion[]>([]);
-  const [missedSuggestionCount, setMissedSuggestionCount] = useState(0);
+  const [undoCountdowns, setUndoCountdowns] = useState<Map<string, number>>(new Map());
   const abortRef = useRef(false);
+  const undoSnapshotsRef = useRef<Map<string, Resume>>(new Map());
+  const undoTimersRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   const apiKey = useAppStore((s) => s.apiKey);
   const resumes = useAppStore((s) => s.resumes);
@@ -32,6 +36,112 @@ export function useChat() {
 
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
+
+  // Merge new AI suggestions with existing ones
+  const mergeActionSuggestions = useCallback((newSuggestions: ActionSuggestion[]) => {
+    setActionSuggestions((prev) => {
+      // Remove completed/dismissed cards (unless they have active undo countdowns)
+      const kept = prev.filter(
+        (a) => a.status === 'pending' || a.status === 'executing' ||
+        (a.status === 'completed' && undoSnapshotsRef.current.has(a.id))
+      );
+      // Add new suggestions, cap at 7 total
+      return [...newSuggestions, ...kept].slice(0, 7);
+    });
+  }, []);
+
+  // Dismiss an action
+  const dismissAction = useCallback((id: string) => {
+    setActionSuggestions((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, status: 'dismissed' as const } : a))
+    );
+    // Clean up after animation
+    setTimeout(() => {
+      setActionSuggestions((prev) => prev.filter((a) => a.id !== id));
+    }, 300);
+  }, []);
+
+  // Start undo countdown for a completed action
+  const startUndoCountdown = useCallback((actionId: string) => {
+    setUndoCountdowns((prev) => new Map(prev).set(actionId, UNDO_TIMEOUT_SECONDS));
+
+    const interval = setInterval(() => {
+      setUndoCountdowns((prev) => {
+        const current = prev.get(actionId);
+        if (current === undefined || current <= 1) {
+          clearInterval(interval);
+          undoTimersRef.current.delete(actionId);
+          undoSnapshotsRef.current.delete(actionId);
+          const next = new Map(prev);
+          next.delete(actionId);
+          // Remove the completed card after undo window expires
+          setActionSuggestions((actions) => actions.filter((a) => a.id !== actionId));
+          return next;
+        }
+        return new Map(prev).set(actionId, current - 1);
+      });
+    }, 1000);
+
+    undoTimersRef.current.set(actionId, interval);
+  }, []);
+
+  // Execute an action (click "Fix")
+  const executeAction = useCallback(
+    (id: string) => {
+      const action = actionSuggestions.find((a) => a.id === id);
+      if (!action || isStreaming) return;
+
+      // Snapshot resume for undo
+      const currentResume = useAppStore.getState().resumes.find((r) => r.id === activeResumeId);
+      if (currentResume) {
+        undoSnapshotsRef.current.set(id, structuredClone(currentResume));
+      }
+
+      // Mark as executing
+      setActionSuggestions((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, status: 'executing' as const } : a))
+      );
+
+      // Send the prompt
+      sendMessage(action.prompt).then(() => {
+        // Mark as completed
+        setActionSuggestions((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, status: 'completed' as const } : a))
+        );
+        startUndoCountdown(id);
+      });
+    },
+    [actionSuggestions, isStreaming, activeResumeId, startUndoCountdown]
+    // Note: sendMessage is referenced but defined in the same scope — added below
+  );
+
+  // Undo an action
+  const undoAction = useCallback(
+    (id: string) => {
+      const snapshot = undoSnapshotsRef.current.get(id);
+      if (!snapshot) return;
+
+      // Restore resume
+      updateResume(snapshot);
+
+      // Clear undo state
+      const timer = undoTimersRef.current.get(id);
+      if (timer) clearInterval(timer);
+      undoTimersRef.current.delete(id);
+      undoSnapshotsRef.current.delete(id);
+      setUndoCountdowns((prev) => {
+        const next = new Map(prev);
+        next.delete(id);
+        return next;
+      });
+
+      // Re-open the action as pending
+      setActionSuggestions((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, status: 'pending' as const } : a))
+      );
+    },
+    [updateResume]
+  );
 
   const sendMessage = useCallback(
     async (userText: string) => {
@@ -62,7 +172,6 @@ export function useChat() {
           activeSession.mode === 'job-customisation' ? activeSession.jobDescriptionId : undefined
         );
 
-        // Build conversation history for API
         const apiMessages: Anthropic.Messages.MessageParam[] = updatedMessages.map((m) => ({
           role: m.role,
           content: m.content,
@@ -86,7 +195,6 @@ export function useChat() {
             tools: resumeTools,
           });
 
-          let responseText = '';
           const toolUses: Array<{ id: string; name: string; input: Record<string, unknown> }> = [];
 
           for await (const event of stream) {
@@ -94,7 +202,6 @@ export function useChat() {
 
             if (event.type === 'content_block_delta') {
               if (event.delta.type === 'text_delta') {
-                responseText += event.delta.text;
                 fullText += event.delta.text;
                 setStreamingText(fullText);
               }
@@ -109,39 +216,23 @@ export function useChat() {
                 });
               }
             }
-
-            if (event.type === 'content_block_delta') {
-              if (event.delta.type === 'input_json_delta' && toolUses.length > 0) {
-                // The SDK handles JSON accumulation in the final message
-              }
-            }
           }
 
-          // Get the final message to extract complete tool inputs
           const finalMessage = await stream.finalMessage();
 
-          // Extract tool uses from the final message
           const finalToolUses = finalMessage.content
             .filter((block): block is Anthropic.Messages.ToolUseBlock => block.type === 'tool_use');
 
           if (finalToolUses.length === 0 || finalMessage.stop_reason === 'end_turn') {
-            // No tool calls or final response — done
             break;
           }
 
-          // Handle tool calls
-          // Get fresh resume state for each tool call
           const freshResume = useAppStore.getState().resumes.find((r) => r.id === activeResumeId);
           if (!freshResume) break;
 
           const toolResults: Anthropic.Messages.ToolResultBlockParam[] = [];
 
-          let hadSuggestActions = false;
-          const RESUME_MODIFYING_TOOLS = ['update_contact', 'set_summary', 'add_experience', 'update_experience_bullets', 'add_education', 'add_skills', 'add_certification', 'add_project'];
-
           for (const toolUse of finalToolUses) {
-            if (toolUse.name === 'suggest_actions') hadSuggestActions = true;
-
             const result = handleToolCall(
               toolUse.name,
               toolUse.input as Record<string, unknown>,
@@ -151,13 +242,7 @@ export function useChat() {
                 addContentBankItem,
                 onStarSuggestion: (s) => setStarSuggestions((prev) => [...prev, s]),
                 onActionSuggestion: (suggestions) => {
-                  setActionSuggestions(suggestions);
-                  if (suggestions.length > 0) {
-                    useAppStore.getState().setLatestCoachSuggestion({
-                      text: suggestions[0].text,
-                      prompt: suggestions[0].prompt,
-                    });
-                  }
+                  mergeActionSuggestions(suggestions);
                 },
               }
             );
@@ -175,15 +260,6 @@ export function useChat() {
             });
           }
 
-          // Update fallback counter: increment if resume was modified but no suggest_actions
-          const hadResumeModification = finalToolUses.some((t) => RESUME_MODIFYING_TOOLS.includes(t.name));
-          if (hadResumeModification && !hadSuggestActions) {
-            setMissedSuggestionCount((c) => c + 1);
-          } else if (hadSuggestActions) {
-            setMissedSuggestionCount(0);
-          }
-
-          // Continue conversation with tool results
           currentMessages = [
             ...currentMessages,
             { role: 'assistant' as const, content: finalMessage.content },
@@ -195,7 +271,6 @@ export function useChat() {
           fullText += '\n\n*I got a bit carried away there. Could you rephrase your request?*';
         }
 
-        // Save assistant message
         const assistantMessage: ChatMessage = {
           id: generateId(),
           role: 'assistant',
@@ -227,6 +302,7 @@ export function useChat() {
       updateChatSession,
       updateResume,
       addContentBankItem,
+      mergeActionSuggestions,
     ]
   );
 
@@ -245,7 +321,6 @@ export function useChat() {
       const suggestion = starSuggestions[index];
       if (!suggestion || !activeResume) return;
 
-      // If we have section/item/bullet info, update the resume
       if (suggestion.sectionId && suggestion.itemId && suggestion.bulletIndex !== undefined) {
         const section = activeResume.sections.find((s) => s.id === suggestion.sectionId);
         if (section && section.content.type === 'experience') {
@@ -291,7 +366,10 @@ export function useChat() {
     acceptStarSuggestion,
     rejectStarSuggestion,
     actionSuggestions,
-    missedSuggestionCount,
+    dismissAction,
+    executeAction,
+    undoAction,
+    undoCountdowns,
     messages: activeSession?.messages ?? [],
   };
 }
