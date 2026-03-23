@@ -65,6 +65,43 @@ export function createDefaultSections(): ResumeSection[] {
   ];
 }
 
+export function cloneResume(source: Resume, newName?: string): Resume {
+  const now = new Date().toISOString();
+
+  const cloneSections = source.sections.map((section) => {
+    const cloned = structuredClone(section);
+    cloned.id = generateId();
+
+    // Regenerate all nested item IDs
+    const data = cloned.content.data;
+    if ('items' in data && Array.isArray(data.items)) {
+      for (const item of data.items) {
+        if ('id' in item) {
+          (item as { id: string }).id = generateId();
+        }
+      }
+    }
+    if ('categories' in data && Array.isArray(data.categories)) {
+      for (const cat of data.categories) {
+        if ('id' in cat) {
+          (cat as { id: string }).id = generateId();
+        }
+      }
+    }
+
+    return cloned;
+  });
+
+  return {
+    id: generateId(),
+    name: newName ?? `${source.name} (copy)`,
+    createdAt: now,
+    updatedAt: now,
+    templateId: source.templateId,
+    sections: cloneSections,
+  };
+}
+
 export function createDefaultResume(): Resume {
   return {
     id: generateId(),

@@ -1,11 +1,9 @@
 import { useAppStore } from '../../stores/useAppStore';
 import { ThemeToggle } from './ThemeToggle';
 import { TemplateSelector } from '../resume/TemplateSelector';
+import { ResumeMenu } from './ResumeMenu';
 
 export function Header() {
-  const resumes = useAppStore((s) => s.resumes);
-  const activeResumeId = useAppStore((s) => s.activeResumeId);
-  const setActiveResumeId = useAppStore((s) => s.setActiveResumeId);
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
 
   return (
@@ -14,26 +12,7 @@ export function Header() {
         <h1 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
           Resume Builder
         </h1>
-
-        {resumes.length > 0 && (
-          <div className="flex items-center gap-2">
-            <label htmlFor="resume-select" className="text-sm text-gray-500 dark:text-gray-400">
-              Resume:
-            </label>
-            <select
-              id="resume-select"
-              value={activeResumeId ?? ''}
-              onChange={(e) => setActiveResumeId(e.target.value)}
-              className="text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              {resumes.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <ResumeMenu />
       </div>
 
       <div className="flex items-center gap-1">
