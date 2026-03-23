@@ -1,6 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import { generateId } from '../../utils/id';
+import { ModeToggle } from '../chat/ModeToggle';
+import { JobDescriptionInput } from '../chat/JobDescriptionInput';
 import type { ContentPoolEntry, ContentPoolItemData, ContentPoolItemType } from '../../types/resume';
 
 const SECTION_ORDER: ContentPoolItemType[] = [
@@ -238,12 +240,63 @@ function isEntryInResume(entry: ContentPoolEntry, sections: Array<{ content: { t
   return false;
 }
 
-// --- Job Group Card (with inline add bullet + checkboxes) ---
-function JobGroupCard({ group, onAdd, onRemove, onToggle, resumeSections }: {
+// --- Editable text (click to edit, blur/Enter to save) ---
+function EditableText({ text, onSave, className }: { text: string; onSave: (newText: string) => void; className?: string }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(text);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editing && textareaRef.current) {
+      // Reset height then set to scrollHeight to fit all content
+      const ta = textareaRef.current;
+      ta.style.height = '0px';
+      ta.style.height = `${Math.max(ta.scrollHeight, 24)}px`;
+    }
+  }, [editing]);
+
+  if (!editing) {
+    return (
+      <p
+        ref={textRef}
+        onClick={() => { setEditing(true); setValue(text); }}
+        className={`cursor-text hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 -mx-1 ${className ?? ''}`}
+        title="Click to edit"
+      >
+        {text}
+      </p>
+    );
+  }
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      onChange={(e) => {
+        setValue(e.target.value);
+        // Auto-resize to fit content
+        e.target.style.height = '0px';
+        e.target.style.height = `${e.target.scrollHeight}px`;
+      }}
+      onBlur={() => { if (value.trim() && value !== text) onSave(value.trim()); setEditing(false); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (value.trim() && value !== text) onSave(value.trim()); setEditing(false); }
+        if (e.key === 'Escape') { setValue(text); setEditing(false); }
+      }}
+      autoFocus
+      className="flex-1 text-sm border border-primary-300 dark:border-primary-600 rounded px-1 py-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 -mx-1 resize-none overflow-hidden"
+    />
+  );
+}
+
+// --- Job Group Card (with inline add bullet + checkboxes + editable) ---
+function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSections }: {
   group: JobGroup;
   onAdd: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
+  onUpdate: (entry: ContentPoolEntry) => void;
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
 }) {
   const [addingBullet, setAddingBullet] = useState(false);
@@ -273,7 +326,15 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, resumeSections }: {
                 onChange={() => onToggle(entry, isChecked)}
                 className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <p className="flex-1 text-sm text-gray-700 dark:text-gray-300">{getItemSummary(entry.item)}</p>
+              <EditableText
+                text={entry.item.type === 'bullet' ? entry.item.data.text : getItemSummary(entry.item)}
+                onSave={(newText) => {
+                  if (entry.item.type === 'bullet') {
+                    onUpdate({ ...entry, item: { ...entry.item, data: { text: newText } }, updatedAt: new Date().toISOString() });
+                  }
+                }}
+                className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+              />
               <button onClick={() => onRemove(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -299,12 +360,18 @@ export function ContentPoolPage() {
   const activeResumeId = useAppStore((s) => s.activeResumeId);
   const addPoolEntry = useAppStore((s) => s.addPoolEntry);
   const removePoolEntry = useAppStore((s) => s.removePoolEntry);
+  const updatePoolEntry = useAppStore((s) => s.updatePoolEntry);
   const addPoolItemToResume = useAppStore((s) => s.addPoolItemToResume);
   const removePoolItemFromResume = useAppStore((s) => s.removePoolItemFromResume);
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
 
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const resumeSections = activeResume?.sections ?? null;
+  const apiKey = useAppStore((s) => s.apiKey);
+  const chatSessions = useAppStore((s) => s.chatSessions);
+  const activeChatSessionId = useAppStore((s) => s.activeChatSessionId);
+  const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
+  const isJobMode = activeSession?.mode === 'job-customisation';
 
   const handleToggle = useCallback((entry: ContentPoolEntry, isChecked: boolean) => {
     if (!activeResumeId) return;
@@ -340,8 +407,33 @@ export function ContentPoolPage() {
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {contentPool.length === 0
               ? 'Upload a resume or add items manually. Pick items for each resume version.'
-              : 'All your career content in one place. Pick items for each resume version.'}
+              : 'Check items to include in the current resume version.'}
           </p>
+        </div>
+
+        {/* Mode toggle + Generate Recommendations */}
+        <div className="space-y-3">
+          {apiKey && (
+            <div className="flex items-center justify-between">
+              <ModeToggle />
+              {contentPool.length > 0 && (
+                <button
+                  className="py-1.5 px-4 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+                  title="AI will analyze your resume and suggest improvements"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                  </svg>
+                  Generate Recommendations
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Job Description input when in Job Match mode */}
+          {isJobMode && (
+            <JobDescriptionInput onSubmit={() => { /* TODO: wire to AI analysis */ }} />
+          )}
         </div>
 
         {SECTION_ORDER.map((sectionType) => {
@@ -377,7 +469,7 @@ export function ContentPoolPage() {
               {sectionType === 'bullet' && entries.length > 0 && (
                 <div className="space-y-4">
                   {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} resumeSections={resumeSections} />
+                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} resumeSections={resumeSections} />
                   ))}
                 </div>
               )}
@@ -396,7 +488,15 @@ export function ContentPoolPage() {
                             onChange={() => handleToggle(entry, isChecked)}
                             className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <p className="flex-1 text-sm text-gray-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
+                          {entry.item.type === 'summary' ? (
+                            <EditableText
+                              text={entry.item.data.text}
+                              onSave={(newText) => updatePoolEntry({ ...entry, item: { type: 'summary', data: { text: newText } }, updatedAt: new Date().toISOString() })}
+                              className="flex-1 text-sm text-gray-900 dark:text-white min-w-0"
+                            />
+                          ) : (
+                            <p className="flex-1 text-sm text-gray-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
+                          )}
                           <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                           </button>
