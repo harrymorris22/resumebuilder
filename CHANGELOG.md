@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1.0] - 2026-03-23
+
+### Added
+- Multi-resume management — create, duplicate, rename, and delete resume versions from header dropdown
+- ResumeMenu dropdown component replacing plain select element in header
+- `cloneResume()` utility with deep ID regeneration for all nested items (experience, education, skills, certs, projects)
+- `duplicateResume()` and `renameResume()` store actions
+- Delete prevention for last remaining resume
+- Inline rename with Enter/blur save and Escape cancel
+
 ## [0.2.0.0] - 2026-03-22
 
 ### Changed
