@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 - Left panel: ActionPanel → ContentPoolPage (content pool is now the primary interface)
 - Right panel: RightPanel with tabs → ResumePreview only (always visible)
 - AI Coach moved from permanent left panel to floating drawer
+- **DESIGN.md** — complete design system (Satoshi + Instrument Sans + Geist Mono, #2563EB blue, 4px spacing, industrial aesthetic)
+- **CLAUDE.md** — project guide with design system and testing references
 
 ## [0.3.2.0] - 2026-03-23
 
