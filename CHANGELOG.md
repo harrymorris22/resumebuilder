@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3.0] - 2026-03-23
+
+### Added
+- **CV Content as primary left panel** — see content pool and resume preview side-by-side
+- **Floating AI Coach** — Intercom-style chat drawer (400px, 60vh) slides up from bottom-right
+- **Generate Recommendations** button in content pool header (visible when API key set)
+- **Job Match mode toggle** restored in content pool header (General / Job Match)
+- **JobDescriptionInput** shown when in Job Match mode
+- **Inline editable bullets** — click any bullet to edit in-place with auto-sizing textarea
+- **Editable summary text** — click summary to edit inline
+- Slide-up animation for chat drawer
+
+### Changed
+- Left panel: ActionPanel → ContentPoolPage (content pool is now the primary interface)
+- Right panel: RightPanel with tabs → ResumePreview only (always visible)
+- AI Coach moved from permanent left panel to floating drawer
+
 ## [0.3.2.0] - 2026-03-23
 
 ### Added
