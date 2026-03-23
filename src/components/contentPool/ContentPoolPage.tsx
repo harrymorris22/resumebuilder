@@ -197,11 +197,54 @@ function AddSimpleForm({ type, onAdd }: { type: ContentPoolItemType; onAdd: (ent
   );
 }
 
-// --- Job Group Card (with inline add bullet) ---
-function JobGroupCard({ group, onAdd, onRemove }: {
+// --- Check if a pool entry's content is in the active resume ---
+function isEntryInResume(entry: ContentPoolEntry, sections: Array<{ content: { type: string; data: unknown } }>): boolean {
+  const item = entry.item;
+  if (item.type === 'bullet') {
+    const expSection = sections.find((s) => s.content.type === 'experience');
+    if (!expSection) return false;
+    const expData = expSection.content.data as { items?: Array<{ company: string; title: string; bullets: string[] }> };
+    const job = (expData.items || []).find((e) => e.company === item.context.company && e.title === item.context.title);
+    return job ? job.bullets.includes(item.data.text) : false;
+  }
+  if (item.type === 'summary') {
+    const sec = sections.find((s) => s.content.type === 'summary');
+    return sec ? (sec.content.data as { text: string }).text === item.data.text : false;
+  }
+  if (item.type === 'education') {
+    const sec = sections.find((s) => s.content.type === 'education');
+    if (!sec) return false;
+    const items = (sec.content.data as { items?: Array<{ institution: string; degree: string }> }).items || [];
+    return items.some((i) => i.institution === item.data.institution && i.degree === item.data.degree);
+  }
+  if (item.type === 'skill_category') {
+    const sec = sections.find((s) => s.content.type === 'skills');
+    if (!sec) return false;
+    const cats = (sec.content.data as { categories?: Array<{ name: string }> }).categories || [];
+    return cats.some((c) => c.name === item.data.name);
+  }
+  if (item.type === 'project') {
+    const sec = sections.find((s) => s.content.type === 'projects');
+    if (!sec) return false;
+    const items = (sec.content.data as { items?: Array<{ name: string }> }).items || [];
+    return items.some((i) => i.name === item.data.name);
+  }
+  if (item.type === 'certification') {
+    const sec = sections.find((s) => s.content.type === 'certifications');
+    if (!sec) return false;
+    const items = (sec.content.data as { items?: Array<{ name: string }> }).items || [];
+    return items.some((i) => i.name === item.data.name);
+  }
+  return false;
+}
+
+// --- Job Group Card (with inline add bullet + checkboxes) ---
+function JobGroupCard({ group, onAdd, onRemove, onToggle, resumeSections }: {
   group: JobGroup;
   onAdd: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
+  onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
+  resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
 }) {
   const [addingBullet, setAddingBullet] = useState(false);
 
@@ -220,20 +263,28 @@ function JobGroupCard({ group, onAdd, onRemove }: {
         </button>
       </div>
       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-        {group.entries.map((entry) => (
-          <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-750">
-            <span className="text-gray-300 dark:text-gray-600 mt-0.5 text-xs">•</span>
-            <p className="flex-1 text-sm text-gray-700 dark:text-gray-300">{getItemSummary(entry.item)}</p>
-            <button onClick={() => onRemove(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-          </div>
-        ))}
+        {group.entries.map((entry) => {
+          const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
+          return (
+            <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-750">
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => onToggle(entry, isChecked)}
+                className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <p className="flex-1 text-sm text-gray-700 dark:text-gray-300">{getItemSummary(entry.item)}</p>
+              <button onClick={() => onRemove(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          );
+        })}
       </div>
       {addingBullet && (
         <AddBulletToJobForm
           context={group.context}
-          onAdd={(entry) => { onAdd(entry); /* keep form open for adding more */ }}
+          onAdd={(entry) => { onAdd(entry); }}
         />
       )}
     </div>
@@ -244,9 +295,25 @@ function JobGroupCard({ group, onAdd, onRemove }: {
 
 export function ContentPoolPage() {
   const contentPool = useAppStore((s) => s.contentPool);
+  const resumes = useAppStore((s) => s.resumes);
+  const activeResumeId = useAppStore((s) => s.activeResumeId);
   const addPoolEntry = useAppStore((s) => s.addPoolEntry);
   const removePoolEntry = useAppStore((s) => s.removePoolEntry);
+  const addPoolItemToResume = useAppStore((s) => s.addPoolItemToResume);
+  const removePoolItemFromResume = useAppStore((s) => s.removePoolItemFromResume);
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
+
+  const activeResume = resumes.find((r) => r.id === activeResumeId);
+  const resumeSections = activeResume?.sections ?? null;
+
+  const handleToggle = useCallback((entry: ContentPoolEntry, isChecked: boolean) => {
+    if (!activeResumeId) return;
+    if (isChecked) {
+      removePoolItemFromResume(entry.id, activeResumeId);
+    } else {
+      addPoolItemToResume(entry.id, activeResumeId);
+    }
+  }, [activeResumeId, addPoolItemToResume, removePoolItemFromResume]);
 
   const handleAdd = useCallback((entry: ContentPoolEntry) => {
     addPoolEntry(entry);
@@ -310,24 +377,33 @@ export function ContentPoolPage() {
               {sectionType === 'bullet' && entries.length > 0 && (
                 <div className="space-y-4">
                   {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} />
+                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} resumeSections={resumeSections} />
                   ))}
                 </div>
               )}
 
-              {/* Non-bullet sections — flat list */}
+              {/* Non-bullet sections — flat list with checkboxes */}
               {sectionType !== 'bullet' && entries.length > 0 && (
                 <div className="space-y-2">
-                  {entries.map((entry) => (
-                    <div key={entry.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-                      <div className="flex items-start gap-3">
-                        <p className="flex-1 text-sm text-gray-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
-                        <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors" title="Remove">
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
+                  {entries.map((entry) => {
+                    const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
+                    return (
+                      <div key={entry.id} className={`bg-white dark:bg-gray-800 rounded-lg border p-3 transition-colors ${isChecked ? 'border-primary-300 dark:border-primary-600' : 'border-gray-200 dark:border-gray-700'}`}>
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggle(entry, isChecked)}
+                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <p className="flex-1 text-sm text-gray-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
+                          <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
