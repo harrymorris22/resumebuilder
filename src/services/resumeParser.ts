@@ -1,6 +1,6 @@
 import { getClient } from './anthropic';
 import { generateId } from '../utils/id';
-import type { Resume, ResumeSection } from '../types/resume';
+import type { Resume, ResumeSection, ContentPoolEntry } from '../types/resume';
 
 export async function extractText(file: File): Promise<string> {
   const type = file.type;
@@ -323,7 +323,7 @@ export async function parseResumeWithClaude(text: string, apiKey: string): Promi
     });
   }
 
-  return {
+  const resume: Resume = {
     id: generateId(),
     name: parsed.name || `${parsed.contact.fullName || 'Uploaded'} Resume`,
     createdAt: now,
@@ -331,4 +331,141 @@ export async function parseResumeWithClaude(text: string, apiKey: string): Promi
     templateId: 'classic',
     sections,
   };
+
+  return resume;
+}
+
+/** Extract ContentPoolEntries from a parsed resume's sections.
+ *  Experience bullets are extracted individually with job context for grouping. */
+export function extractPoolEntries(resume: Resume): ContentPoolEntry[] {
+  const now = new Date().toISOString();
+  const entries: ContentPoolEntry[] = [];
+
+  for (const section of resume.sections) {
+    const { type, data } = section.content;
+
+    if (type === 'contact') {
+      entries.push({
+        id: generateId(),
+        item: { type: 'contact', data: structuredClone(data) },
+        source: 'upload',
+        createdAt: now,
+        updatedAt: now,
+      });
+    } else if (type === 'summary' && data.text) {
+      entries.push({
+        id: generateId(),
+        item: { type: 'summary', data: { text: data.text } },
+        source: 'upload',
+        createdAt: now,
+        updatedAt: now,
+      });
+    } else if (type === 'experience') {
+      // Extract each bullet individually, tagged with job context
+      for (const exp of data.items) {
+        for (const bullet of exp.bullets) {
+          entries.push({
+            id: generateId(),
+            item: {
+              type: 'bullet',
+              data: { text: bullet },
+              context: {
+                company: exp.company,
+                title: exp.title,
+                location: exp.location,
+                startDate: exp.dateRange.start,
+                endDate: exp.dateRange.end,
+              },
+            },
+            source: 'upload',
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+    } else if (type === 'education') {
+      for (const item of data.items) {
+        entries.push({
+          id: generateId(),
+          item: { type: 'education', data: structuredClone(item) },
+          source: 'upload',
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    } else if (type === 'skills') {
+      for (const cat of data.categories) {
+        entries.push({
+          id: generateId(),
+          item: { type: 'skill_category', data: structuredClone(cat) },
+          source: 'upload',
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    } else if (type === 'projects') {
+      for (const item of data.items) {
+        entries.push({
+          id: generateId(),
+          item: { type: 'project', data: structuredClone(item) },
+          source: 'upload',
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    } else if (type === 'certifications') {
+      for (const item of data.items) {
+        entries.push({
+          id: generateId(),
+          item: { type: 'certification', data: structuredClone(item) },
+          source: 'upload',
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+  }
+
+  return deduplicateEntries(entries);
+}
+
+/** Generate a fingerprint for a pool entry to detect duplicates */
+function entryFingerprint(entry: ContentPoolEntry): string {
+  const item = entry.item;
+  switch (item.type) {
+    case 'bullet':
+      return `bullet:${item.context.company}|${item.context.title}|${item.data.text.trim().toLowerCase()}`;
+    case 'contact':
+      return `contact:${item.data.fullName}|${item.data.email}`;
+    case 'summary':
+      return `summary:${item.data.text.trim().toLowerCase().slice(0, 100)}`;
+    case 'education':
+      return `edu:${item.data.institution}|${item.data.degree}|${item.data.field}`;
+    case 'skill_category':
+      return `skill:${item.data.name}|${item.data.skills.sort().join(',')}`;
+    case 'project':
+      return `proj:${item.data.name}`;
+    case 'certification':
+      return `cert:${item.data.name}|${item.data.issuer}`;
+  }
+}
+
+/** Remove duplicate entries within a batch (same fingerprint = duplicate) */
+function deduplicateEntries(entries: ContentPoolEntry[]): ContentPoolEntry[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    const fp = entryFingerprint(entry);
+    if (seen.has(fp)) return false;
+    seen.add(fp);
+    return true;
+  });
+}
+
+/** Filter out entries that already exist in the pool (by fingerprint match) */
+export function deduplicateAgainstPool(
+  newEntries: ContentPoolEntry[],
+  existingPool: ContentPoolEntry[]
+): ContentPoolEntry[] {
+  const existingFingerprints = new Set(existingPool.map(entryFingerprint));
+  return newEntries.filter((entry) => !existingFingerprints.has(entryFingerprint(entry)));
 }

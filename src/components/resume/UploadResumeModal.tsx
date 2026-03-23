@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
-import { extractText, parseResumeWithClaude } from '../../services/resumeParser';
+import { extractText, parseResumeWithClaude, extractPoolEntries, deduplicateAgainstPool } from '../../services/resumeParser';
 
 const ACCEPTED = '.pdf,.docx,.doc,.txt';
 const ACCEPTED_TYPES = [
@@ -23,6 +23,8 @@ export function UploadResumeModal({
   const addResume = useAppStore((s) => s.addResume);
   const setActiveResumeId = useAppStore((s) => s.setActiveResumeId);
   const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
+  const addPoolEntry = useAppStore((s) => s.addPoolEntry);
+  const contentPool = useAppStore((s) => s.contentPool);
 
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
@@ -69,6 +71,14 @@ export function UploadResumeModal({
 
         addResume(resume);
         setActiveResumeId(resume.id);
+
+        // Populate content pool from parsed resume (deduplicated)
+        const poolEntries = extractPoolEntries(resume);
+        const uniqueEntries = deduplicateAgainstPool(poolEntries, contentPool);
+        for (const entry of uniqueEntries) {
+          addPoolEntry(entry);
+        }
+
         setPendingAutoMessage(
           'I just uploaded my resume. Please analyze it thoroughly: identify weak bullets that need STAR-format rewrites, flag missing sections, suggest improvements to my summary, and ask me probing questions about achievements I might be underselling. After your analysis, use the suggest_actions tool to recommend 2-3 specific next steps.'
         );

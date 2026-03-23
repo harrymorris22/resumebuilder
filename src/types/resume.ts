@@ -111,6 +111,27 @@ export interface Resume {
   targetJobId?: string;
 }
 
+// Content Pool — individual bullets/items shared across all resume versions
+export type ContentPoolItemType = 'contact' | 'summary' | 'bullet' | 'education' | 'skill_category' | 'project' | 'certification';
+
+export type ContentPoolItemData =
+  | { type: 'contact'; data: ContactInfo }
+  | { type: 'summary'; data: { text: string } }
+  | { type: 'bullet'; data: { text: string }; context: { company: string; title: string; location: string; startDate: string; endDate: string | null } }
+  | { type: 'education'; data: EducationItem }
+  | { type: 'skill_category'; data: SkillCategory }
+  | { type: 'project'; data: ProjectItem }
+  | { type: 'certification'; data: CertificationItem };
+
+export interface ContentPoolEntry {
+  id: string;
+  item: ContentPoolItemData;
+  source: 'upload' | 'ai' | 'user';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Legacy — kept for backward compat during transition
 export interface ContentBankItem {
   id: string;
   type: 'bullet' | 'summary' | 'skill' | 'experience' | 'project';

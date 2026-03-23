@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Resume } from '../types/resume';
+import type { Resume, ContentPoolEntry, ContentPoolItemData } from '../types/resume';
 import type { ContentBankItem, CoverLetter } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import {
@@ -12,6 +12,9 @@ import {
   saveContentBankItem,
   getAllContentBankItems,
   deleteContentBankItem as deleteContentBankItemFromDb,
+  saveContentPoolEntry,
+  getAllContentPoolEntries,
+  deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
 } from '../db/indexedDb';
 import { createDefaultResume, cloneResume } from '../utils/resumeDefaults';
@@ -29,6 +32,7 @@ interface AppState {
   resumes: Resume[];
   chatSessions: ChatSession[];
   contentBankItems: ContentBankItem[];
+  contentPool: ContentPoolEntry[];
   coverLetters: CoverLetter[];
   hydrated: boolean;
   settingsOpen: boolean;
@@ -56,10 +60,17 @@ interface AppState {
   addChatSession: (session: ChatSession) => void;
   updateChatSession: (session: ChatSession) => void;
 
-  // Actions — content bank
+  // Actions — content bank (legacy)
   addContentBankItem: (item: ContentBankItem) => void;
   removeContentBankItem: (id: string) => void;
   updateContentBankItem: (item: ContentBankItem) => void;
+
+  // Actions — content pool
+  addPoolEntry: (entry: ContentPoolEntry) => void;
+  removePoolEntry: (id: string) => void;
+  updatePoolEntry: (entry: ContentPoolEntry) => void;
+  addPoolItemToResume: (poolEntryId: string, resumeId: string) => void;
+  removePoolItemFromResume: (poolEntryId: string, resumeId: string) => void;
 
   // Actions — cover letters
   addCoverLetter: (letter: CoverLetter) => void;
@@ -90,6 +101,7 @@ export const useAppStore = create<AppState>()(
       resumes: [],
       chatSessions: [],
       contentBankItems: [],
+      contentPool: [],
       coverLetters: [],
       hydrated: false,
       atsKeywords: [],
@@ -189,6 +201,154 @@ export const useAppStore = create<AppState>()(
         saveContentBankItem(item);
       },
 
+      // Content pool
+      addPoolEntry: (entry) => {
+        set((s) => ({ contentPool: [...s.contentPool, entry] }));
+        saveContentPoolEntry(entry);
+      },
+
+      removePoolEntry: (id) => {
+        set((s) => ({ contentPool: s.contentPool.filter((e) => e.id !== id) }));
+        deletePoolEntryFromDb(id);
+      },
+
+      updatePoolEntry: (entry) => {
+        set((s) => ({
+          contentPool: s.contentPool.map((e) => (e.id === entry.id ? entry : e)),
+        }));
+        saveContentPoolEntry(entry);
+      },
+
+      addPoolItemToResume: (poolEntryId, resumeId) => {
+        const pool = get().contentPool;
+        const entry = pool.find((e) => e.id === poolEntryId);
+        if (!entry) return;
+
+        const resume = get().resumes.find((r) => r.id === resumeId);
+        if (!resume) return;
+
+        const itemData = entry.item as ContentPoolItemData;
+        const clonedData = structuredClone(itemData.data);
+
+        // Assign new ID to cloned item if it has one
+        if ('id' in clonedData) {
+          (clonedData as { id: string }).id = generateId();
+        }
+
+        // Map pool item type → resume section type
+        const poolType = itemData.type;
+        const sectionTypeMap: Record<string, string> = {
+          contact: 'contact', summary: 'summary', bullet: 'experience',
+          education: 'education', skill_category: 'skills', project: 'projects', certification: 'certifications',
+        };
+        const sectionType = sectionTypeMap[poolType] || poolType;
+        const updatedSections = [...resume.sections];
+        let section = updatedSections.find((s) => s.content.type === sectionType);
+
+        if (!section) {
+          section = {
+            id: generateId(),
+            order: updatedSections.length,
+            visible: true,
+            content: { type: sectionType, data: {} } as never,
+          };
+          updatedSections.push(section);
+        }
+
+        // Add the item to the section
+        const sectionData = { ...section.content.data } as Record<string, unknown>;
+        if (sectionType === 'contact' || sectionType === 'summary') {
+          section = { ...section, content: { type: sectionType, data: clonedData } as never };
+          const idx = updatedSections.findIndex((s) => s.id === section!.id);
+          if (idx >= 0) updatedSections[idx] = section;
+        } else if (sectionType === 'skills') {
+          const cats = ((sectionData.categories as unknown[]) || []) as unknown[];
+          cats.push(clonedData);
+          section = { ...section, content: { type: 'skills', data: { categories: cats } } as never };
+          const idx = updatedSections.findIndex((s) => s.id === section!.id);
+          if (idx >= 0) updatedSections[idx] = section;
+        } else if (poolType === 'bullet') {
+          // Bullets get added to the matching experience entry's bullets array
+          // For now, add as a new experience entry with just this bullet
+          const bulletText = (clonedData as { text: string }).text;
+          const ctx = (itemData as { context: { company: string; title: string; location: string; startDate: string; endDate: string | null } }).context;
+          const expItems = ((sectionData.items as Array<{ company: string; title: string; bullets: string[] }>) || []);
+          const existing = expItems.find((e) => e.company === ctx.company && e.title === ctx.title);
+          if (existing) {
+            existing.bullets.push(bulletText);
+          } else {
+            expItems.push({ company: ctx.company, title: ctx.title, id: generateId(), location: ctx.location, dateRange: { start: ctx.startDate, end: ctx.endDate }, bullets: [bulletText] } as never);
+          }
+          section = { ...section, content: { type: 'experience', data: { items: expItems } } as never };
+          const idx = updatedSections.findIndex((s) => s.id === section!.id);
+          if (idx >= 0) updatedSections[idx] = section;
+        } else {
+          const items = ((sectionData.items as unknown[]) || []) as unknown[];
+          items.push(clonedData);
+          section = { ...section, content: { type: sectionType, data: { items } } as never };
+          const idx = updatedSections.findIndex((s) => s.id === section!.id);
+          if (idx >= 0) updatedSections[idx] = section;
+        }
+
+        const updated = { ...resume, sections: updatedSections, updatedAt: new Date().toISOString() };
+        get().updateResume(updated);
+      },
+
+      removePoolItemFromResume: (poolEntryId, resumeId) => {
+        const pool = get().contentPool;
+        const entry = pool.find((e) => e.id === poolEntryId);
+        if (!entry) return;
+
+        const resume = get().resumes.find((r) => r.id === resumeId);
+        if (!resume) return;
+
+        const poolType = entry.item.type;
+        const sectionTypeMap: Record<string, string> = {
+          contact: 'contact', summary: 'summary', bullet: 'experience',
+          education: 'education', skill_category: 'skills', project: 'projects', certification: 'certifications',
+        };
+        const sectionType = sectionTypeMap[poolType] || poolType;
+        const section = resume.sections.find((s) => s.content.type === sectionType);
+        if (!section) return;
+
+        const updatedSections = resume.sections.map((s) => {
+          if (s.id !== section.id) return s;
+          const data = s.content.data as Record<string, unknown>;
+
+          if (poolType === 'contact') {
+            return { ...s, content: { type: 'contact' as const, data: { fullName: '', email: '', phone: '', location: '' } } };
+          }
+          if (poolType === 'summary') {
+            return { ...s, content: { type: 'summary' as const, data: { text: '' } } };
+          }
+          if (poolType === 'skill_category') {
+            const entryData = entry.item.data as { name: string };
+            const skillsData = data as { categories?: Array<{ id: string; name: string; skills: string[] }> };
+            const cats = (skillsData.categories || []).filter((c) => c.name !== entryData.name);
+            return { ...s, content: { type: 'skills' as const, data: { categories: cats } } };
+          }
+          if (poolType === 'bullet') {
+            // Remove the specific bullet text from the matching experience entry
+            const bulletText = (entry.item.data as { text: string }).text;
+            const ctx = (entry.item as { context: { company: string; title: string } }).context;
+            const expItems = (data.items as Array<{ company: string; title: string; bullets: string[] }>) || [];
+            const job = expItems.find((e) => e.company === ctx.company && e.title === ctx.title);
+            if (job) {
+              job.bullets = job.bullets.filter((b) => b !== bulletText);
+            }
+            return { ...s, content: { type: 'experience' as const, data: { items: expItems } } as never };
+          }
+
+          // For education, projects, certifications — remove last item
+          const items = ((data.items as unknown[]) || []) as unknown[];
+          if (items.length > 0) items.pop();
+          return { ...s, content: { type: sectionType, data: { items } } as never };
+        });
+
+        const updated = { ...resume, sections: updatedSections, updatedAt: new Date().toISOString() };
+        get().updateResume(updated);
+      },
+
       // Cover letters
       addCoverLetter: (letter) => {
         set((s) => ({ coverLetters: [...s.coverLetters, letter] }));
@@ -205,10 +365,11 @@ export const useAppStore = create<AppState>()(
 
       // Hydration
       hydrateFromIdb: async () => {
-        const [resumes, chatSessions, contentBankItems] = await Promise.all([
+        const [resumes, chatSessions, contentBankItems, contentPool] = await Promise.all([
           getAllResumes(),
           getAllChatSessions(),
           getAllContentBankItems(),
+          getAllContentPoolEntries(),
         ]);
 
         // Create default master resume if none exist
@@ -224,6 +385,7 @@ export const useAppStore = create<AppState>()(
           resumes,
           chatSessions,
           contentBankItems,
+          contentPool,
           hydrated: true,
           activeResumeId,
         });

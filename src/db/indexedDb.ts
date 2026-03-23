@@ -1,14 +1,15 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Resume, ContentBankItem, CoverLetter } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 
 const DB_NAME = 'resume-builder';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface ResumeBuilderDB {
   resumes: Resume;
   chatSessions: ChatSession;
   contentBank: ContentBankItem;
+  contentPool: ContentPoolEntry;
   coverLetters: CoverLetter;
 }
 
@@ -32,6 +33,9 @@ async function getDb(): Promise<IDBPDatabase<ResumeBuilderDB> | null> {
           const store = db.createObjectStore('contentBank', { keyPath: 'id' });
           store.createIndex('byType', 'type');
           store.createIndex('byCreatedAt', 'createdAt');
+        }
+        if (!db.objectStoreNames.contains('contentPool')) {
+          db.createObjectStore('contentPool', { keyPath: 'id' });
         }
         if (!db.objectStoreNames.contains('coverLetters')) {
           db.createObjectStore('coverLetters', { keyPath: 'id' });
@@ -109,6 +113,24 @@ export async function getAllContentBankItems(): Promise<ContentBankItem[]> {
 export async function deleteContentBankItem(id: string): Promise<void> {
   const db = await getDb();
   if (db) await db.delete('contentBank', id);
+}
+
+// --- Content Pool ---
+
+export async function saveContentPoolEntry(entry: ContentPoolEntry): Promise<void> {
+  const db = await getDb();
+  if (db) await db.put('contentPool', entry);
+}
+
+export async function getAllContentPoolEntries(): Promise<ContentPoolEntry[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.getAll('contentPool');
+}
+
+export async function deleteContentPoolEntry(id: string): Promise<void> {
+  const db = await getDb();
+  if (db) await db.delete('contentPool', id);
 }
 
 // --- Cover Letters ---
