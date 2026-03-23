@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1.1] - 2026-03-23
+
+### Changed
+- Moved CV Content from RightPanel tab to header nav button — full-page toggle makes it clear the content pool is global across all resume versions
+- ResumeMenu and TemplateSelector hidden when viewing content pool
+- Removed CV Content tab from RightPanel (now only Resume + Cover Letter)
+
 ## [0.3.1.0] - 2026-03-23
 
 ### Added
