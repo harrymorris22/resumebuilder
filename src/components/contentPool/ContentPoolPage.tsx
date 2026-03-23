@@ -36,8 +36,15 @@ function getItemSummary(item: ContentPoolItemData): string {
   }
 }
 
-function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, { label: string; dateLabel: string; entries: ContentPoolEntry[] }> {
-  const groups = new Map<string, { label: string; dateLabel: string; entries: ContentPoolEntry[] }>();
+interface JobGroup {
+  label: string;
+  dateLabel: string;
+  context: { company: string; title: string; location: string; startDate: string; endDate: string | null };
+  entries: ContentPoolEntry[];
+}
+
+function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, JobGroup> {
+  const groups = new Map<string, JobGroup>();
   for (const entry of bullets) {
     if (entry.item.type !== 'bullet') continue;
     const ctx = entry.item.context;
@@ -46,6 +53,7 @@ function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, { label: st
       groups.set(key, {
         label: `${ctx.title} @ ${ctx.company}`,
         dateLabel: `${ctx.startDate}–${ctx.endDate ?? 'Present'}`,
+        context: ctx,
         entries: [],
       });
     }
@@ -54,22 +62,22 @@ function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, { label: st
   return groups;
 }
 
-// --- Add Item Forms ---
-
-function AddBulletForm({ onAdd }: { onAdd: (entry: ContentPoolEntry) => void }) {
-  const [company, setCompany] = useState('');
-  const [title, setTitle] = useState('');
+// --- Inline "add bullet to existing job" form ---
+function AddBulletToJobForm({ context, onAdd }: {
+  context: { company: string; title: string; location: string; startDate: string; endDate: string | null };
+  onAdd: (entry: ContentPoolEntry) => void;
+}) {
   const [bullet, setBullet] = useState('');
 
   const handleSubmit = () => {
-    if (!bullet.trim() || !company.trim() || !title.trim()) return;
+    if (!bullet.trim()) return;
     const now = new Date().toISOString();
     onAdd({
       id: generateId(),
       item: {
         type: 'bullet',
         data: { text: bullet.trim() },
-        context: { company: company.trim(), title: title.trim(), location: '', startDate: '', endDate: null },
+        context: { ...context },
       },
       source: 'user',
       createdAt: now,
@@ -79,14 +87,58 @@ function AddBulletForm({ onAdd }: { onAdd: (entry: ContentPoolEntry) => void }) 
   };
 
   return (
+    <div className="flex gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-750">
+      <input
+        value={bullet}
+        onChange={(e) => setBullet(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+        placeholder="New bullet point..."
+        className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        autoFocus
+      />
+      <button onClick={handleSubmit} disabled={!bullet.trim()} className="text-xs px-2 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
+    </div>
+  );
+}
+
+// --- "New job" form (company + title, optionally first bullet) ---
+function AddNewJobForm({ onAdd }: { onAdd: (entry: ContentPoolEntry) => void }) {
+  const [company, setCompany] = useState('');
+  const [title, setTitle] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [bullet, setBullet] = useState('');
+
+  const handleSubmit = () => {
+    if (!company.trim() || !title.trim()) return;
+    const now = new Date().toISOString();
+    const context = { company: company.trim(), title: title.trim(), location: '', startDate: startDate.trim(), endDate: null };
+
+    // If they provided a bullet, add it. Otherwise create a placeholder bullet so the job shows up.
+    const bulletText = bullet.trim() || `Worked as ${title.trim()} at ${company.trim()}`;
+    onAdd({
+      id: generateId(),
+      item: { type: 'bullet', data: { text: bulletText }, context },
+      source: 'user',
+      createdAt: now,
+      updatedAt: now,
+    });
+    setCompany('');
+    setTitle('');
+    setStartDate('');
+    setBullet('');
+  };
+
+  return (
     <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-600">
+      <p className="text-xs font-medium text-gray-600 dark:text-gray-400">New job</p>
       <div className="flex gap-2">
         <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Job title" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
       </div>
       <div className="flex gap-2">
-        <input value={bullet} onChange={(e) => setBullet(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder="Achievement bullet point..." className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-        <button onClick={handleSubmit} disabled={!bullet.trim() || !company.trim() || !title.trim()} className="text-xs px-3 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
+        <input value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start date (e.g. 2020)" className="w-32 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+        <input value={bullet} onChange={(e) => setBullet(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder="First bullet (optional)" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+        <button onClick={handleSubmit} disabled={!company.trim() || !title.trim()} className="text-xs px-3 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
       </div>
     </div>
   );
@@ -145,6 +197,49 @@ function AddSimpleForm({ type, onAdd }: { type: ContentPoolItemType; onAdd: (ent
   );
 }
 
+// --- Job Group Card (with inline add bullet) ---
+function JobGroupCard({ group, onAdd, onRemove }: {
+  group: JobGroup;
+  onAdd: (entry: ContentPoolEntry) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [addingBullet, setAddingBullet] = useState(false);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{group.label}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{group.dateLabel}</p>
+        </div>
+        <button
+          onClick={() => setAddingBullet(!addingBullet)}
+          className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400"
+        >
+          {addingBullet ? 'Cancel' : '+ Bullet'}
+        </button>
+      </div>
+      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+        {group.entries.map((entry) => (
+          <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-750">
+            <span className="text-gray-300 dark:text-gray-600 mt-0.5 text-xs">•</span>
+            <p className="flex-1 text-sm text-gray-700 dark:text-gray-300">{getItemSummary(entry.item)}</p>
+            <button onClick={() => onRemove(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        ))}
+      </div>
+      {addingBullet && (
+        <AddBulletToJobForm
+          context={group.context}
+          onAdd={(entry) => { onAdd(entry); /* keep form open for adding more */ }}
+        />
+      )}
+    </div>
+  );
+}
+
 // --- Main Component ---
 
 export function ContentPoolPage() {
@@ -154,6 +249,10 @@ export function ContentPoolPage() {
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
 
   const handleAdd = useCallback((entry: ContentPoolEntry) => {
+    addPoolEntry(entry);
+  }, [addPoolEntry]);
+
+  const handleAddAndClose = useCallback((entry: ContentPoolEntry) => {
     addPoolEntry(entry);
     setAddingSection(null);
   }, [addPoolEntry]);
@@ -192,42 +291,26 @@ export function ContentPoolPage() {
                   onClick={() => setAddingSection(addingSection === sectionType ? null : sectionType)}
                   className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 flex items-center gap-0.5"
                 >
-                  {addingSection === sectionType ? 'Cancel' : '+ Add'}
+                  {addingSection === sectionType ? 'Cancel' : sectionType === 'bullet' ? '+ New Job' : '+ Add'}
                 </button>
               </div>
 
-              {/* Add form */}
+              {/* Add form — "New Job" for experience, simple form for others */}
               {addingSection === sectionType && (
                 <div className="mb-2">
                   {sectionType === 'bullet' ? (
-                    <AddBulletForm onAdd={handleAdd} />
+                    <AddNewJobForm onAdd={handleAddAndClose} />
                   ) : (
-                    <AddSimpleForm type={sectionType} onAdd={handleAdd} />
+                    <AddSimpleForm type={sectionType} onAdd={handleAddAndClose} />
                   )}
                 </div>
               )}
 
-              {/* Bullet section — grouped by job */}
+              {/* Bullet section — grouped by job, each with inline "+ Bullet" */}
               {sectionType === 'bullet' && entries.length > 0 && (
                 <div className="space-y-4">
                   {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                    <div key={key} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{group.label}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{group.dateLabel}</p>
-                      </div>
-                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {group.entries.map((entry) => (
-                          <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-750">
-                            <span className="text-gray-300 dark:text-gray-600 mt-0.5 text-xs">•</span>
-                            <p className="flex-1 text-sm text-gray-700 dark:text-gray-300">{getItemSummary(entry.item)}</p>
-                            <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove">
-                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} />
                   ))}
                 </div>
               )}

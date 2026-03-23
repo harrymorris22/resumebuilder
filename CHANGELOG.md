@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1.0] - 2026-03-23
+
+### Added
+- "+ New Job" form in Experience section — add company, title, start date, and optional first bullet
+- "+ Bullet" button on each job group header — add bullets to existing jobs inline
+- JobGroupCard component with persistent inline add-bullet form (stays open for rapid entry)
+
+### Changed
+- Experience section header button changed from "+ Add" to "+ New Job" for clarity
+
 ## [0.3.0.0] - 2026-03-23
 
 ### Added
