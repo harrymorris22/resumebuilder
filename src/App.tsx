@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from './stores/useAppStore';
 import { MobileGate } from './components/layout/MobileGate';
 import { Header } from './components/layout/Header';
@@ -6,11 +6,13 @@ import { SplitPane } from './components/layout/SplitPane';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { ActionPanel } from './components/actions/ActionPanel';
 import { RightPanel } from './components/resume/RightPanel';
+import { ContentPoolPage } from './components/contentPool/ContentPoolPage';
 
 function AppContent() {
   const hydrated = useAppStore((s) => s.hydrated);
   const darkMode = useAppStore((s) => s.darkMode);
   const hydrateFromIdb = useAppStore((s) => s.hydrateFromIdb);
+  const [showContentPool, setShowContentPool] = useState(false);
 
   useEffect(() => {
     hydrateFromIdb();
@@ -33,11 +35,15 @@ function AppContent() {
 
   return (
     <div className={`flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}>
-      <Header />
-      <SplitPane
-        left={<ActionPanel />}
-        right={<RightPanel />}
-      />
+      <Header showContentPool={showContentPool} onToggleContentPool={() => setShowContentPool(!showContentPool)} />
+      {showContentPool ? (
+        <ContentPoolPage />
+      ) : (
+        <SplitPane
+          left={<ActionPanel />}
+          right={<RightPanel />}
+        />
+      )}
       <SettingsModal />
     </div>
   );
