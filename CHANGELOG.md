@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2.0] - 2026-03-23
+
+### Added
+- Selection checkboxes on each CV Content pool item — check to add to current resume version, uncheck to remove
+- `isEntryInResume()` matching logic for all item types (bullets by company+title+text, education by institution+degree, skills by category name, etc.)
+- Checked items get highlighted border (primary color) for visual feedback
+
+### Changed
+- CV Content moved back to RightPanel tab (reverted from header nav) — clearer UX alongside Resume + Cover Letter tabs
+- Header simplified — removed CV Content button and conditional props
+
 ## [0.3.1.1] - 2026-03-23
 
 ### Changed
