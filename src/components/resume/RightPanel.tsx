@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { ResumePreview } from './ResumePreview';
 import { CoverLetterPanel } from '../coverLetter/CoverLetterPanel';
-import { ContentPoolPage } from '../contentPool/ContentPoolPage';
 import { useAppStore } from '../../stores/useAppStore';
 
-type Tab = 'resume' | 'cover-letter' | 'cv-content';
+type Tab = 'resume' | 'cover-letter';
 
 export function RightPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('resume');
   const activeCoverLetter = useAppStore((s) => s.activeCoverLetter);
-  const contentPool = useAppStore((s) => s.contentPool);
 
   const tabClass = (tab: Tab) =>
     `px-3 py-1 text-sm rounded-md transition-colors ${
@@ -25,12 +23,6 @@ export function RightPanel() {
         <button onClick={() => setActiveTab('resume')} className={tabClass('resume')}>
           Resume
         </button>
-        <button onClick={() => setActiveTab('cv-content')} className={tabClass('cv-content')}>
-          CV Content
-          {contentPool.length > 0 && (
-            <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">{contentPool.length}</span>
-          )}
-        </button>
         <button onClick={() => setActiveTab('cover-letter')} className={tabClass('cover-letter')}>
           Cover Letter
           {activeCoverLetter && (
@@ -41,9 +33,7 @@ export function RightPanel() {
 
       {/* Content */}
       <div className="flex-1 min-h-0">
-        {activeTab === 'resume' && <ResumePreview />}
-        {activeTab === 'cv-content' && <ContentPoolPage />}
-        {activeTab === 'cover-letter' && <CoverLetterPanel />}
+        {activeTab === 'resume' ? <ResumePreview /> : <CoverLetterPanel />}
       </div>
     </div>
   );
