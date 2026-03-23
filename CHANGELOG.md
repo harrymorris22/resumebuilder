@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0.0] - 2026-03-23
+
+### Added
+- **CV Content Pool** — shared content library that persists across all resume versions
+  - Upload populates pool with individual bullets (grouped by job), education, skills, projects, certifications
+  - Bullet-level granularity — pick specific achievements per version, not whole jobs
+  - "+ Add" forms per section for manual content entry
+  - Automated deduplication within uploads and across existing pool (fingerprint-based matching)
+- **CV Content tab** in right panel alongside Resume and Cover Letter
+- **Multi-resume management** — create, duplicate, rename, and delete resume versions from header dropdown
+  - `ResumeMenu` custom dropdown replacing plain select
+  - Deep clone with full ID regeneration for all nested items
+  - Delete prevention for last remaining resume
+  - Inline rename with Enter/blur save, Escape cancel
+- **ContentPoolEntry** type for structured pool items (IDB v2)
+- `cloneResume()` utility, `duplicateResume()`/`renameResume()` store actions
+
 ## [0.2.1.0] - 2026-03-23
 
 ### Added
