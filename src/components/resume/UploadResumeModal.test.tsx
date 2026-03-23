@@ -9,6 +9,8 @@ const defaultState: any = {
   addResume: vi.fn(),
   setActiveResumeId: vi.fn(),
   setPendingAutoMessage: vi.fn(),
+  addPoolEntry: vi.fn(),
+  contentPool: [],
 }
 
 // Mock the store
@@ -22,6 +24,8 @@ vi.mock('../../stores/useAppStore', () => ({
 vi.mock('../../services/resumeParser', () => ({
   extractText: vi.fn(),
   parseResumeWithClaude: vi.fn(),
+  extractPoolEntries: vi.fn(() => []),
+  deduplicateAgainstPool: vi.fn((_new: unknown[]) => []),
 }))
 
 describe('UploadResumeModal', () => {
@@ -78,6 +82,8 @@ describe('UploadResumeModal', () => {
         addResume: vi.fn(),
         setActiveResumeId: vi.fn(),
         setPendingAutoMessage: vi.fn(),
+        addPoolEntry: vi.fn(),
+        contentPool: [],
       }
       return selector(state as unknown)
     })
