@@ -14,7 +14,7 @@ import {
   deleteContentBankItem as deleteContentBankItemFromDb,
   saveCoverLetter,
 } from '../db/indexedDb';
-import { createDefaultResume } from '../utils/resumeDefaults';
+import { createDefaultResume, cloneResume } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
 
 interface AppState {
@@ -48,6 +48,8 @@ interface AppState {
   addResume: (resume: Resume) => void;
   updateResume: (resume: Resume) => void;
   removeResume: (id: string) => void;
+  duplicateResume: (id: string) => void;
+  renameResume: (id: string, name: string) => void;
 
   // Actions — chat
   setActiveChatSessionId: (id: string | null) => void;
@@ -118,11 +120,34 @@ export const useAppStore = create<AppState>()(
       },
 
       removeResume: (id) => {
+        const { resumes } = get();
+        if (resumes.length <= 1) return; // prevent deleting last resume
+        const remaining = resumes.filter((r) => r.id !== id);
         set((s) => ({
-          resumes: s.resumes.filter((r) => r.id !== id),
-          activeResumeId: s.activeResumeId === id ? null : s.activeResumeId,
+          resumes: remaining,
+          activeResumeId: s.activeResumeId === id ? remaining[0]?.id ?? null : s.activeResumeId,
         }));
         deleteResumeFromDb(id);
+      },
+
+      duplicateResume: (id) => {
+        const source = get().resumes.find((r) => r.id === id);
+        if (!source) return;
+        const clone = cloneResume(source);
+        set((s) => ({ resumes: [...s.resumes, clone], activeResumeId: clone.id }));
+        saveResume(clone);
+      },
+
+      renameResume: (id, name) => {
+        const trimmed = name.trim();
+        if (!trimmed) return;
+        set((s) => ({
+          resumes: s.resumes.map((r) =>
+            r.id === id ? { ...r, name: trimmed, updatedAt: new Date().toISOString() } : r
+          ),
+        }));
+        const updated = get().resumes.find((r) => r.id === id);
+        if (updated) saveResume(updated);
       },
 
       // Chat
