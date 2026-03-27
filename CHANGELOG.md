@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6.1] - 2026-03-27
+
+### Fixed
+- **Duplicate bullets in resume preview** — checking a bullet in the content pool when experience entries already existed could push the same bullet multiple times due to direct state mutation and a missing deduplication guard
+- **State mutation bug** — `addPoolItemToResume` and `removePoolItemFromResume` now clone arrays before mutating, preventing Zustand from missing updates
+- **Startup cleanup** — `hydrateFromIdb` deduplicates any already-corrupted bullet arrays on first load, so existing data heals automatically
+
 ## [0.3.6.0] - 2026-03-27
 
 ### Added
