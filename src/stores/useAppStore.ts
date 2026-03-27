@@ -69,6 +69,7 @@ interface AppState {
   addPoolEntry: (entry: ContentPoolEntry) => void;
   removePoolEntry: (id: string) => void;
   updatePoolEntry: (entry: ContentPoolEntry) => void;
+  reorderPoolEntries: (orderedIds: string[]) => void;
   addPoolItemToResume: (poolEntryId: string, resumeId: string) => void;
   removePoolItemFromResume: (poolEntryId: string, resumeId: string) => void;
 
@@ -219,6 +220,25 @@ export const useAppStore = create<AppState>()(
         saveContentPoolEntry(entry);
       },
 
+      reorderPoolEntries: (orderedIds) => {
+        set((s) => {
+          const idToEntry = new Map(s.contentPool.map((e) => [e.id, e]));
+          const reordered: ContentPoolEntry[] = [];
+          for (const id of orderedIds) {
+            const entry = idToEntry.get(id);
+            if (entry) {
+              reordered.push(entry);
+              idToEntry.delete(id);
+            }
+          }
+          // Append any entries not in orderedIds (shouldn't happen, but defensive)
+          for (const entry of idToEntry.values()) {
+            reordered.push(entry);
+          }
+          return { contentPool: reordered };
+        });
+      },
+
       addPoolItemToResume: (poolEntryId, resumeId) => {
         const pool = get().contentPool;
         const entry = pool.find((e) => e.id === poolEntryId);
@@ -279,6 +299,27 @@ export const useAppStore = create<AppState>()(
           } else {
             expItems.push({ company: ctx.company, title: ctx.title, id: generateId(), location: ctx.location, dateRange: { start: ctx.startDate, end: ctx.endDate }, bullets: [bulletText] } as never);
           }
+          // Sort experience items: current jobs first, then by start date descending
+          const parseJobDate = (d: string): number => {
+            if (!d) return 0;
+            const t = Date.parse(d);
+            if (!isNaN(t)) return t;
+            const t2 = Date.parse(`1 ${d}`);
+            if (!isNaN(t2)) return t2;
+            const year = parseInt(d, 10);
+            if (!isNaN(year)) return new Date(year, 0).getTime();
+            return 0;
+          };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          expItems.sort((a: any, b: any) => {
+            const aEnd = a.dateRange?.end;
+            const bEnd = b.dateRange?.end;
+            const aIsCurrent = !aEnd || aEnd === 'Present';
+            const bIsCurrent = !bEnd || bEnd === 'Present';
+            if (aIsCurrent && !bIsCurrent) return -1;
+            if (!aIsCurrent && bIsCurrent) return 1;
+            return parseJobDate(b.dateRange?.start || '') - parseJobDate(a.dateRange?.start || '');
+          });
           section = { ...section, content: { type: 'experience', data: { items: expItems } } as never };
           const idx = updatedSections.findIndex((s) => s.id === section!.id);
           if (idx >= 0) updatedSections[idx] = section;
