@@ -1,13 +1,50 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useAppStore } from '../../stores/useAppStore';
 import { generateId } from '../../utils/id';
 import { ModeToggle } from '../chat/ModeToggle';
 import { JobDescriptionInput } from '../chat/JobDescriptionInput';
 import type { ContentPoolEntry, ContentPoolItemData, ContentPoolItemType } from '../../types/resume';
 
-const SECTION_ORDER: ContentPoolItemType[] = [
+const DEFAULT_SECTION_ORDER: ContentPoolItemType[] = [
   'summary', 'bullet', 'education', 'skill_category', 'project', 'certification',
 ];
+
+/** Map resume section content.type → pool item type */
+const RESUME_TO_POOL: Record<string, ContentPoolItemType> = {
+  summary: 'summary',
+  experience: 'bullet',
+  education: 'education',
+  skills: 'skill_category',
+  projects: 'project',
+  certifications: 'certification',
+};
+
+/** Map pool item type → resume section content.type */
+const POOL_TO_RESUME: Record<ContentPoolItemType, string> = {
+  contact: 'contact',
+  summary: 'summary',
+  bullet: 'experience',
+  education: 'education',
+  skill_category: 'skills',
+  project: 'projects',
+  certification: 'certifications',
+};
 
 const SECTION_LABELS: Record<ContentPoolItemType, string> = {
   contact: 'Contact',
@@ -61,7 +98,33 @@ function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, JobGroup> {
     }
     groups.get(key)!.entries.push(entry);
   }
-  return groups;
+
+  // Sort by start date descending (newest/current job first)
+  // Dates can be "Mar 2024", "2020", "Oct 2016", etc. — parse to comparable timestamps
+  const parseDate = (d: string): number => {
+    if (!d) return 0;
+    const t = Date.parse(d);
+    if (!isNaN(t)) return t;
+    // Try "Mon YYYY" format
+    const t2 = Date.parse(`1 ${d}`);
+    if (!isNaN(t2)) return t2;
+    // Try bare year
+    const year = parseInt(d, 10);
+    if (!isNaN(year)) return new Date(year, 0).getTime();
+    return 0;
+  };
+
+  const sorted = new Map(
+    [...groups.entries()].sort(([, a], [, b]) => {
+      const aIsCurrent = !a.context.endDate || a.context.endDate === 'Present';
+      const bIsCurrent = !b.context.endDate || b.context.endDate === 'Present';
+      if (aIsCurrent && !bIsCurrent) return -1;
+      if (!aIsCurrent && bIsCurrent) return 1;
+      return parseDate(b.context.startDate) - parseDate(a.context.startDate);
+    })
+  );
+
+  return sorted;
 }
 
 // --- Inline "add bullet to existing job" form ---
@@ -290,16 +353,89 @@ function EditableText({ text, onSave, className }: { text: string; onSave: (newT
   );
 }
 
-// --- Job Group Card (with inline add bullet + checkboxes + editable) ---
-function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSections }: {
+// --- Sortable bullet row ---
+function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
+  entry: ContentPoolEntry;
+  isChecked: boolean;
+  onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
+  onUpdate: (entry: ContentPoolEntry) => void;
+  onRemove: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: entry.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} className="flex items-start gap-2 px-3 py-2 hover:bg-stone-50 dark:hover:bg-stone-700">
+      <button
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-0.5 text-stone-300 hover:text-stone-500 dark:hover:text-stone-400 touch-none mt-0.5 flex-shrink-0"
+        title="Drag to reorder"
+      >
+        <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="5" cy="3" r="1.2" /><circle cx="11" cy="3" r="1.2" />
+          <circle cx="5" cy="8" r="1.2" /><circle cx="11" cy="8" r="1.2" />
+          <circle cx="5" cy="13" r="1.2" /><circle cx="11" cy="13" r="1.2" />
+        </svg>
+      </button>
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={() => onToggle(entry, isChecked)}
+        className="mt-0.5 h-3.5 w-3.5 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
+      />
+      <EditableText
+        text={entry.item.type === 'bullet' ? entry.item.data.text : getItemSummary(entry.item)}
+        onSave={(newText) => {
+          if (entry.item.type === 'bullet') {
+            onUpdate({ ...entry, item: { ...entry.item, data: { text: newText } }, updatedAt: new Date().toISOString() });
+          }
+        }}
+        className="flex-1 text-sm text-stone-700 dark:text-stone-300"
+      />
+      <button onClick={() => onRemove(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+  );
+}
+
+// --- Job Group Card (with inline add bullet + checkboxes + editable + drag reorder) ---
+function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, resumeSections }: {
   group: JobGroup;
   onAdd: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
+  onReorder: (orderedIds: string[]) => void;
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
 }) {
   const [addingBullet, setAddingBullet] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleBulletDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const ids = group.entries.map((e) => e.id);
+    const oldIndex = ids.indexOf(active.id as string);
+    const newIndex = ids.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = [...ids];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+    onReorder(reordered);
+  }, [group.entries, onReorder]);
 
   return (
     <div className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
@@ -315,33 +451,25 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSectio
           {addingBullet ? 'Cancel' : '+ Bullet'}
         </button>
       </div>
-      <div className="divide-y divide-stone-100 dark:divide-stone-700">
-        {group.entries.map((entry) => {
-          const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
-          return (
-            <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-stone-50 dark:hover:bg-stone-700">
-              <input
-                type="checkbox"
-                checked={isChecked}
-                onChange={() => onToggle(entry, isChecked)}
-                className="mt-0.5 h-3.5 w-3.5 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
-              />
-              <EditableText
-                text={entry.item.type === 'bullet' ? entry.item.data.text : getItemSummary(entry.item)}
-                onSave={(newText) => {
-                  if (entry.item.type === 'bullet') {
-                    onUpdate({ ...entry, item: { ...entry.item, data: { text: newText } }, updatedAt: new Date().toISOString() });
-                  }
-                }}
-                className="flex-1 text-sm text-stone-700 dark:text-stone-300"
-              />
-              <button onClick={() => onRemove(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-          );
-        })}
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleBulletDragEnd}>
+        <SortableContext items={group.entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
+          <div className="divide-y divide-stone-100 dark:divide-stone-700">
+            {group.entries.map((entry) => {
+              const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
+              return (
+                <SortableBulletRow
+                  key={entry.id}
+                  entry={entry}
+                  isChecked={isChecked}
+                  onToggle={onToggle}
+                  onUpdate={onUpdate}
+                  onRemove={onRemove}
+                />
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
       {addingBullet && (
         <AddBulletToJobForm
           context={group.context}
@@ -352,15 +480,163 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSectio
   );
 }
 
+// --- Sortable non-bullet item row ---
+function SortableItemRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
+  entry: ContentPoolEntry;
+  isChecked: boolean;
+  onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
+  onUpdate: (entry: ContentPoolEntry) => void;
+  onRemove: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: entry.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} className={`bg-white dark:bg-stone-800 rounded-lg border p-3 transition-colors ${isChecked ? 'border-primary-300 dark:border-primary-600' : 'border-stone-200 dark:border-stone-700'}`}>
+      <div className="flex items-start gap-2">
+        <button
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-0.5 text-stone-300 hover:text-stone-500 dark:hover:text-stone-400 touch-none mt-0.5 flex-shrink-0"
+          title="Drag to reorder"
+        >
+          <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="3" r="1.2" /><circle cx="11" cy="3" r="1.2" />
+            <circle cx="5" cy="8" r="1.2" /><circle cx="11" cy="8" r="1.2" />
+            <circle cx="5" cy="13" r="1.2" /><circle cx="11" cy="13" r="1.2" />
+          </svg>
+        </button>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={() => onToggle(entry, isChecked)}
+          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
+        />
+        {entry.item.type === 'summary' ? (
+          <EditableText
+            text={entry.item.data.text}
+            onSave={(newText) => onUpdate({ ...entry, item: { type: 'summary', data: { text: newText } }, updatedAt: new Date().toISOString() })}
+            className="flex-1 text-sm text-stone-900 dark:text-white min-w-0"
+          />
+        ) : (
+          <p className="flex-1 text-sm text-stone-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
+        )}
+        <button onClick={() => onRemove(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- Sortable list for non-bullet section items ---
+function SortableItemList({ entries, resumeSections, onToggle, onUpdate, onRemove, onReorder }: {
+  entries: ContentPoolEntry[];
+  resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
+  onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
+  onUpdate: (entry: ContentPoolEntry) => void;
+  onRemove: (id: string) => void;
+  onReorder: (orderedIds: string[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const ids = entries.map((e) => e.id);
+    const oldIndex = ids.indexOf(active.id as string);
+    const newIndex = ids.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = [...ids];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+    onReorder(reordered);
+  }, [entries, onReorder]);
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-2">
+          {entries.map((entry) => {
+            const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
+            return (
+              <SortableItemRow
+                key={entry.id}
+                entry={entry}
+                isChecked={isChecked}
+                onToggle={onToggle}
+                onUpdate={onUpdate}
+                onRemove={onRemove}
+              />
+            );
+          })}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+// --- Sortable section wrapper for drag-and-drop ---
+function SortablePoolSection({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      <div className="flex items-center gap-1 mb-2">
+        <button
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-0.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 touch-none"
+          title="Drag to reorder"
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="3" r="1.5" />
+            <circle cx="11" cy="3" r="1.5" />
+            <circle cx="5" cy="8" r="1.5" />
+            <circle cx="11" cy="8" r="1.5" />
+            <circle cx="5" cy="13" r="1.5" />
+            <circle cx="11" cy="13" r="1.5" />
+          </svg>
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // --- Main Component ---
 
 export function ContentPoolPage() {
   const contentPool = useAppStore((s) => s.contentPool);
   const resumes = useAppStore((s) => s.resumes);
   const activeResumeId = useAppStore((s) => s.activeResumeId);
+  const updateResume = useAppStore((s) => s.updateResume);
   const addPoolEntry = useAppStore((s) => s.addPoolEntry);
   const removePoolEntry = useAppStore((s) => s.removePoolEntry);
   const updatePoolEntry = useAppStore((s) => s.updatePoolEntry);
+  const reorderPoolEntries = useAppStore((s) => s.reorderPoolEntries);
   const addPoolItemToResume = useAppStore((s) => s.addPoolItemToResume);
   const removePoolItemFromResume = useAppStore((s) => s.removePoolItemFromResume);
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
@@ -373,6 +649,63 @@ export function ContentPoolPage() {
   const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
   const isJobMode = activeSession?.mode === 'job-customisation';
 
+  // Derive section order from resume sections, with fallback
+  const sectionOrder = useMemo<ContentPoolItemType[]>(() => {
+    if (!resumeSections || resumeSections.length === 0) return DEFAULT_SECTION_ORDER;
+
+    const ordered: ContentPoolItemType[] = [];
+    const resumeOrdered = [...resumeSections]
+      .filter((s) => s.content.type !== 'contact')
+      .sort((a, b) => a.order - b.order);
+
+    for (const section of resumeOrdered) {
+      const poolType = RESUME_TO_POOL[section.content.type];
+      if (poolType && !ordered.includes(poolType)) {
+        ordered.push(poolType);
+      }
+    }
+
+    // Append any pool section types not in the resume (orphans)
+    for (const t of DEFAULT_SECTION_ORDER) {
+      if (!ordered.includes(t)) ordered.push(t);
+    }
+
+    return ordered;
+  }, [resumeSections]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleSectionDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !activeResume) return;
+
+    const oldIndex = sectionOrder.indexOf(active.id as ContentPoolItemType);
+    const newIndex = sectionOrder.indexOf(over.id as ContentPoolItemType);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    // Compute new order — reorder the pool types, then update resume section order values
+    const reordered = [...sectionOrder];
+    const [moved] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, moved);
+
+    // Map back to resume sections: assign order = index + 1 (contact is 0)
+    const updatedSections = activeResume.sections.map((s) => {
+      if (s.content.type === 'contact') return s;
+      const poolType = RESUME_TO_POOL[s.content.type];
+      const newOrder = reordered.indexOf(poolType);
+      return newOrder !== -1 ? { ...s, order: newOrder + 1 } : s;
+    });
+
+    updateResume({
+      ...activeResume,
+      sections: updatedSections,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [activeResume, sectionOrder, updateResume]);
+
   const handleToggle = useCallback((entry: ContentPoolEntry, isChecked: boolean) => {
     if (!activeResumeId) return;
     if (isChecked) {
@@ -381,6 +714,23 @@ export function ContentPoolPage() {
       addPoolItemToResume(entry.id, activeResumeId);
     }
   }, [activeResumeId, addPoolItemToResume, removePoolItemFromResume]);
+
+  const handleItemReorder = useCallback((reorderedSubsetIds: string[]) => {
+    // Build new full ordering: keep all IDs in current order, but replace
+    // the subset with the reordered version in place
+    const currentIds = contentPool.map((e) => e.id);
+    const subsetSet = new Set(reorderedSubsetIds);
+    const result: string[] = [];
+    let subsetIdx = 0;
+    for (const id of currentIds) {
+      if (subsetSet.has(id)) {
+        result.push(reorderedSubsetIds[subsetIdx++]);
+      } else {
+        result.push(id);
+      }
+    }
+    reorderPoolEntries(result);
+  }, [contentPool, reorderPoolEntries]);
 
   const handleAdd = useCallback((entry: ContentPoolEntry) => {
     addPoolEntry(entry);
@@ -399,6 +749,15 @@ export function ContentPoolPage() {
     grouped.get(type)!.push(entry);
   }
 
+  // Determine which sections are draggable (have a resume section counterpart)
+  const draggableSections = useMemo(() => {
+    if (!resumeSections) return new Set<ContentPoolItemType>();
+    const types = new Set<string>(resumeSections.map((s) => s.content.type));
+    return new Set(
+      sectionOrder.filter((poolType) => types.has(POOL_TO_RESUME[poolType]))
+    );
+  }, [resumeSections, sectionOrder]);
+
   return (
     <div className="h-full overflow-y-auto p-4 bg-stone-50 dark:bg-stone-900">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -410,6 +769,37 @@ export function ContentPoolPage() {
               : 'Check items to include in the current resume version.'}
           </p>
         </div>
+
+        {/* DEV: Seed test data button */}
+        {contentPool.length === 0 && (
+          <button
+            onClick={() => {
+              const now = new Date().toISOString();
+              const testEntries: ContentPoolEntry[] = [
+                { id: generateId(), item: { type: 'summary', data: { text: 'Experienced product manager with 8+ years in healthcare tech, fintech, and consulting. Led cross-functional teams of up to 30 people.' } }, source: 'user', createdAt: now, updatedAt: now },
+                // Job 1: Current role (newest)
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Grew the Medical Platform from 1 team to 6 teams, managing four other PMs' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Led multi-million GBP enquiries from pharma-cos for data access' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Built Electronic Patient Record — migrated data into interoperable database' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                // Job 2: Previous role
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Led the Medical Platform Team dedicated to improving clinical outcomes' }, context: { company: 'Numan', title: 'Senior Product Manager', location: 'London', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Launched prescription management system serving 50k+ patients monthly' }, context: { company: 'Numan', title: 'Senior Product Manager', location: 'London', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
+                // Job 3: Older role
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Consistently ranked top 5 analyst in Canada — 1 of 3 promoted to Accenture Digital' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', location: 'Toronto', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Developed the business case for a suite of digital mortgage products' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', location: 'Toronto', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
+                // Education
+                { id: generateId(), item: { type: 'education', data: { id: generateId(), institution: 'University of Toronto', degree: 'BComm', field: 'Finance & Economics', dateRange: { start: '2012', end: '2016' } } }, source: 'user', createdAt: now, updatedAt: now },
+                // Skills
+                { id: generateId(), item: { type: 'skill_category', data: { id: generateId(), name: 'Product', skills: ['Roadmapping', 'User Research', 'A/B Testing', 'Agile/Scrum'] } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'skill_category', data: { id: generateId(), name: 'Technical', skills: ['SQL', 'Python', 'Figma', 'Amplitude'] } }, source: 'user', createdAt: now, updatedAt: now },
+              ];
+              for (const entry of testEntries) addPoolEntry(entry);
+            }}
+            className="text-xs px-3 py-1.5 bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 text-stone-600 dark:text-stone-300 rounded-md transition-colors"
+          >
+            Seed Test Data
+          </button>
+        )}
 
         {/* Mode toggle + Generate Recommendations */}
         <div className="space-y-3">
@@ -436,84 +826,80 @@ export function ContentPoolPage() {
           )}
         </div>
 
-        {SECTION_ORDER.map((sectionType) => {
-          const entries = grouped.get(sectionType) || [];
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
+          <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+            {sectionOrder.map((sectionType) => {
+              const entries = grouped.get(sectionType) || [];
+              const isDraggable = draggableSections.has(sectionType);
 
-          return (
-            <div key={sectionType}>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  {SECTION_LABELS[sectionType]}
-                  {entries.length > 0 && <span className="ml-1 text-stone-400 dark:text-stone-500 normal-case font-normal">({entries.length})</span>}
-                </h3>
-                <button
-                  onClick={() => setAddingSection(addingSection === sectionType ? null : sectionType)}
-                  className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 flex items-center gap-0.5"
-                >
-                  {addingSection === sectionType ? 'Cancel' : sectionType === 'bullet' ? '+ New Job' : '+ Add'}
-                </button>
-              </div>
+              const sectionHeader = (
+                <>
+                  <h3 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider flex-1">
+                    {SECTION_LABELS[sectionType]}
+                    {entries.length > 0 && <span className="ml-1 text-stone-400 dark:text-stone-500 normal-case font-normal">({entries.length})</span>}
+                  </h3>
+                  <button
+                    onClick={() => setAddingSection(addingSection === sectionType ? null : sectionType)}
+                    className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 flex items-center gap-0.5"
+                  >
+                    {addingSection === sectionType ? 'Cancel' : sectionType === 'bullet' ? '+ New Job' : '+ Add'}
+                  </button>
+                </>
+              );
 
-              {/* Add form — "New Job" for experience, simple form for others */}
-              {addingSection === sectionType && (
-                <div className="mb-2">
-                  {sectionType === 'bullet' ? (
-                    <AddNewJobForm onAdd={handleAddAndClose} />
+              return (
+                <div key={sectionType}>
+                  {isDraggable ? (
+                    <SortablePoolSection id={sectionType}>
+                      {sectionHeader}
+                    </SortablePoolSection>
                   ) : (
-                    <AddSimpleForm type={sectionType} onAdd={handleAddAndClose} />
+                    <div className="flex items-center justify-between mb-2">
+                      {sectionHeader}
+                    </div>
+                  )}
+
+                  {/* Add form — "New Job" for experience, simple form for others */}
+                  {addingSection === sectionType && (
+                    <div className="mb-2">
+                      {sectionType === 'bullet' ? (
+                        <AddNewJobForm onAdd={handleAddAndClose} />
+                      ) : (
+                        <AddSimpleForm type={sectionType} onAdd={handleAddAndClose} />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Bullet section — grouped by job, each with inline "+ Bullet" */}
+                  {sectionType === 'bullet' && entries.length > 0 && (
+                    <div className="space-y-4">
+                      {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
+                        <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} onReorder={handleItemReorder} resumeSections={resumeSections} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Non-bullet sections — flat list with checkboxes + drag reorder */}
+                  {sectionType !== 'bullet' && entries.length > 0 && (
+                    <SortableItemList
+                      entries={entries}
+                      resumeSections={resumeSections}
+                      onToggle={handleToggle}
+                      onUpdate={updatePoolEntry}
+                      onRemove={removePoolEntry}
+                      onReorder={handleItemReorder}
+                    />
+                  )}
+
+                  {/* Empty state for section */}
+                  {entries.length === 0 && addingSection !== sectionType && (
+                    <p className="text-xs text-stone-400 dark:text-stone-500 italic">No items yet</p>
                   )}
                 </div>
-              )}
-
-              {/* Bullet section — grouped by job, each with inline "+ Bullet" */}
-              {sectionType === 'bullet' && entries.length > 0 && (
-                <div className="space-y-4">
-                  {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                    <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} resumeSections={resumeSections} />
-                  ))}
-                </div>
-              )}
-
-              {/* Non-bullet sections — flat list with checkboxes */}
-              {sectionType !== 'bullet' && entries.length > 0 && (
-                <div className="space-y-2">
-                  {entries.map((entry) => {
-                    const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
-                    return (
-                      <div key={entry.id} className={`bg-white dark:bg-stone-800 rounded-lg border p-3 transition-colors ${isChecked ? 'border-primary-300 dark:border-primary-600' : 'border-stone-200 dark:border-stone-700'}`}>
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => handleToggle(entry, isChecked)}
-                            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          {entry.item.type === 'summary' ? (
-                            <EditableText
-                              text={entry.item.data.text}
-                              onSave={(newText) => updatePoolEntry({ ...entry, item: { type: 'summary', data: { text: newText } }, updatedAt: new Date().toISOString() })}
-                              className="flex-1 text-sm text-stone-900 dark:text-white min-w-0"
-                            />
-                          ) : (
-                            <p className="flex-1 text-sm text-stone-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
-                          )}
-                          <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Empty state for section */}
-              {entries.length === 0 && addingSection !== sectionType && (
-                <p className="text-xs text-stone-400 dark:text-stone-500 italic">No items yet</p>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );
