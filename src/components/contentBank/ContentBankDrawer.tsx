@@ -36,14 +36,14 @@ export function ContentBankDrawer({ open, onClose }: ContentBankDrawerProps) {
       <div className="fixed inset-0 bg-black/20" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="relative w-[400px] max-w-full bg-white dark:bg-gray-800 shadow-2xl flex flex-col ml-auto">
-        <div className="flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="relative w-[400px] max-w-full bg-white dark:bg-stone-800 shadow-2xl flex flex-col ml-auto">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-stone-200 dark:border-stone-700 flex-shrink-0">
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-white">
             Content Bank
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-1 rounded-md text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
             aria-label="Close content bank"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -53,13 +53,13 @@ export function ContentBankDrawer({ open, onClose }: ContentBankDrawerProps) {
         </div>
 
         {/* Filters */}
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 space-y-2">
+        <div className="px-4 py-3 border-b border-stone-200 dark:border-stone-700 space-y-2">
           <input
             type="text"
             placeholder="Search content..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-1.5 text-sm border border-stone-300 dark:border-stone-600 rounded-md bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
           <div className="flex gap-1 flex-wrap">
             {TYPES.map((t) => (
@@ -69,14 +69,14 @@ export function ContentBankDrawer({ open, onClose }: ContentBankDrawerProps) {
                 className={`px-2 py-0.5 text-xs rounded-md transition-colors ${
                   typeFilter === t
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-600'
                 }`}
               >
                 {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-1.5 text-xs text-gray-500">
+          <label className="flex items-center gap-1.5 text-xs text-stone-500">
             <input
               type="checkbox"
               checked={showSuperseded}
@@ -91,7 +91,7 @@ export function ContentBankDrawer({ open, onClose }: ContentBankDrawerProps) {
         <div className="flex-1 overflow-y-auto p-4">
           {filtered.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-400 dark:text-gray-500 text-sm">
+              <p className="text-stone-400 dark:text-stone-500 text-sm">
                 {items.length === 0
                   ? 'Your content bank is empty. Chat with Claude to start building.'
                   : 'No items match your filters.'}
@@ -110,7 +110,7 @@ export function ContentBankDrawer({ open, onClose }: ContentBankDrawerProps) {
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-400">
+        <div className="px-4 py-2 border-t border-stone-200 dark:border-stone-700 text-xs text-stone-400">
           {filtered.length} of {items.length} items
         </div>
       </div>

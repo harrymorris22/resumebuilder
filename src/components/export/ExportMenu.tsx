@@ -55,22 +55,22 @@ export function ExportMenu() {
       <button
         onClick={() => setOpen(!open)}
         disabled={exporting}
-        className="text-xs text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
+        className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors disabled:opacity-50"
       >
         {exporting ? 'Exporting...' : 'Export'}
       </button>
 
       {open && (
-        <div className="absolute bottom-full right-0 mb-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50">
+        <div className="absolute bottom-full right-0 mb-1 w-40 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-xl z-50">
           <button
             onClick={handlePdfExport}
-            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg"
+            className="w-full text-left px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-t-lg"
           >
             Download PDF
           </button>
           <button
             onClick={handleWordExport}
-            className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg"
+            className="w-full text-left px-3 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 rounded-b-lg"
           >
             Download Word
           </button>

@@ -84,7 +84,7 @@ export function ActionSuggestions({
     return (
       <button
         onClick={() => setExpanded(true)}
-        className="text-xs text-gray-400 hover:text-primary-500 transition-colors py-1"
+        className="text-xs text-stone-400 hover:text-primary-500 transition-colors py-1"
       >
         More actions...
       </button>
@@ -109,7 +109,7 @@ export function ActionSuggestions({
               onSend(chip.prompt);
             }
           }}
-          className="px-3 py-1.5 text-xs rounded-full border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 dark:hover:bg-primary-900/20 dark:hover:border-primary-500 dark:hover:text-primary-300 transition-colors"
+          className="px-3 py-1.5 text-xs rounded-full border border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 dark:hover:bg-primary-900/20 dark:hover:border-primary-500 dark:hover:text-primary-300 transition-colors"
         >
           {chip.label}
         </button>
@@ -117,7 +117,7 @@ export function ActionSuggestions({
       {collapsed && expanded && (
         <button
           onClick={() => setExpanded(false)}
-          className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2"
+          className="text-xs text-stone-400 hover:text-stone-600 transition-colors px-2"
         >
           Less
         </button>

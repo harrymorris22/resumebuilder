@@ -13,12 +13,12 @@ export function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCar
 
   if (suggestion.status !== 'pending') {
     return (
-      <div className="mx-3 mb-3 p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-sm">
-        <div className="flex items-center gap-1 text-xs text-gray-500">
+      <div className="mx-3 mb-3 p-3 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700/50 text-sm">
+        <div className="flex items-center gap-1 text-xs text-stone-500">
           {suggestion.status === 'accepted' ? (
             <span className="text-emerald-500">&#10003; Accepted</span>
           ) : (
-            <span className="text-gray-400">&#10005; Skipped</span>
+            <span className="text-stone-400">&#10005; Skipped</span>
           )}
         </div>
       </div>
@@ -26,23 +26,23 @@ export function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCar
   }
 
   return (
-    <div className="mx-3 mb-3 p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-700 bg-white dark:bg-gray-800 text-sm">
+    <div className="mx-3 mb-3 p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-700 bg-white dark:bg-stone-800 text-sm">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
           Content Bank Suggestion
         </span>
         {suggestion.targetSection && (
-          <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500">
+          <span className="text-xs px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-500">
             {suggestion.targetSection}
           </span>
         )}
       </div>
 
       {bankItem && (
-        <p className="text-gray-800 dark:text-gray-200 mb-1">{bankItem.text}</p>
+        <p className="text-stone-800 dark:text-stone-200 mb-1">{bankItem.text}</p>
       )}
 
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+      <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
         {suggestion.reason}
       </p>
 
@@ -55,7 +55,7 @@ export function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCar
         </button>
         <button
           onClick={onReject}
-          className="px-3 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="px-3 py-1 text-xs rounded-md border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
         >
           Skip
         </button>

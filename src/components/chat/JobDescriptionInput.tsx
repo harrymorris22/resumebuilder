@@ -15,14 +15,14 @@ export function JobDescriptionInput({ onSubmit }: JobDescriptionInputProps) {
 
   return (
     <div className="p-4 space-y-3">
-      <div className="text-sm text-gray-600 dark:text-gray-300">
+      <div className="text-sm text-stone-600 dark:text-stone-300">
         Paste the job description below. I'll analyze it and help tailor your resume.
       </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Paste the full job description here..."
-        className="w-full h-32 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+        className="w-full h-32 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-md bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
       />
       <button
         onClick={handleSubmit}

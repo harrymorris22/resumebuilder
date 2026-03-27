@@ -25,7 +25,7 @@ export function ProjectsSection({ data, onUpdate }: ProjectsSectionProps) {
 
   return (
     <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b border-gray-300 pb-1 mb-2">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
         Projects
       </h2>
       {data.items.map((item, i) => (
@@ -36,10 +36,10 @@ export function ProjectsSection({ data, onUpdate }: ProjectsSectionProps) {
               onChange={(v) => updateItem(i, { name: v })}
               placeholder="Project Name"
               tag="span"
-              className="font-semibold text-sm text-gray-900"
+              className="font-semibold text-sm text-stone-900"
             />
             {item.technologies.length > 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-stone-500">
                 ({item.technologies.join(', ')})
               </span>
             )}
@@ -49,12 +49,12 @@ export function ProjectsSection({ data, onUpdate }: ProjectsSectionProps) {
             onChange={(v) => updateItem(i, { description: v })}
             placeholder="Brief project description"
             tag="p"
-            className="text-sm text-gray-600 mt-0.5"
+            className="text-sm text-stone-600 mt-0.5"
           />
           {item.bullets.length > 0 && (
             <ul className="list-disc ml-4 mt-1 space-y-0.5">
               {item.bullets.map((bullet, bi) => (
-                <li key={bi} className="text-sm text-gray-700">
+                <li key={bi} className="text-sm text-stone-700">
                   <InlineEditor
                     value={bullet}
                     onChange={(v) => updateBullet(i, bi, v)}

@@ -17,19 +17,19 @@ export function CreativeTemplate({ sections, onUpdate }: CreativeTemplateProps) 
   const mainSections = visible.filter((s) => !sidebarTypes.has(s.content.type));
 
   return (
-    <div className="font-sans text-gray-800">
+    <div className="font-sans text-stone-800">
       {/* Creative header */}
       {contactData && contact && (
-        <div className="mb-6 pb-4 border-b-2 border-gray-800">
+        <div className="mb-6 pb-4 border-b-2 border-stone-800">
           <InlineEditor
             value={contactData.fullName}
             onChange={(v) => onUpdate(contact.id, { type: 'contact', data: { ...contactData, fullName: v } })}
             placeholder="Your Name"
             tag="h1"
-            className="text-3xl font-bold text-gray-900 tracking-tight"
+            className="text-3xl font-bold text-stone-900 tracking-tight"
             // Playfair Display would be loaded via Google Fonts in production
           />
-          <div className="flex gap-3 mt-1 text-sm text-gray-500 flex-wrap">
+          <div className="flex gap-3 mt-1 text-sm text-stone-500 flex-wrap">
             {contactData.email && <span>{contactData.email}</span>}
             {contactData.phone && <span>&#183; {contactData.phone}</span>}
             {contactData.location && <span>&#183; {contactData.location}</span>}
@@ -44,7 +44,7 @@ export function CreativeTemplate({ sections, onUpdate }: CreativeTemplateProps) 
         <div className="flex-1">
           {mainSections.map((section) => (
             <div key={section.id} className="mb-5">
-              <h2 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <h2 className="text-base font-bold text-stone-900 mb-2 flex items-center gap-2">
                 <span className="w-2 h-2 bg-primary-600 rounded-full" />
                 {getSectionTitle(section)}
               </h2>
@@ -58,7 +58,7 @@ export function CreativeTemplate({ sections, onUpdate }: CreativeTemplateProps) 
           <div className="w-44 flex-shrink-0">
             {sidebarSections.map((section) => (
               <div key={section.id} className="mb-5">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
                   {getSectionTitle(section)}
                 </h2>
                 <RenderSection section={section} onUpdate={onUpdate} />
@@ -94,26 +94,26 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
         onChange={(text) => onUpdate(section.id, { type: 'summary', data: { text } })}
         placeholder="Professional summary..."
         tag="p"
-        className="text-sm text-gray-600 leading-relaxed border-l-2 border-primary-200 pl-3"
+        className="text-sm text-stone-600 leading-relaxed border-l-2 border-primary-200 pl-3"
         multiline
       />
     );
   }
 
   if (content.type === 'experience') {
-    if (content.data.items.length === 0) return <p className="text-sm text-gray-300 italic">No experience yet.</p>;
+    if (content.data.items.length === 0) return <p className="text-sm text-stone-300 italic">No experience yet.</p>;
     return (
       <div className="space-y-4">
         {content.data.items.map((item) => (
-          <div key={item.id} className="relative pl-4 border-l-2 border-gray-200">
+          <div key={item.id} className="relative pl-4 border-l-2 border-stone-200">
             <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-primary-600 rounded-full" />
             <div className="font-medium text-sm">{item.title}</div>
             <div className="text-sm text-primary-600">{item.company}</div>
-            <div className="text-xs text-gray-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
+            <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
             {item.bullets.length > 0 && (
               <ul className="list-disc ml-4 mt-1 space-y-0.5">
                 {item.bullets.map((b, bi) => (
-                  <li key={bi} className="text-sm text-gray-600">{b}</li>
+                  <li key={bi} className="text-sm text-stone-600">{b}</li>
                 ))}
               </ul>
             )}
@@ -124,14 +124,14 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
   }
 
   if (content.type === 'education') {
-    if (content.data.items.length === 0) return <p className="text-sm text-gray-300 italic">No education yet.</p>;
+    if (content.data.items.length === 0) return <p className="text-sm text-stone-300 italic">No education yet.</p>;
     return (
       <div className="space-y-2">
         {content.data.items.map((item) => (
           <div key={item.id}>
             <div className="font-medium text-sm">{item.degree} in {item.field}</div>
-            <div className="text-sm text-gray-500">{item.institution}</div>
-            <div className="text-xs text-gray-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
+            <div className="text-sm text-stone-500">{item.institution}</div>
+            <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
           </div>
         ))}
       </div>
@@ -139,15 +139,15 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
   }
 
   if (content.type === 'skills') {
-    if (content.data.categories.length === 0) return <p className="text-xs text-gray-300 italic">No skills yet.</p>;
+    if (content.data.categories.length === 0) return <p className="text-xs text-stone-300 italic">No skills yet.</p>;
     return (
       <div className="space-y-2">
         {content.data.categories.map((cat) => (
           <div key={cat.id}>
-            <div className="text-xs font-medium text-gray-700 mb-0.5">{cat.name}</div>
+            <div className="text-xs font-medium text-stone-700 mb-0.5">{cat.name}</div>
             <div className="flex flex-wrap gap-1">
               {cat.skills.map((s) => (
-                <span key={s} className="px-1.5 py-0.5 text-xs bg-gray-100 rounded text-gray-600">{s}</span>
+                <span key={s} className="px-1.5 py-0.5 text-xs bg-stone-100 rounded text-stone-600">{s}</span>
               ))}
             </div>
           </div>
@@ -163,7 +163,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
         {content.data.items.map((item) => (
           <div key={item.id} className="text-sm">
             <span className="font-medium">{item.name}</span>
-            <div className="text-xs text-gray-400">{item.issuer} — {item.date}</div>
+            <div className="text-xs text-stone-400">{item.issuer} — {item.date}</div>
           </div>
         ))}
       </div>
@@ -184,7 +184,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
                 ))}
               </div>
             )}
-            <p className="text-sm text-gray-600 mt-0.5">{item.description}</p>
+            <p className="text-sm text-stone-600 mt-0.5">{item.description}</p>
           </div>
         ))}
       </div>

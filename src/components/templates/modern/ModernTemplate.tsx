@@ -12,7 +12,7 @@ export function ModernTemplate({ sections, onUpdate }: ModernTemplateProps) {
   const contactData = contact?.content.type === 'contact' ? contact.content.data : null;
 
   return (
-    <div className="font-sans text-gray-800">
+    <div className="font-sans text-stone-800">
       {/* Header — accent bar */}
       {contactData && contact && (
         <div className="bg-primary-600 text-white px-8 py-6 -mx-8 -mt-8 mb-6">
@@ -68,7 +68,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
         onChange={(text) => onUpdate(section.id, { type: 'summary', data: { text } })}
         placeholder="Professional summary..."
         tag="p"
-        className="text-sm text-gray-600 leading-relaxed"
+        className="text-sm text-stone-600 leading-relaxed"
         multiline
       />
     );
@@ -82,13 +82,13 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
           <div key={item.id}>
             <div className="flex justify-between items-baseline">
               <span className="font-medium text-sm">{item.title}</span>
-              <span className="text-xs text-gray-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
+              <span className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
             </div>
             <div className="text-sm text-primary-600">{item.company}{item.location ? ` — ${item.location}` : ''}</div>
             {item.bullets.length > 0 && (
               <ul className="list-none mt-1 space-y-0.5">
                 {item.bullets.map((b, bi) => (
-                  <li key={bi} className="text-sm text-gray-600 pl-3 relative before:content-['—'] before:absolute before:left-0 before:text-gray-300">{b}</li>
+                  <li key={bi} className="text-sm text-stone-600 pl-3 relative before:content-['—'] before:absolute before:left-0 before:text-stone-300">{b}</li>
                 ))}
               </ul>
             )}
@@ -106,9 +106,9 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
           <div key={item.id} className="flex justify-between items-baseline">
             <div>
               <span className="font-medium text-sm">{item.degree} in {item.field}</span>
-              <div className="text-sm text-gray-500">{item.institution}</div>
+              <div className="text-sm text-stone-500">{item.institution}</div>
             </div>
-            <span className="text-xs text-gray-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
+            <span className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
           </div>
         ))}
       </div>
@@ -122,7 +122,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
         {content.data.categories.map((cat) => (
           <div key={cat.id} className="text-sm">
             <span className="font-medium">{cat.name}: </span>
-            <span className="text-gray-600">{cat.skills.join(', ')}</span>
+            <span className="text-stone-600">{cat.skills.join(', ')}</span>
           </div>
         ))}
       </div>
@@ -135,8 +135,8 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
       <div className="space-y-1">
         {content.data.items.map((item) => (
           <div key={item.id} className="text-sm flex justify-between">
-            <span>{item.name} — <span className="text-gray-500">{item.issuer}</span></span>
-            <span className="text-xs text-gray-400">{item.date}</span>
+            <span>{item.name} — <span className="text-stone-500">{item.issuer}</span></span>
+            <span className="text-xs text-stone-400">{item.date}</span>
           </div>
         ))}
       </div>
@@ -150,8 +150,8 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
         {content.data.items.map((item) => (
           <div key={item.id}>
             <span className="font-medium text-sm">{item.name}</span>
-            {item.technologies.length > 0 && <span className="text-xs text-gray-400 ml-1">({item.technologies.join(', ')})</span>}
-            <p className="text-sm text-gray-600">{item.description}</p>
+            {item.technologies.length > 0 && <span className="text-xs text-stone-400 ml-1">({item.technologies.join(', ')})</span>}
+            <p className="text-sm text-stone-600">{item.description}</p>
           </div>
         ))}
       </div>
@@ -162,5 +162,5 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
 }
 
 function Empty({ text }: { text: string }) {
-  return <p className="text-sm text-gray-300 italic">{text}</p>;
+  return <p className="text-sm text-stone-300 italic">{text}</p>;
 }

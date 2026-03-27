@@ -14,21 +14,21 @@ export function RightPanel() {
   const tabClass = (tab: Tab) =>
     `px-3 py-1 text-sm rounded-md transition-colors ${
       activeTab === tab
-        ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium'
-        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+        ? 'bg-stone-100 dark:bg-stone-700 text-stone-900 dark:text-white font-medium'
+        : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
     }`;
 
   return (
     <div className="flex flex-col h-full">
       {/* Tab bar */}
-      <div className="flex items-center gap-1 px-4 h-10 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+      <div className="flex items-center gap-1 px-4 h-10 border-b border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex-shrink-0">
         <button onClick={() => setActiveTab('resume')} className={tabClass('resume')}>
           Resume
         </button>
         <button onClick={() => setActiveTab('cv-content')} className={tabClass('cv-content')}>
           CV Content
           {contentPool.length > 0 && (
-            <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">{contentPool.length}</span>
+            <span className="ml-1 text-xs text-stone-400 dark:text-stone-500">{contentPool.length}</span>
           )}
         </button>
         <button onClick={() => setActiveTab('cover-letter')} className={tabClass('cover-letter')}>

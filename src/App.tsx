@@ -23,17 +23,17 @@ function AppContent() {
 
   if (!hydrated) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen bg-stone-50 dark:bg-stone-900">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white`}>
+    <div className={`flex flex-col h-screen bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-white`}>
       <Header />
       <SplitPane
         left={<ContentPoolPage />}

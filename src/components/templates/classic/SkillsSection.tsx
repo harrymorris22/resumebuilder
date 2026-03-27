@@ -16,10 +16,10 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
   if (data.categories.length === 0) {
     return (
       <div className="mb-5">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b border-gray-300 pb-1 mb-2">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
           Skills
         </h2>
-        <p className="text-sm text-gray-300 italic">
+        <p className="text-sm text-stone-300 italic">
           Your skills will appear here.
         </p>
       </div>
@@ -28,7 +28,7 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
 
   return (
     <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b border-gray-300 pb-1 mb-2">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
         Skills
       </h2>
       {data.categories.map((cat, i) => (
@@ -38,9 +38,9 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
             onChange={(v) => updateCategory(i, 'name', v)}
             placeholder="Category"
             tag="span"
-            className="font-semibold text-gray-800"
+            className="font-semibold text-stone-800"
           />
-          <span className="text-gray-400">: </span>
+          <span className="text-stone-400">: </span>
           <InlineEditor
             value={cat.skills.join(', ')}
             onChange={(v) =>
@@ -52,7 +52,7 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
             }
             placeholder="Skill 1, Skill 2, Skill 3"
             tag="span"
-            className="text-gray-700"
+            className="text-stone-700"
           />
         </div>
       ))}

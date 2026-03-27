@@ -68,11 +68,11 @@ export function SectionRenderer({ section, onUpdate }: SectionRendererProps) {
     case 'custom':
       return (
         <div className="mb-5">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b border-gray-300 pb-1 mb-2">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
             {content.data.heading || 'Custom Section'}
           </h2>
           {content.data.items.length === 0 && (
-            <p className="text-sm text-gray-300 italic">Empty section</p>
+            <p className="text-sm text-stone-300 italic">Empty section</p>
           )}
         </div>
       );

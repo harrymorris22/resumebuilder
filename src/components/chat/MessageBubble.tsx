@@ -14,7 +14,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
           isUser
             ? 'bg-primary-600 text-white'
-            : 'bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200'
+            : 'bg-stone-50 dark:bg-stone-700/50 text-stone-800 dark:text-stone-200'
         }`}
       >
         {isUser ? (
@@ -26,11 +26,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         )}
 
         {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+          <div className="mt-2 pt-2 border-t border-stone-200 dark:border-stone-600">
             {message.toolCalls.map((tc, i) => (
               <div
                 key={i}
-                className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5"
+                className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1 mt-0.5"
               >
                 <span className="text-emerald-500">&#10003;</span>
                 <span>{formatToolName(tc.toolName)}</span>

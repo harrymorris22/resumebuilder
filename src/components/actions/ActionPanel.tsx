@@ -106,16 +106,16 @@ export function ActionPanel() {
   const showOnboarding = !hasContent && actionSuggestions.length === 0 && !isStreaming;
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-stone-50 dark:bg-stone-900">
       {/* Header with mode toggle */}
-      <div className="flex items-center justify-between px-3 h-10 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white dark:bg-gray-800">
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Coach</span>
+      <div className="flex items-center justify-between px-3 h-10 border-b border-stone-200 dark:border-stone-700 flex-shrink-0 bg-white dark:bg-stone-800">
+        <span className="text-sm font-medium text-stone-600 dark:text-stone-300">Coach</span>
         <div className="flex items-center gap-2">
           {apiKey && <ModeToggle />}
           {isStreaming && (
             <button
               onClick={abort}
-              className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+              className="text-xs text-stone-400 hover:text-red-500 transition-colors"
             >
               Stop
             </button>
@@ -129,11 +129,11 @@ export function ActionPanel() {
           <ResumeScore />
           {totalActions > 0 && (
             <div className="px-3 pb-2">
-              <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 mb-1">
+              <div className="flex items-center justify-between text-xs text-stone-400 dark:text-stone-500 mb-1">
                 <span>{completedActions.length} of {totalActions} addressed</span>
                 <span>{progressPercent}%</span>
               </div>
-              <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-1 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
@@ -167,7 +167,7 @@ export function ActionPanel() {
 
             {/* Streaming indicator */}
             {isStreaming && (
-              <div className="flex items-center gap-2 p-3 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 p-3 text-sm text-stone-500 dark:text-stone-400">
                 <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                 <span>{streamingText ? 'Working...' : 'Thinking...'}</span>
               </div>
@@ -188,7 +188,7 @@ export function ActionPanel() {
 
             {/* Empty state when actions were all addressed */}
             {!showOnboarding && visibleActions.length === 0 && !isStreaming && hasContent && (
-              <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
+              <div className="text-center py-8 text-sm text-stone-400 dark:text-stone-500">
                 <p className="font-medium mb-1">All caught up!</p>
                 <p>Ask a question below or upload a new resume to get more suggestions.</p>
               </div>

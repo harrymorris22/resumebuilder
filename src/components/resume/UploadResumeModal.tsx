@@ -129,15 +129,15 @@ export function UploadResumeModal({
       aria-modal="true"
       aria-label="Upload Resume"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="bg-white dark:bg-stone-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-white">
             Upload Resume
           </h2>
           {!isProcessing && (
             <button
               onClick={handleClose}
-              className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="p-1 rounded-md text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -147,7 +147,7 @@ export function UploadResumeModal({
           )}
         </div>
 
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
           Upload a PDF, Word document, or text file. Claude will parse it into editable sections.
         </p>
 
@@ -163,11 +163,11 @@ export function UploadResumeModal({
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
               dragOver
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500'
+                : 'border-stone-300 dark:border-stone-600 hover:border-primary-400 dark:hover:border-primary-500'
             }`}
           >
             <svg
-              className="w-10 h-10 mx-auto mb-3 text-gray-400"
+              className="w-10 h-10 mx-auto mb-3 text-stone-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -179,10 +179,10 @@ export function UploadResumeModal({
                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
               />
             </svg>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="text-sm font-medium text-stone-700 dark:text-stone-300">
               Drop your resume here or click to browse
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
               PDF, DOCX, or TXT
             </p>
             <input
@@ -198,7 +198,7 @@ export function UploadResumeModal({
         {isProcessing && (
           <div className="py-8 text-center">
             <div className="inline-block w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mb-3" />
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-stone-600 dark:text-stone-300">
               {status === 'extracting' ? 'Extracting text...' : 'Parsing resume with Claude...'}
             </p>
           </div>

@@ -11,7 +11,7 @@ export function SectionDragHandle({ listeners, attributes }: SectionDragHandlePr
     <button
       {...listeners}
       {...attributes}
-      className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-opacity"
+      className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-stone-300 hover:text-stone-500 transition-opacity"
       aria-label="Drag to reorder section"
       tabIndex={-1}
     >

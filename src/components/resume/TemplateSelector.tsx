@@ -36,7 +36,7 @@ export function TemplateSelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+        className="flex items-center gap-1 text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300 transition-colors"
       >
         Template: {templates.find((t) => t.id === activeResume.templateId)?.name}
         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -45,7 +45,7 @@ export function TemplateSelector() {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50 p-2">
+        <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-xl z-50 p-2">
           <div className="grid grid-cols-2 gap-2">
             {templates.map((t) => (
               <button
@@ -54,15 +54,15 @@ export function TemplateSelector() {
                 className={`p-2 rounded-md text-left transition-colors ${
                   activeResume.templateId === t.id
                     ? 'bg-primary-50 dark:bg-primary-900/30 border-2 border-primary-500'
-                    : 'border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
+                    : 'border-2 border-stone-100 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-500'
                 }`}
               >
                 {/* Mini preview placeholder */}
-                <div className="h-12 bg-gray-50 dark:bg-gray-700 rounded mb-1 flex items-center justify-center">
-                  <span className="text-[8px] text-gray-400">{t.name}</span>
+                <div className="h-12 bg-stone-50 dark:bg-stone-700 rounded mb-1 flex items-center justify-center">
+                  <span className="text-[8px] text-stone-400">{t.name}</span>
                 </div>
-                <div className="text-xs font-medium text-gray-900 dark:text-white">{t.name}</div>
-                <div className="text-[10px] text-gray-400">{t.desc}</div>
+                <div className="text-xs font-medium text-stone-900 dark:text-white">{t.name}</div>
+                <div className="text-[10px] text-stone-400">{t.desc}</div>
               </button>
             ))}
           </div>

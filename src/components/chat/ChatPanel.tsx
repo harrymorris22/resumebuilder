@@ -87,9 +87,9 @@ export function ChatPanel() {
   const showFallbackChips = false;
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
-      <div className="flex items-center justify-between px-4 h-10 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Chat</span>
+    <div className="flex flex-col h-full bg-white dark:bg-stone-800">
+      <div className="flex items-center justify-between px-4 h-10 border-b border-stone-200 dark:border-stone-700 flex-shrink-0">
+        <span className="text-sm font-medium text-stone-600 dark:text-stone-300">Chat</span>
         <div className="flex items-center gap-2">
           {apiKey && <ModeToggle />}
           {isStreaming && (
@@ -113,7 +113,7 @@ export function ChatPanel() {
           />
         ) : !apiKey ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <p className="text-gray-500 dark:text-gray-400 mb-2">
+            <p className="text-stone-500 dark:text-stone-400 mb-2">
               Hi! I'm your AI career coach. To get started, click the button
               below and enter your Anthropic API key.
             </p>
@@ -160,7 +160,7 @@ export function ChatPanel() {
 
             {isStreaming && streamingText && (
               <div className="flex justify-start mb-3">
-                <div className="max-w-[85%] rounded-lg px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200">
+                <div className="max-w-[85%] rounded-lg px-3 py-2 text-sm bg-stone-50 dark:bg-stone-700/50 text-stone-800 dark:text-stone-200">
                   <p className="whitespace-pre-wrap">{streamingText}</p>
                   <span className="inline-block w-1.5 h-4 bg-primary-500 animate-pulse ml-0.5" />
                 </div>
@@ -169,11 +169,11 @@ export function ChatPanel() {
 
             {isStreaming && !streamingText && (
               <div className="flex justify-start mb-3">
-                <div className="rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700/50">
+                <div className="rounded-lg px-3 py-2 bg-stone-50 dark:bg-stone-700/50">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export function ChatPanel() {
       </div>
 
       {/* Action chips + input area */}
-      <div className="border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <div className="border-t border-stone-200 dark:border-stone-700 flex-shrink-0">
         {apiKey && messages.length > 0 && (
           <div className="px-3 pt-2">
             <ActionSuggestions
@@ -228,7 +228,7 @@ export function ChatPanel() {
                   : 'Set your API key in Settings to start'
               }
               disabled={!apiKey || isStreaming}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none min-h-[72px] max-h-[192px] overflow-y-auto"
+              className="flex-1 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-md bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none min-h-[72px] max-h-[192px] overflow-y-auto"
             />
             <button
               onClick={() => handleSend()}
