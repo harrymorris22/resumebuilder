@@ -304,7 +304,7 @@ function isEntryInResume(entry: ContentPoolEntry, sections: Array<{ content: { t
 }
 
 // --- Editable text (click to edit, blur/Enter to save) ---
-function EditableText({ text, onSave, className }: { text: string; onSave: (newText: string) => void; className?: string }) {
+function EditableText({ text, onSave, className, allowEmpty }: { text: string; onSave: (newText: string) => void; className?: string; allowEmpty?: boolean }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(text);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -342,9 +342,9 @@ function EditableText({ text, onSave, className }: { text: string; onSave: (newT
         e.target.style.height = '0px';
         e.target.style.height = `${e.target.scrollHeight}px`;
       }}
-      onBlur={() => { if (value.trim() && value !== text) onSave(value.trim()); setEditing(false); }}
+      onBlur={() => { if ((allowEmpty ? value !== text : value.trim() && value !== text)) onSave(value.trim()); setEditing(false); }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (value.trim() && value !== text) onSave(value.trim()); setEditing(false); }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if ((allowEmpty ? value !== text : value.trim() && value !== text)) onSave(value.trim()); setEditing(false); }
         if (e.key === 'Escape') { setValue(text); setEditing(false); }
       }}
       autoFocus
@@ -406,13 +406,14 @@ function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
 }
 
 // --- Job Group Card (with inline add bullet + checkboxes + editable + drag reorder) ---
-function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, resumeSections }: {
+function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, onUpdateContext, resumeSections }: {
   group: JobGroup;
   onAdd: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
   onReorder: (orderedIds: string[]) => void;
+  onUpdateContext: (entries: ContentPoolEntry[], field: 'title' | 'company' | 'startDate' | 'endDate', value: string | null) => void;
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
 }) {
   const [addingBullet, setAddingBullet] = useState(false);
@@ -439,17 +440,44 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, r
 
   return (
     <div className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
-      <div className="px-3 py-2 bg-stone-50 dark:bg-stone-700 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-stone-900 dark:text-white">{group.label}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400">{group.dateLabel}</p>
+      <div className="px-3 py-2 bg-stone-50 dark:bg-stone-700 border-b border-stone-200 dark:border-stone-700">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-1 flex-wrap">
+              <EditableText
+                text={group.context.title}
+                onSave={(v) => v.trim() && onUpdateContext(group.entries, 'title', v)}
+                className="text-sm font-medium text-stone-900 dark:text-white"
+              />
+              <span className="text-sm text-stone-400">@</span>
+              <EditableText
+                text={group.context.company}
+                onSave={(v) => v.trim() && onUpdateContext(group.entries, 'company', v)}
+                className="text-sm font-medium text-stone-900 dark:text-white"
+              />
+            </div>
+            <div className="flex items-baseline gap-1 flex-wrap">
+              <EditableText
+                text={group.context.startDate || ''}
+                onSave={(v) => onUpdateContext(group.entries, 'startDate', v)}
+                className="text-xs text-stone-500 dark:text-stone-400"
+                allowEmpty
+              />
+              <span className="text-xs text-stone-400">–</span>
+              <EditableText
+                text={group.context.endDate ?? 'Present'}
+                onSave={(v) => onUpdateContext(group.entries, 'endDate', v.toLowerCase() === 'present' ? null : v)}
+                className="text-xs text-stone-500 dark:text-stone-400"
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => setAddingBullet(!addingBullet)}
+            className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 ml-2 flex-shrink-0"
+          >
+            {addingBullet ? 'Cancel' : '+ Bullet'}
+          </button>
         </div>
-        <button
-          onClick={() => setAddingBullet(!addingBullet)}
-          className="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400"
-        >
-          {addingBullet ? 'Cancel' : '+ Bullet'}
-        </button>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleBulletDragEnd}>
         <SortableContext items={group.entries.map((e) => e.id)} strategy={verticalListSortingStrategy}>
@@ -732,6 +760,19 @@ export function ContentPoolPage() {
     reorderPoolEntries(result);
   }, [contentPool, reorderPoolEntries]);
 
+  const handleUpdateContext = useCallback((entries: ContentPoolEntry[], field: 'title' | 'company' | 'startDate' | 'endDate', value: string | null) => {
+    const now = new Date().toISOString();
+    for (const entry of entries) {
+      if (entry.item.type !== 'bullet') continue;
+      const updatedContext = { ...entry.item.context, [field]: value };
+      updatePoolEntry({
+        ...entry,
+        item: { ...entry.item, context: updatedContext },
+        updatedAt: now,
+      });
+    }
+  }, [updatePoolEntry]);
+
   const handleAdd = useCallback((entry: ContentPoolEntry) => {
     addPoolEntry(entry);
   }, [addPoolEntry]);
@@ -874,7 +915,7 @@ export function ContentPoolPage() {
                   {sectionType === 'bullet' && entries.length > 0 && (
                     <div className="space-y-4">
                       {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                        <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} onReorder={handleItemReorder} resumeSections={resumeSections} />
+                        <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} onReorder={handleItemReorder} onUpdateContext={handleUpdateContext} resumeSections={resumeSections} />
                       ))}
                     </div>
                   )}

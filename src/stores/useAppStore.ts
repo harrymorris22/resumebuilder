@@ -292,10 +292,14 @@ export const useAppStore = create<AppState>()(
           // For now, add as a new experience entry with just this bullet
           const bulletText = (clonedData as { text: string }).text;
           const ctx = (itemData as { context: { company: string; title: string; location: string; startDate: string; endDate: string | null } }).context;
-          const expItems = ((sectionData.items as Array<{ company: string; title: string; bullets: string[] }>) || []);
+          // Clone items array to avoid mutating store state directly
+          const expItems = ((sectionData.items as Array<{ company: string; title: string; bullets: string[]; [key: string]: unknown }>) || []).map((item) => ({ ...item, bullets: [...item.bullets] }));
           const existing = expItems.find((e) => e.company === ctx.company && e.title === ctx.title);
           if (existing) {
-            existing.bullets.push(bulletText);
+            // Deduplicate: only add if not already present
+            if (!existing.bullets.includes(bulletText)) {
+              existing.bullets.push(bulletText);
+            }
           } else {
             expItems.push({ company: ctx.company, title: ctx.title, id: generateId(), location: ctx.location, dateRange: { start: ctx.startDate, end: ctx.endDate }, bullets: [bulletText] } as never);
           }
@@ -372,11 +376,11 @@ export const useAppStore = create<AppState>()(
             // Remove the specific bullet text from the matching experience entry
             const bulletText = (entry.item.data as { text: string }).text;
             const ctx = (entry.item as { context: { company: string; title: string } }).context;
-            const expItems = (data.items as Array<{ company: string; title: string; bullets: string[] }>) || [];
-            const job = expItems.find((e) => e.company === ctx.company && e.title === ctx.title);
-            if (job) {
-              job.bullets = job.bullets.filter((b) => b !== bulletText);
-            }
+            // Clone items to avoid mutating store state directly
+            const expItems = ((data.items as Array<{ company: string; title: string; bullets: string[]; [key: string]: unknown }>) || []).map((item) => {
+              if (item.company !== ctx.company || item.title !== ctx.title) return item;
+              return { ...item, bullets: item.bullets.filter((b) => b !== bulletText) };
+            });
             return { ...s, content: { type: 'experience' as const, data: { items: expItems } } as never };
           }
 
@@ -412,6 +416,24 @@ export const useAppStore = create<AppState>()(
           getAllContentBankItems(),
           getAllContentPoolEntries(),
         ]);
+
+        // Deduplicate experience bullets (repair any data corrupted by prior bug)
+        for (const resume of resumes) {
+          for (const section of resume.sections) {
+            if (section.content.type !== 'experience') continue;
+            const expData = section.content.data as { items?: Array<{ bullets: string[] }> };
+            if (!expData.items) continue;
+            let dirty = false;
+            for (const job of expData.items) {
+              const deduped = [...new Set(job.bullets)];
+              if (deduped.length !== job.bullets.length) {
+                job.bullets = deduped;
+                dirty = true;
+              }
+            }
+            if (dirty) saveResume(resume);
+          }
+        }
 
         // Create default master resume if none exist
         if (resumes.length === 0) {
