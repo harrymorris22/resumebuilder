@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.4.0] - 2026-03-27
+
+### Changed
+- Applied DESIGN.md design system across entire UI
+- Font: Inter → Instrument Sans (body) + Satoshi (headings) + Geist Mono (data)
+- Primary color: indigo (#6366f1) → blue (#2563EB) per design system
+- Neutrals: cool gray → warm gray (stone palette) across all 44 components
+- Font imports via Fontshare CDN + Google Fonts with font-display: swap
+
 ## [0.3.3.0] - 2026-03-23
 
 ### Added
