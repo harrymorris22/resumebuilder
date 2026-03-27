@@ -60,7 +60,7 @@ export function InlineEditor({
       onPaste={handlePaste}
       onKeyDown={handleKeyDown}
       className={`outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-primary-50/30 rounded px-0.5 -mx-0.5 cursor-text ${
-        !value ? 'text-gray-300 italic' : ''
+        !value ? 'text-stone-300 italic' : ''
       } ${className}`}
       data-placeholder={placeholder}
       role="textbox"

@@ -8,7 +8,7 @@ interface SummarySectionProps {
 export function SummarySection({ data, onUpdate }: SummarySectionProps) {
   return (
     <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b border-gray-300 pb-1 mb-2">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
         Professional Summary
       </h2>
       <InlineEditor
@@ -16,7 +16,7 @@ export function SummarySection({ data, onUpdate }: SummarySectionProps) {
         onChange={(text) => onUpdate({ text })}
         placeholder="Write a brief professional summary highlighting your key strengths and career objectives..."
         tag="p"
-        className="text-sm text-gray-700 leading-relaxed"
+        className="text-sm text-stone-700 leading-relaxed"
         multiline
       />
     </div>

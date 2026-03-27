@@ -89,13 +89,13 @@ function AddBulletToJobForm({ context, onAdd }: {
   };
 
   return (
-    <div className="flex gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-750">
+    <div className="flex gap-2 px-3 py-2 bg-stone-50 dark:bg-stone-700">
       <input
         value={bullet}
         onChange={(e) => setBullet(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         placeholder="New bullet point..."
-        className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white"
         autoFocus
       />
       <button onClick={handleSubmit} disabled={!bullet.trim()} className="text-xs px-2 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
@@ -131,15 +131,15 @@ function AddNewJobForm({ onAdd }: { onAdd: (entry: ContentPoolEntry) => void }) 
   };
 
   return (
-    <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-600">
-      <p className="text-xs font-medium text-gray-600 dark:text-gray-400">New job</p>
+    <div className="space-y-2 p-3 bg-stone-50 dark:bg-stone-700 rounded-lg border border-stone-200 dark:border-stone-600">
+      <p className="text-xs font-medium text-stone-600 dark:text-stone-400">New job</p>
       <div className="flex gap-2">
-        <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Job title" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+        <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Job title" className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />
       </div>
       <div className="flex gap-2">
-        <input value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start date (e.g. 2020)" className="w-32 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-        <input value={bullet} onChange={(e) => setBullet(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder="First bullet (optional)" className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+        <input value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="Start date (e.g. 2020)" className="w-32 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />
+        <input value={bullet} onChange={(e) => setBullet(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder="First bullet (optional)" className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />
         <button onClick={handleSubmit} disabled={!company.trim() || !title.trim()} className="text-xs px-3 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
       </div>
     </div>
@@ -191,9 +191,9 @@ function AddSimpleForm({ type, onAdd }: { type: ContentPoolItemType; onAdd: (ent
   };
 
   return (
-    <div className="flex gap-2 p-2 bg-gray-50 dark:bg-gray-750 rounded-lg border border-gray-200 dark:border-gray-600">
-      <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder={p1} className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
-      {p2 && <input value={text2} onChange={(e) => setText2(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder={p2} className="flex-1 text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />}
+    <div className="flex gap-2 p-2 bg-stone-50 dark:bg-stone-700 rounded-lg border border-stone-200 dark:border-stone-600">
+      <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder={p1} className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />
+      {p2 && <input value={text2} onChange={(e) => setText2(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} placeholder={p2} className="flex-1 text-xs border border-stone-300 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-white" />}
       <button onClick={handleSubmit} disabled={!text.trim()} className="text-xs px-3 py-1 bg-primary-500 text-white rounded hover:bg-primary-600 disabled:opacity-40 disabled:cursor-not-allowed">Add</button>
     </div>
   );
@@ -261,7 +261,7 @@ function EditableText({ text, onSave, className }: { text: string; onSave: (newT
       <p
         ref={textRef}
         onClick={() => { setEditing(true); setValue(text); }}
-        className={`cursor-text hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-1 -mx-1 ${className ?? ''}`}
+        className={`cursor-text hover:bg-stone-100 dark:hover:bg-stone-700 rounded px-1 -mx-1 ${className ?? ''}`}
         title="Click to edit"
       >
         {text}
@@ -285,7 +285,7 @@ function EditableText({ text, onSave, className }: { text: string; onSave: (newT
         if (e.key === 'Escape') { setValue(text); setEditing(false); }
       }}
       autoFocus
-      className="flex-1 text-sm border border-primary-300 dark:border-primary-600 rounded px-1 py-0 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 -mx-1 resize-none overflow-hidden"
+      className="flex-1 text-sm border border-primary-300 dark:border-primary-600 rounded px-1 py-0 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 -mx-1 resize-none overflow-hidden"
     />
   );
 }
@@ -302,11 +302,11 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSectio
   const [addingBullet, setAddingBullet] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="px-3 py-2 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+      <div className="px-3 py-2 bg-stone-50 dark:bg-stone-700 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{group.label}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{group.dateLabel}</p>
+          <p className="text-sm font-medium text-stone-900 dark:text-white">{group.label}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{group.dateLabel}</p>
         </div>
         <button
           onClick={() => setAddingBullet(!addingBullet)}
@@ -315,16 +315,16 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSectio
           {addingBullet ? 'Cancel' : '+ Bullet'}
         </button>
       </div>
-      <div className="divide-y divide-gray-100 dark:divide-gray-700">
+      <div className="divide-y divide-stone-100 dark:divide-stone-700">
         {group.entries.map((entry) => {
           const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
           return (
-            <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-750">
+            <div key={entry.id} className="flex items-start gap-3 px-3 py-2 hover:bg-stone-50 dark:hover:bg-stone-700">
               <input
                 type="checkbox"
                 checked={isChecked}
                 onChange={() => onToggle(entry, isChecked)}
-                className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="mt-0.5 h-3.5 w-3.5 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
               />
               <EditableText
                 text={entry.item.type === 'bullet' ? entry.item.data.text : getItemSummary(entry.item)}
@@ -333,9 +333,9 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, resumeSectio
                     onUpdate({ ...entry, item: { ...entry.item, data: { text: newText } }, updatedAt: new Date().toISOString() });
                   }
                 }}
-                className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+                className="flex-1 text-sm text-stone-700 dark:text-stone-300"
               />
-              <button onClick={() => onRemove(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
+              <button onClick={() => onRemove(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors flex-shrink-0" title="Remove from pool">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -400,11 +400,11 @@ export function ContentPoolPage() {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+    <div className="h-full overflow-y-auto p-4 bg-stone-50 dark:bg-stone-900">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">CV Content Pool</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <h2 className="text-sm font-display font-semibold text-stone-900 dark:text-white">CV Content Pool</h2>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             {contentPool.length === 0
               ? 'Upload a resume or add items manually. Pick items for each resume version.'
               : 'Check items to include in the current resume version.'}
@@ -442,9 +442,9 @@ export function ContentPoolPage() {
           return (
             <div key={sectionType}>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <h3 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   {SECTION_LABELS[sectionType]}
-                  {entries.length > 0 && <span className="ml-1 text-gray-400 dark:text-gray-500 normal-case font-normal">({entries.length})</span>}
+                  {entries.length > 0 && <span className="ml-1 text-stone-400 dark:text-stone-500 normal-case font-normal">({entries.length})</span>}
                 </h3>
                 <button
                   onClick={() => setAddingSection(addingSection === sectionType ? null : sectionType)}
@@ -480,24 +480,24 @@ export function ContentPoolPage() {
                   {entries.map((entry) => {
                     const isChecked = resumeSections ? isEntryInResume(entry, resumeSections) : false;
                     return (
-                      <div key={entry.id} className={`bg-white dark:bg-gray-800 rounded-lg border p-3 transition-colors ${isChecked ? 'border-primary-300 dark:border-primary-600' : 'border-gray-200 dark:border-gray-700'}`}>
+                      <div key={entry.id} className={`bg-white dark:bg-stone-800 rounded-lg border p-3 transition-colors ${isChecked ? 'border-primary-300 dark:border-primary-600' : 'border-stone-200 dark:border-stone-700'}`}>
                         <div className="flex items-start gap-3">
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggle(entry, isChecked)}
-                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
                           />
                           {entry.item.type === 'summary' ? (
                             <EditableText
                               text={entry.item.data.text}
                               onSave={(newText) => updatePoolEntry({ ...entry, item: { type: 'summary', data: { text: newText } }, updatedAt: new Date().toISOString() })}
-                              className="flex-1 text-sm text-gray-900 dark:text-white min-w-0"
+                              className="flex-1 text-sm text-stone-900 dark:text-white min-w-0"
                             />
                           ) : (
-                            <p className="flex-1 text-sm text-gray-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
+                            <p className="flex-1 text-sm text-stone-900 dark:text-white min-w-0">{getItemSummary(entry.item)}</p>
                           )}
-                          <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-gray-300 hover:text-rose-500 dark:text-gray-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
+                          <button onClick={() => removePoolEntry(entry.id)} className="p-1 text-stone-300 hover:text-rose-500 dark:text-stone-600 dark:hover:text-rose-400 transition-colors" title="Remove from pool">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                           </button>
                         </div>
@@ -509,7 +509,7 @@ export function ContentPoolPage() {
 
               {/* Empty state for section */}
               {entries.length === 0 && addingSection !== sectionType && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 italic">No items yet</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500 italic">No items yet</p>
               )}
             </div>
           );

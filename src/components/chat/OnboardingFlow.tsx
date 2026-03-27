@@ -14,10 +14,10 @@ export function OnboardingFlow({
           </svg>
         </div>
 
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-white mb-2">
           Your AI Career Coach
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
           I'll help you build a compelling resume, strengthen your bullets, and tailor for each job application.
         </p>
 
@@ -34,14 +34,14 @@ export function OnboardingFlow({
 
           <button
             onClick={() => onSend("Let's start building my resume from scratch. Ask me about my background, starting with my current role.")}
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+            className="w-full px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
           >
             Start from scratch
           </button>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-6 pt-4 border-t border-stone-100 dark:border-stone-700">
+          <p className="text-xs text-stone-400 dark:text-stone-500">
             Steps: Upload or create → AI analyzes → Fix weak points → Tailor to jobs
           </p>
         </div>

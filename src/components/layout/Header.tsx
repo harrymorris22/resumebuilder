@@ -7,9 +7,9 @@ export function Header() {
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
 
   return (
-    <header className="flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+    <header className="flex items-center justify-between px-4 h-14 border-b border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex-shrink-0">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
+        <h1 className="text-lg font-display font-semibold text-stone-900 dark:text-white tracking-tight">
           Resume Builder
         </h1>
         <ResumeMenu />
@@ -20,7 +20,7 @@ export function Header() {
         <ThemeToggle />
         <button
           onClick={() => setSettingsOpen(true)}
-          className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="p-2 rounded-md text-stone-500 hover:text-stone-700 hover:bg-stone-100 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-700 transition-colors"
           aria-label="Settings"
           title="Settings"
         >

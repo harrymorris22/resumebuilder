@@ -45,14 +45,14 @@ export function SettingsModal() {
       aria-modal="true"
       aria-label="Settings"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="bg-white dark:bg-stone-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-white">
             Settings
           </h2>
           <button
             onClick={() => setSettingsOpen(false)}
-            className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="p-1 rounded-md text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
             aria-label="Close settings"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -62,10 +62,10 @@ export function SettingsModal() {
         </div>
 
         <div className="space-y-3">
-          <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="api-key" className="block text-sm font-medium text-stone-700 dark:text-stone-300">
             Anthropic API Key
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-stone-500 dark:text-stone-400">
             Your API key is stored locally in your browser and never sent to any server other than Anthropic's API.
           </p>
           <div className="flex gap-2">
@@ -80,7 +80,7 @@ export function SettingsModal() {
               }}
               onKeyDown={handleKeyDown}
               placeholder="sk-ant-..."
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="flex-1 px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-md bg-white dark:bg-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
             <button
               onClick={async () => {
@@ -93,7 +93,7 @@ export function SettingsModal() {
                   // Clipboard not available
                 }
               }}
-              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+              className="px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-md hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300"
               title="Paste from clipboard"
             >
               Paste
@@ -115,7 +115,7 @@ export function SettingsModal() {
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={() => setSettingsOpen(false)}
-            className="px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="px-4 py-2 text-sm rounded-md border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700"
           >
             Cancel
           </button>

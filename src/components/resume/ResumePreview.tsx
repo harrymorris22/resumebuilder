@@ -67,8 +67,8 @@ export function ResumePreview() {
 
   if (!activeResume) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-900">
-        <p className="text-gray-400">No resume selected</p>
+      <div className="flex items-center justify-center h-full bg-stone-100 dark:bg-stone-900">
+        <p className="text-stone-400">No resume selected</p>
       </div>
     );
   }
@@ -119,9 +119,9 @@ export function ResumePreview() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-full bg-stone-100 dark:bg-stone-900">
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-        <div className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-gray-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
+        <div className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-stone-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
           {activeResume.templateId === 'modern' ? (
             <ModernTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
           ) : activeResume.templateId === 'minimal' ? (
@@ -161,17 +161,17 @@ export function ResumePreview() {
       </div>
 
       {/* Bottom bar */}
-      <div className="flex items-center justify-between px-4 h-10 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 h-10 border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex-shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setBankOpen(true)}
-            className="text-xs text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
+            className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors"
           >
             Content Bank
           </button>
           <button
             onClick={() => setUploadOpen(true)}
-            className="text-xs text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors"
+            className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors"
           >
             Upload Resume
           </button>

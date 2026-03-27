@@ -30,13 +30,13 @@ export function FloatingChat() {
           />
 
           {/* Drawer */}
-          <div className="fixed bottom-0 right-6 z-50 w-[400px] h-[60vh] bg-white dark:bg-gray-800 rounded-t-xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden animate-slide-up">
+          <div className="fixed bottom-0 right-6 z-50 w-[400px] h-[60vh] bg-white dark:bg-stone-800 rounded-t-xl shadow-2xl border border-stone-200 dark:border-stone-700 flex flex-col overflow-hidden animate-slide-up">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 h-10 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">AI Coach</span>
+            <div className="flex items-center justify-between px-4 h-10 border-b border-stone-200 dark:border-stone-700 flex-shrink-0">
+              <span className="text-sm font-medium text-stone-900 dark:text-white">AI Coach</span>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="p-1 rounded-md text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 aria-label="Close"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

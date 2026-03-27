@@ -6,7 +6,7 @@ const CATEGORY_COLORS: Record<ActionSuggestion['category'], string> = {
   metrics: 'border-l-amber-500',
   structure: 'border-l-purple-500',
   missing: 'border-l-emerald-500',
-  question: 'border-l-gray-400',
+  question: 'border-l-stone-400',
 };
 
 const CATEGORY_LABELS: Record<ActionSuggestion['category'], string> = {
@@ -56,26 +56,26 @@ export function ActionCard({ action, onExecute, onDismiss, onUndo, isExecuting, 
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 border-l-4 ${CATEGORY_COLORS[action.category]} rounded-lg p-3 transition-all duration-200 ${
+      className={`bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 border-l-4 ${CATEGORY_COLORS[action.category]} rounded-lg p-3 transition-all duration-200 ${
         isExecuting ? 'animate-pulse ring-1 ring-primary-300 dark:ring-primary-700' : 'hover:shadow-md'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500">
               {CATEGORY_LABELS[action.category]}
             </span>
             {action.priority === 'high' && (
               <span className="text-[10px] font-medium text-rose-500">HIGH</span>
             )}
           </div>
-          <p className="text-sm text-gray-800 dark:text-gray-200">{action.text}</p>
+          <p className="text-sm text-stone-800 dark:text-stone-200">{action.text}</p>
 
           {action.preview && (
             <button
               onClick={() => setExpanded(!expanded)}
-              className="mt-1.5 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1"
+              className="mt-1.5 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 flex items-center gap-1"
             >
               <svg
                 className={`w-3 h-3 transition-transform ${expanded ? 'rotate-90' : ''}`}
@@ -91,7 +91,7 @@ export function ActionCard({ action, onExecute, onDismiss, onUndo, isExecuting, 
           )}
 
           {expanded && action.preview && (
-            <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-900 rounded text-xs text-gray-600 dark:text-gray-400 italic border-l-2 border-gray-300 dark:border-gray-600">
+            <div className="mt-2 p-2 bg-stone-50 dark:bg-stone-900 rounded text-xs text-stone-600 dark:text-stone-400 italic border-l-2 border-stone-300 dark:border-stone-600">
               {action.preview}
             </div>
           )}
@@ -110,7 +110,7 @@ export function ActionCard({ action, onExecute, onDismiss, onUndo, isExecuting, 
               </button>
               <button
                 onClick={() => onDismiss(action.id)}
-                className="p-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 transition-colors"
+                className="p-1 text-stone-300 hover:text-stone-500 dark:text-stone-600 dark:hover:text-stone-400 transition-colors"
                 aria-label="Dismiss"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

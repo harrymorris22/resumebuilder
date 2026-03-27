@@ -30,10 +30,10 @@ export function ResumeScore() {
       >
         <div className="flex items-center gap-2">
           <span className={`text-sm font-bold ${color}`}>{total}/100</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">Resume Score</span>
+          <span className="text-xs text-stone-500 dark:text-stone-400">Resume Score</span>
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-stone-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -45,20 +45,20 @@ export function ResumeScore() {
           {categories.map((cat) => (
             <div key={cat.name}>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600 dark:text-gray-400">{cat.name}</span>
-                <span className="text-gray-500 dark:text-gray-500">{cat.score}/{cat.maxScore}</span>
+                <span className="text-stone-600 dark:text-stone-400">{cat.name}</span>
+                <span className="text-stone-500 dark:text-stone-500">{cat.score}/{cat.maxScore}</span>
               </div>
-              <div className="mt-0.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              <div className="mt-0.5 h-1.5 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
                     cat.score === cat.maxScore ? 'bg-emerald-500' :
-                    cat.score > 0 ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-600'
+                    cat.score > 0 ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-600'
                   }`}
                   style={{ width: `${(cat.score / cat.maxScore) * 100}%` }}
                 />
               </div>
               {cat.tip !== 'Complete' && cat.tip !== 'Strong' && (
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{cat.tip}</p>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">{cat.tip}</p>
               )}
             </div>
           ))}

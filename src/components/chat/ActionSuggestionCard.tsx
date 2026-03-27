@@ -11,7 +11,7 @@ export function ActionSuggestionCard({
 }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800" role="listitem">
-      <p className="flex-1 text-xs text-gray-700 dark:text-gray-300">{suggestion.text}</p>
+      <p className="flex-1 text-xs text-stone-700 dark:text-stone-300">{suggestion.text}</p>
       <button
         onClick={onTry}
         disabled={disabled}
