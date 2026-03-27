@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6.0] - 2026-03-27
+
+### Added
+- **Editable job headers** — click any job header field (title, company, start date, end date) to edit inline; changes propagate to all bullets in that job group
+- **"Present" for current roles** — end date shows "Present" when null; typing "Present" stores null
+- `allowEmpty` option on `EditableText` — enables clearing the start date field (previously a cleared value was silently discarded)
+
+### Fixed
+- **Empty start date now saveable** — clearing a job's start date previously did nothing silently; the field now saves correctly
+- **Type-safe field updates** — context field parameter is now typed as a union (`'title' | 'company' | 'startDate' | 'endDate'`) instead of `string`, preventing silent typo-induced corruption
+
 ## [0.3.5.0] - 2026-03-27
 
 ### Added
