@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9.0] - 2026-03-27
+
+### Added
+- **Page-accurate resume preview** — preview padding now matches print CSS exactly (`0.5in` instead of Tailwind `p-8`), so what you see is what you print
+- **Page overflow indicator** — dashed amber boundary line at the one-page mark and amber warning bar when content overflows: "Content overflows one page. Remove items to fit."
+- **Overflow detection tests** — `ResumePreview.test.tsx` with 3 tests covering no-overflow, overflow-detected, and boundary-line-hidden states
+
+### Changed
+- Page boundary line is hidden in `@media print` so it never appears in exported PDFs
+
 ## [0.3.8.0] - 2026-03-27
 
 ### Fixed

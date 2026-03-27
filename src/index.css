@@ -51,6 +51,11 @@ body {
     visibility: visible;
   }
 
+  /* Hide page boundary line in print */
+  .page-boundary-line {
+    display: none !important;
+  }
+
   /* Position it at the top of the page */
   #resume-print-area {
     position: absolute;

@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { ResumeSection, SectionContent } from '../../types/resume';
 import { SectionRenderer } from './SectionRenderer';
@@ -59,11 +59,22 @@ export function ResumePreview() {
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const [bankOpen, setBankOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  // 10in usable content height = 11in page - 2 * 0.5in padding
+  const PAGE_CONTENT_HEIGHT = 10 * 96; // 960px at 96dpi
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const contentHeight = contentRef.current.scrollHeight;
+    setOverflows(contentHeight > PAGE_CONTENT_HEIGHT);
+  });
 
   if (!activeResume) {
     return (
@@ -121,44 +132,57 @@ export function ResumePreview() {
   return (
     <div className="flex flex-col h-full bg-stone-100 dark:bg-stone-900">
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-        <div id="resume-print-area" className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-stone-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
-          {activeResume.templateId === 'modern' ? (
-            <ModernTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
-          ) : activeResume.templateId === 'minimal' ? (
-            <MinimalTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
-          ) : activeResume.templateId === 'creative' ? (
-            <CreativeTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
-          ) : (
-            <>
-              {/* Classic template with drag-and-drop */}
-              {contactSection && contactSection.visible && (
-                <SectionRenderer
-                  section={contactSection}
-                  onUpdate={(content) => handleSectionUpdate(contactSection.id, content)}
-                />
-              )}
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sortableSections.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {sortableSections.map((section) => (
-                    <SortableSection
-                      key={section.id}
-                      section={section}
-                      onUpdate={(content) => handleSectionUpdate(section.id, content)}
-                    />
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </>
+        <div id="resume-print-area" className="relative bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] text-stone-900" style={{ padding: '0.5in', fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
+          {overflows && (
+            <div className="page-boundary-line absolute left-0 right-0 border-t-2 border-dashed border-amber-400 pointer-events-none" style={{ top: '11in' }}>
+              <span className="absolute right-2 -top-5 text-[10px] text-amber-500 bg-white px-1">page limit</span>
+            </div>
           )}
+          <div ref={contentRef}>
+            {activeResume.templateId === 'modern' ? (
+              <ModernTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
+            ) : activeResume.templateId === 'minimal' ? (
+              <MinimalTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
+            ) : activeResume.templateId === 'creative' ? (
+              <CreativeTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
+            ) : (
+              <>
+                {/* Classic template with drag-and-drop */}
+                {contactSection && contactSection.visible && (
+                  <SectionRenderer
+                    section={contactSection}
+                    onUpdate={(content) => handleSectionUpdate(contactSection.id, content)}
+                  />
+                )}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={sortableSections.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {sortableSections.map((section) => (
+                      <SortableSection
+                        key={section.id}
+                        section={section}
+                        onUpdate={(content) => handleSectionUpdate(section.id, content)}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {overflows && (
+        <div className="flex-shrink-0 px-4 py-2 bg-amber-50 dark:bg-amber-900/30 border-t border-amber-200 dark:border-amber-700 text-center">
+          <p className="text-xs text-amber-700 dark:text-amber-400">Content overflows one page. Remove items to fit.</p>
+        </div>
+      )}
 
       {/* Bottom bar */}
       <div className="flex items-center justify-between px-4 h-10 border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex-shrink-0">
