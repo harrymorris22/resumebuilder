@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5.0] - 2026-03-27
+
+### Added
+- **Pool section order synced with resume** — content pool sections display in the same order as the resume sections
+- **Drag-and-drop section reorder** — drag section headers in the pool to reorder; resume preview updates to match
+- **Drag-and-drop item reorder** — drag individual bullets within a job or items within any section to reorder
+- **reorderPoolEntries** store action for persisting item-level reordering
+- **Seed Test Data** button for development testing (visible when pool is empty)
+
+### Fixed
+- Job chronological sorting now parses "Mon YYYY" date formats correctly (was doing alphabetical comparison)
+- Experience items added to resume via checkbox now sort chronologically (newest first)
+
+### Changed
+- Applied DESIGN.md design system across entire UI (fonts, colors, warm grays)
+
 ## [0.3.4.0] - 2026-03-27
 
 ### Changed
