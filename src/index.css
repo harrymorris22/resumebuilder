@@ -35,8 +35,32 @@ body {
 }
 
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  /* Hide everything, preserve layout tree */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show the resume and all its children */
+  #resume-print-area,
+  #resume-print-area * {
+    visibility: visible;
+  }
+
+  /* Position it at the top of the page */
+  #resume-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8.5in;
+    max-width: 8.5in;
+    padding: 0.5in;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

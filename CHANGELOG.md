@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.8.0] - 2026-03-27
+
+### Fixed
+- **PDF export matches preview** — replaced react-pdf/renderer (separate layout with mismatched fonts and styles) with `window.print()` targeting `#resume-print-area`; print CSS uses `visibility: hidden` isolation so only the active resume template renders, pixel-perfect match with what the user sees
+- **Reset confirmation dialog null guard** — closing the confirm dialog when `activeResumeId` is null no longer leaves the dialog stuck open
+
 ## [0.3.7.0] - 2026-03-27
 
 ### Added

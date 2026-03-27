@@ -121,7 +121,7 @@ export function ResumePreview() {
   return (
     <div className="flex flex-col h-full bg-stone-100 dark:bg-stone-900">
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-        <div className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-stone-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
+        <div id="resume-print-area" className="bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] p-8 text-stone-900" style={{ fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
           {activeResume.templateId === 'modern' ? (
             <ModernTemplate sections={activeResume.sections} onUpdate={handleSectionUpdate} />
           ) : activeResume.templateId === 'minimal' ? (
