@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { saveAs } from 'file-saver';
 import { useAppStore } from '../../stores/useAppStore';
-import { PdfDocument } from './PdfDocument';
 import { exportToWord } from './WordExporter';
 
 export function ExportMenu() {
@@ -24,18 +21,9 @@ export function ExportMenu() {
 
   if (!activeResume) return null;
 
-  const handlePdfExport = async () => {
-    setExporting(true);
+  const handlePdfExport = () => {
     setOpen(false);
-    try {
-      const blob = await pdf(<PdfDocument resume={activeResume} />).toBlob();
-      const fileName = `${activeResume.name.replace(/\s+/g, '_')}.pdf`;
-      saveAs(blob, fileName);
-    } catch (err) {
-      console.error('PDF export failed:', err);
-    } finally {
-      setExporting(false);
-    }
+    window.print();
   };
 
   const handleWordExport = async () => {
