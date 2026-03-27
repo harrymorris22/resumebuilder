@@ -58,6 +58,8 @@ export function ResumeMenu() {
       resetResume(activeResumeId);
       setConfirmReset(false);
       setOpen(false);
+    } else {
+      setConfirmReset(false);
     }
   }, [activeResumeId, resetResume]);
 
@@ -149,7 +151,7 @@ export function ResumeMenu() {
           {/* Reset */}
           {confirmReset ? (
             <div className="px-3 py-1.5 flex items-center gap-2">
-              <span className="text-xs text-amber-600 dark:text-amber-400">Clear all content?</span>
+              <span className="text-xs text-amber-600 dark:text-amber-400">Clear all content? Cannot be undone.</span>
               <button onClick={handleReset} className="text-xs text-white bg-amber-500 hover:bg-amber-600 rounded px-2 py-0.5">Yes</button>
               <button onClick={() => setConfirmReset(false)} className="text-xs text-stone-500 hover:text-stone-700 dark:text-stone-400">Cancel</button>
             </div>

@@ -53,7 +53,7 @@ describe('ResumeMenu — reset content', () => {
     render(<ResumeMenu />)
     await user.click(screen.getByText('My Resume'))
     await user.click(screen.getByText('Reset content'))
-    expect(screen.getByText('Clear all content?')).toBeInTheDocument()
+    expect(screen.getByText('Clear all content? Cannot be undone.')).toBeInTheDocument()
     expect(screen.getByText('Yes')).toBeInTheDocument()
     expect(screen.getByText('Cancel')).toBeInTheDocument()
   })
