@@ -17,7 +17,7 @@ import {
   deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
 } from '../db/indexedDb';
-import { createDefaultResume, cloneResume } from '../utils/resumeDefaults';
+import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
 
 interface AppState {
@@ -54,6 +54,7 @@ interface AppState {
   removeResume: (id: string) => void;
   duplicateResume: (id: string) => void;
   renameResume: (id: string, name: string) => void;
+  resetResume: (id: string) => void;
 
   // Actions — chat
   setActiveChatSessionId: (id: string | null) => void;
@@ -157,6 +158,18 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           resumes: s.resumes.map((r) =>
             r.id === id ? { ...r, name: trimmed, updatedAt: new Date().toISOString() } : r
+          ),
+        }));
+        const updated = get().resumes.find((r) => r.id === id);
+        if (updated) saveResume(updated);
+      },
+
+      resetResume: (id) => {
+        set((s) => ({
+          resumes: s.resumes.map((r) =>
+            r.id === id
+              ? { ...r, sections: createDefaultSections(), updatedAt: new Date().toISOString() }
+              : r
           ),
         }));
         const updated = get().resumes.find((r) => r.id === id);
