@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.7.0] - 2026-03-27
+
+### Added
+- **Reset resume** — "Reset content" option in the resume menu clears all resume sections back to defaults while leaving the content pool untouched; two-step confirm (amber) with "Cannot be undone." warning prevents accidental data loss
+- `resetResume` store action — replaces sections with fresh defaults, persists to IDB
+
+### Fixed
+- Reset confirmation dialog no longer gets stuck open when `activeResumeId` is null
+
 ## [0.3.6.1] - 2026-03-27
 
 ### Fixed
