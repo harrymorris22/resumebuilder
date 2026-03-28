@@ -1,4 +1,5 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
+import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface CreativeTemplateProps {
@@ -8,7 +9,7 @@ interface CreativeTemplateProps {
 
 export function CreativeTemplate({ sections, onUpdate }: CreativeTemplateProps) {
   const contact = sections.find((s) => s.content.type === 'contact');
-  const visible = sections.filter((s) => s.visible && s.content.type !== 'contact').sort((a, b) => a.order - b.order);
+  const visible = sections.filter((s) => s.visible && s.content.type !== 'contact' && !isSectionEmpty(s.content)).sort((a, b) => a.order - b.order);
   const contactData = contact?.content.type === 'contact' ? contact.content.data : null;
 
   // Split into sidebar sections (contact, skills) and main sections

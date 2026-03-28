@@ -1,4 +1,5 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
+import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface MinimalTemplateProps {
@@ -8,7 +9,7 @@ interface MinimalTemplateProps {
 
 export function MinimalTemplate({ sections, onUpdate }: MinimalTemplateProps) {
   const contact = sections.find((s) => s.content.type === 'contact');
-  const visible = sections.filter((s) => s.visible && s.content.type !== 'contact').sort((a, b) => a.order - b.order);
+  const visible = sections.filter((s) => s.visible && s.content.type !== 'contact' && !isSectionEmpty(s.content)).sort((a, b) => a.order - b.order);
   const contactData = contact?.content.type === 'contact' ? contact.content.data : null;
 
   return (

@@ -17,6 +17,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { ResumeSection, SectionContent } from '../../types/resume';
+import { isSectionEmpty } from '../../utils/sectionEmpty';
 import { SectionRenderer } from './SectionRenderer';
 import { SectionDragHandle } from './SectionDragHandle';
 import { ContentBankDrawer } from '../contentBank/ContentBankDrawer';
@@ -86,7 +87,7 @@ export function ResumePreview() {
 
   const contactSection = activeResume.sections.find((s) => s.content.type === 'contact');
   const sortableSections = activeResume.sections
-    .filter((s) => s.visible && s.content.type !== 'contact')
+    .filter((s) => s.visible && s.content.type !== 'contact' && !isSectionEmpty(s.content))
     .sort((a, b) => a.order - b.order);
 
   const handleSectionUpdate = (sectionId: string, content: SectionContent) => {
