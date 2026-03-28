@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9.1] - 2026-03-28
+
+### Changed
+- **Empty sections hidden from resume** — sections with no content (skills, certifications, projects, experience, education, summary, custom) no longer render on the resume, keeping the layout clean
+
 ## [0.3.9.0] - 2026-03-27
 
 ### Added
