@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Resume, ContentPoolEntry, ContentPoolItemData } from '../types/resume';
+import type { Resume, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
 import type { ContentBankItem, CoverLetter } from '../types/resume';
 import type { ChatSession } from '../types/chat';
+import type { Recommendation } from '../types/recommendation';
+import type { WizardStep } from '../types/wizard';
 import {
   saveResume,
   getAllResumes,
@@ -16,6 +18,13 @@ import {
   getAllContentPoolEntries,
   deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
+  saveJobDescription,
+  getAllJobDescriptions,
+  deleteJobDescription as deleteJdFromDb,
+  saveRecommendation,
+  getAllRecommendations,
+  deleteRecommendation as deleteRecFromDb,
+  clearRecommendations as clearRecsFromDb,
 } from '../db/indexedDb';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
@@ -27,6 +36,9 @@ interface AppState {
   activeResumeId: string | null;
   activeChatSessionId: string | null;
   leftPanelWidth: number;
+  wizardStep: WizardStep;
+  activeJobDescriptionId: string | null;
+  generatedResumeId: string | null;
 
   // In-memory state (hydrated from IDB)
   resumes: Resume[];
@@ -34,6 +46,9 @@ interface AppState {
   contentBankItems: ContentBankItem[];
   contentPool: ContentPoolEntry[];
   coverLetters: CoverLetter[];
+  jobDescriptions: JobDescription[];
+  recommendations: Recommendation[];
+  recommendationsLoading: boolean;
   hydrated: boolean;
   settingsOpen: boolean;
   atsKeywords: string[];
@@ -81,6 +96,21 @@ interface AppState {
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
 
+  // Actions — wizard
+  setWizardStep: (step: WizardStep) => void;
+  setActiveJobDescriptionId: (id: string | null) => void;
+  setGeneratedResumeId: (id: string | null) => void;
+
+  // Actions — job descriptions
+  addJobDescription: (jd: JobDescription) => void;
+  removeJobDescription: (id: string) => void;
+
+  // Actions — recommendations
+  setRecommendations: (recs: Recommendation[]) => void;
+  updateRecommendation: (id: string, updates: Partial<Recommendation>) => void;
+  clearRecommendations: () => void;
+  setRecommendationsLoading: (loading: boolean) => void;
+
   // Actions — auto-message & coach
   setPendingAutoMessage: (msg: string | null) => void;
   setLatestCoachSuggestion: (s: { text: string; prompt: string } | null) => void;
@@ -98,6 +128,9 @@ export const useAppStore = create<AppState>()(
       activeResumeId: null,
       activeChatSessionId: null,
       leftPanelWidth: 40,
+      wizardStep: 'content-pool' as WizardStep,
+      activeJobDescriptionId: null,
+      generatedResumeId: null,
 
       // In-memory
       resumes: [],
@@ -105,6 +138,9 @@ export const useAppStore = create<AppState>()(
       contentBankItems: [],
       contentPool: [],
       coverLetters: [],
+      jobDescriptions: [],
+      recommendations: [],
+      recommendationsLoading: false,
       hydrated: false,
       atsKeywords: [],
       activeCoverLetter: null,
@@ -417,17 +453,60 @@ export const useAppStore = create<AppState>()(
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
 
+      // Wizard
+      setWizardStep: (step) => set({ wizardStep: step }),
+      setActiveJobDescriptionId: (id) => set({ activeJobDescriptionId: id }),
+      setGeneratedResumeId: (id) => set({ generatedResumeId: id }),
+
+      // Job descriptions
+      addJobDescription: (jd) => {
+        set((s) => ({ jobDescriptions: [...s.jobDescriptions, jd] }));
+        saveJobDescription(jd);
+      },
+      removeJobDescription: (id) => {
+        set((s) => ({
+          jobDescriptions: s.jobDescriptions.filter((j) => j.id !== id),
+          activeJobDescriptionId: s.activeJobDescriptionId === id ? null : s.activeJobDescriptionId,
+        }));
+        deleteJdFromDb(id);
+      },
+
+      // Recommendations
+      setRecommendations: (recs) => {
+        set({ recommendations: recs });
+        // Persist each to IDB
+        clearRecsFromDb().then(() => {
+          for (const rec of recs) saveRecommendation(rec);
+        });
+      },
+      updateRecommendation: (id, updates) => {
+        set((s) => ({
+          recommendations: s.recommendations.map((r) =>
+            r.id === id ? { ...r, ...updates } : r
+          ),
+        }));
+        const updated = get().recommendations.find((r) => r.id === id);
+        if (updated) saveRecommendation(updated);
+      },
+      clearRecommendations: () => {
+        set({ recommendations: [] });
+        clearRecsFromDb();
+      },
+      setRecommendationsLoading: (loading) => set({ recommendationsLoading: loading }),
+
       // Auto-message & coach
       setPendingAutoMessage: (msg) => set({ pendingAutoMessage: msg }),
       setLatestCoachSuggestion: (s) => set({ latestCoachSuggestion: s }),
 
       // Hydration
       hydrateFromIdb: async () => {
-        const [resumes, chatSessions, contentBankItems, contentPool] = await Promise.all([
+        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations] = await Promise.all([
           getAllResumes(),
           getAllChatSessions(),
           getAllContentBankItems(),
           getAllContentPoolEntries(),
+          getAllJobDescriptions(),
+          getAllRecommendations(),
         ]);
 
         // Deduplicate experience bullets (repair any data corrupted by prior bug)
@@ -457,13 +536,29 @@ export const useAppStore = create<AppState>()(
 
         const state = get();
         const activeResumeId = state.activeResumeId ?? resumes[0]?.id ?? null;
+
+        // Validate wizard step gates after hydration
+        let wizardStep = state.wizardStep;
+        if (wizardStep === 'recommendations' && contentPool.length === 0) {
+          wizardStep = 'content-pool';
+        }
+        if (wizardStep === 'generate' && !jobDescriptions.find((j) => j.id === state.activeJobDescriptionId)) {
+          wizardStep = 'job-description';
+        }
+        if (wizardStep === 'refine' && !resumes.find((r) => r.id === state.generatedResumeId)) {
+          wizardStep = 'generate';
+        }
+
         set({
           resumes,
           chatSessions,
           contentBankItems,
           contentPool,
+          jobDescriptions,
+          recommendations,
           hydrated: true,
           activeResumeId,
+          wizardStep,
         });
 
         // Restore or create a chat session for the active resume
@@ -505,6 +600,9 @@ export const useAppStore = create<AppState>()(
         activeResumeId: state.activeResumeId,
         activeChatSessionId: state.activeChatSessionId,
         leftPanelWidth: state.leftPanelWidth,
+        wizardStep: state.wizardStep,
+        activeJobDescriptionId: state.activeJobDescriptionId,
+        generatedResumeId: state.generatedResumeId,
       }),
     }
   )

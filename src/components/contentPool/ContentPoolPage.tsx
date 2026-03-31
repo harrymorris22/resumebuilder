@@ -17,8 +17,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useAppStore } from '../../stores/useAppStore';
 import { generateId } from '../../utils/id';
-import { ModeToggle } from '../chat/ModeToggle';
-import { JobDescriptionInput } from '../chat/JobDescriptionInput';
 import type { ContentPoolEntry, ContentPoolItemData, ContentPoolItemType } from '../../types/resume';
 
 const DEFAULT_SECTION_ORDER: ContentPoolItemType[] = [
@@ -668,16 +666,9 @@ export function ContentPoolPage() {
   const addPoolItemToResume = useAppStore((s) => s.addPoolItemToResume);
   const removePoolItemFromResume = useAppStore((s) => s.removePoolItemFromResume);
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
-  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
-  const pendingAutoMessage = useAppStore((s) => s.pendingAutoMessage);
 
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const resumeSections = activeResume?.sections ?? null;
-  const apiKey = useAppStore((s) => s.apiKey);
-  const chatSessions = useAppStore((s) => s.chatSessions);
-  const activeChatSessionId = useAppStore((s) => s.activeChatSessionId);
-  const activeSession = chatSessions.find((s) => s.id === activeChatSessionId);
-  const isJobMode = activeSession?.mode === 'job-customisation';
 
   // Derive section order from resume sections, with fallback
   const sectionOrder = useMemo<ContentPoolItemType[]>(() => {
@@ -843,33 +834,6 @@ export function ContentPoolPage() {
             Seed Test Data
           </button>
         )}
-
-        {/* Mode toggle + Generate Recommendations */}
-        <div className="space-y-3">
-          {apiKey && (
-            <div className="flex items-center justify-between">
-              <ModeToggle />
-              {contentPool.length > 0 && (
-                <button
-                  onClick={() => setPendingAutoMessage('Analyze my CV content pool and suggest improvements. Use the suggest_actions tool to provide actionable recommendations for each section.')}
-                  disabled={!!pendingAutoMessage}
-                  className="py-1.5 px-4 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
-                  title="AI will analyze your resume and suggest improvements"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-                  </svg>
-                  Generate Recommendations
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Job Description input when in Job Match mode */}
-          {isJobMode && (
-            <JobDescriptionInput onSubmit={(text) => setPendingAutoMessage(`Here is the job description I'm targeting:\n\n${text}\n\nAnalyze my resume against this job description. Use suggest_actions to recommend specific improvements to better match this role.`)} />
-          )}
-        </div>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
           <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>

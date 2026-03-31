@@ -1,12 +1,8 @@
 import { useEffect } from 'react';
 import { useAppStore } from './stores/useAppStore';
-import { MobileGate } from './components/layout/MobileGate';
 import { Header } from './components/layout/Header';
-import { SplitPane } from './components/layout/SplitPane';
 import { SettingsModal } from './components/settings/SettingsModal';
-import { ContentPoolPage } from './components/contentPool/ContentPoolPage';
-import { ResumePreview } from './components/resume/ResumePreview';
-import { FloatingChat } from './components/chat/FloatingChat';
+import { WizardShell } from './components/wizard/WizardShell';
 
 function AppContent() {
   const hydrated = useAppStore((s) => s.hydrated);
@@ -35,24 +31,12 @@ function AppContent() {
   return (
     <div className={`flex flex-col h-screen bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-white`}>
       <Header />
-      <SplitPane
-        left={<ContentPoolPage />}
-        right={
-          <div className="flex flex-col h-full">
-            <ResumePreview />
-          </div>
-        }
-      />
-      <FloatingChat />
+      <WizardShell />
       <SettingsModal />
     </div>
   );
 }
 
 export default function App() {
-  return (
-    <MobileGate>
-      <AppContent />
-    </MobileGate>
-  );
+  return <AppContent />;
 }

@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0.0] - 2026-03-31
+
+### Added
+- **Wizard-based UI** replacing the two-panel + chat layout with a guided 5-step flow: Content Pool, AI Recommendations, Job Description, Generate CV, Refine
+- **Step-by-step navigation** with progress indicator, back/next buttons, and step gates
+- **AI Recommendations** (Step 2) analyzes your content pool and suggests improvements inline
+- **Job Description analysis** (Step 3) extracts keywords and generates JD-specific recommendations
+- **CV Generation** (Step 4) creates a new 1-page resume from your content pool, targeted to the job description, with section-by-section progress checklist
+- **Refine step** (Step 5) with JD-specific AI suggestions and prominent export
+- **Resume Library drawer** accessible from header, showing all generated resumes grouped by job application
+- **Job description persistence** with saved JD list, keyword extraction, and select/delete
+- **Empty states** for all wizard steps with clear calls-to-action
+
+### Changed
+- Header simplified (removed ResumeMenu dropdown and TemplateSelector, added "My Resumes" button)
+- DESIGN.md updated for wizard-based layout
+- Recommendations and job descriptions now persist to IndexedDB (survive page refresh)
+
+### Removed
+- Floating chat drawer (FloatingChat, ChatPanel, ActionPanel, MessageBubble)
+- Split pane two-panel layout
+- Content Bank drawer (replaced by Content Pool in wizard)
+- Mode toggle (general/job-customisation)
+- Coach notes and resume score components
+
+### Fixed
+- "Add Manually" button on empty content pool now shows the full ContentPoolPage
+
 ## [0.3.9.3] - 2026-03-31
 
 ### Fixed
