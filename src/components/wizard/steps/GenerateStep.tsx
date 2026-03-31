@@ -100,20 +100,12 @@ export function GenerateStep() {
           <ProgressChecklist sections={sections} />
         </div>
 
-        <div className="flex items-center gap-3 mt-4">
-          <button
-            onClick={() => setWizardStep(WIZARD_STEPS[WIZARD_STEPS.length - 1])}
-            className="px-6 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition-colors"
-          >
-            Continue to Refine
-          </button>
-          <button
-            onClick={() => generate()}
-            className="px-4 py-2 text-sm text-stone-600 dark:text-stone-400 border border-stone-300 dark:border-stone-600 rounded-md hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-          >
-            Regenerate
-          </button>
-        </div>
+        <button
+          onClick={() => setWizardStep(WIZARD_STEPS[WIZARD_STEPS.length - 1])}
+          className="mt-4 px-6 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition-colors"
+        >
+          Continue to Refine
+        </button>
       </div>
     );
   }

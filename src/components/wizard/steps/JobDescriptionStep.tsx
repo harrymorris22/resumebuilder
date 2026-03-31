@@ -1,10 +1,7 @@
-import { useEffect, useRef } from 'react';
 import { useAppStore } from '../../../stores/useAppStore';
 import { useAnalyzeJobDescription } from '../../../hooks/useAnalyzeJobDescription';
-import { useRecommendations } from '../../../hooks/useRecommendations';
 import { JobDescriptionForm } from '../../jobDescription/JobDescriptionForm';
 import { SavedJobList } from '../../jobDescription/SavedJobList';
-import { RecommendationList } from '../../recommendations/RecommendationList';
 
 export function JobDescriptionStep() {
   const apiKey = useAppStore((s) => s.apiKey);
@@ -13,41 +10,13 @@ export function JobDescriptionStep() {
   const activeJobDescriptionId = useAppStore((s) => s.activeJobDescriptionId);
   const setActiveJobDescriptionId = useAppStore((s) => s.setActiveJobDescriptionId);
   const removeJobDescription = useAppStore((s) => s.removeJobDescription);
-  const updateRecommendation = useAppStore((s) => s.updateRecommendation);
-
-  const { analyze, isLoading: isAnalyzing, error: analyzeError } = useAnalyzeJobDescription();
-  const {
-    recommendations,
-    isLoading: isLoadingRecs,
-    error: recsError,
-    generateJdRecommendations,
-    executeRecommendation,
-  } = useRecommendations();
+  const { analyze, isLoading: isAnalyzing, error } = useAnalyzeJobDescription();
 
   const activeJd = jobDescriptions.find((j) => j.id === activeJobDescriptionId);
-
-  // Auto-generate recommendations when a JD is selected/analyzed
-  const lastAnalyzedIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (activeJobDescriptionId && activeJobDescriptionId !== lastAnalyzedIdRef.current) {
-      lastAnalyzedIdRef.current = activeJobDescriptionId;
-      generateJdRecommendations(activeJobDescriptionId);
-    }
-  }, [activeJobDescriptionId, generateJdRecommendations]);
 
   const handleSelectJd = (id: string) => {
     setActiveJobDescriptionId(id);
   };
-
-  const handleAccept = (id: string) => {
-    executeRecommendation(id);
-  };
-
-  const handleDismiss = (id: string) => {
-    updateRecommendation(id, { status: 'dismissed' });
-  };
-
-  const error = analyzeError || recsError;
 
   if (!apiKey) {
     return (
@@ -130,41 +99,6 @@ export function JobDescriptionStep() {
                   </span>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* JD-specific recommendations */}
-        {activeJd && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                Recommendations for this role
-              </h3>
-              {!isLoadingRecs && recommendations.length > 0 && (
-                <button
-                  onClick={() => generateJdRecommendations(activeJd.id)}
-                  className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                >
-                  Regenerate
-                </button>
-              )}
-            </div>
-
-            <RecommendationList
-              recommendations={recommendations}
-              onAccept={handleAccept}
-              onDismiss={handleDismiss}
-              isLoading={isLoadingRecs}
-            />
-
-            {!isLoadingRecs && recommendations.length === 0 && (
-              <button
-                onClick={() => generateJdRecommendations(activeJd.id)}
-                className="w-full py-3 text-sm text-stone-500 dark:text-stone-400 border border-dashed border-stone-300 dark:border-stone-600 rounded-md hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-              >
-                Generate recommendations for this role
-              </button>
             )}
           </div>
         )}

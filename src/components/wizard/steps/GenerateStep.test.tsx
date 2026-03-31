@@ -84,7 +84,6 @@ describe('GenerateStep', () => {
     render(<GenerateStep />)
     expect(screen.getByText('Your CV is ready')).toBeInTheDocument()
     expect(screen.getByText('Continue to Refine')).toBeInTheDocument()
-    expect(screen.getByText('Regenerate')).toBeInTheDocument()
   })
 
   it('shows warning when resume has empty sections', () => {

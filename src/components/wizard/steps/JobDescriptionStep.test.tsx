@@ -10,8 +10,6 @@ vi.mock('../../../stores/useAppStore', () => ({
 }))
 
 const mockAnalyze = vi.fn()
-const mockGenerateJdRecommendations = vi.fn()
-const mockExecuteRecommendation = vi.fn()
 
 vi.mock('../../../hooks/useAnalyzeJobDescription', () => ({
   useAnalyzeJobDescription: () => ({
@@ -21,37 +19,21 @@ vi.mock('../../../hooks/useAnalyzeJobDescription', () => ({
   }),
 }))
 
-vi.mock('../../../hooks/useRecommendations', () => ({
-  useRecommendations: () => ({
-    recommendations: mockState.recommendations || [],
-    isLoading: mockState.recsLoading || false,
-    error: mockState.recsError || null,
-    generateJdRecommendations: mockGenerateJdRecommendations,
-    executeRecommendation: mockExecuteRecommendation,
-    generatePoolRecommendations: vi.fn(),
-    generateRefineRecommendations: vi.fn(),
-    abort: vi.fn(),
-  }),
-}))
-
 const setSettingsOpen = vi.fn()
 const setActiveJobDescriptionId = vi.fn()
 const removeJobDescription = vi.fn()
-const updateRecommendation = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
   mockState = {
     apiKey: 'test-key',
     jobDescriptions: [],
-    recommendations: [],
     activeJobDescriptionId: null,
     jdLoading: false,
     jdError: null,
     setSettingsOpen,
     setActiveJobDescriptionId,
     removeJobDescription,
-    updateRecommendation,
   }
 })
 
