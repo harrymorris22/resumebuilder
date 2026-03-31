@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.4.1.0] - 2026-03-31
 
 ### Fixed
-- **CV generation no longer fabricates content** — the AI system prompt now strictly requires all resume content (bullets, summary, skills, education) to come verbatim from the content pool. Previously, the AI could rewrite bullets, invent summaries, and add skills not in the pool. Now it selects from the pool only, skipping sections with no matching content.
+- **CV generation no longer fabricates content** — generated resumes now use your exact content pool text, word for word. Previously, the AI could rewrite bullets, invent summaries, and add skills not in your pool. Now it selects from your pool only, skipping sections with no matching content.
 
 ## [0.4.0.0] - 2026-03-31
 
