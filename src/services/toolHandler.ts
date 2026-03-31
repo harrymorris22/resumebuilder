@@ -217,7 +217,11 @@ export function handleToolCall(
         title: input.title as string,
         company: input.company as string,
         rawText: '',
-        keywords: (input.keywords as string[]) || [],
+        keywords: Array.isArray(input.keywords)
+          ? input.keywords
+          : typeof input.keywords === 'string'
+            ? (input.keywords as string).split(',').map((k: string) => k.trim()).filter(Boolean)
+            : [],
         createdAt: new Date().toISOString(),
       };
       if (onJobAnalyzed) onJobAnalyzed(job);
