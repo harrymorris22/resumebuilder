@@ -4,7 +4,7 @@
 - **What this is:** AI-powered resume builder with a content pool + version system
 - **Who it's for:** Recently laid off tech workers applying to 15-30 companies fast
 - **Space/industry:** Resume builders (Teal, Enhancv, Kickresume, Rezi)
-- **Project type:** Web app — two-panel SPA with floating AI coach
+- **Project type:** Web app — wizard-based SPA with inline AI at each step
 
 ## Aesthetic Direction
 - **Direction:** Industrial/Utilitarian
@@ -51,9 +51,9 @@
 
 ## Layout
 - **Approach:** Grid-disciplined
-- **Grid:** Two-panel split (content pool left, resume preview right) with drag-resize
-- **Min panel width:** 300px
-- **Max content width:** 1400px (full app), 640px (content pool inner), 8.5in (resume preview)
+- **Grid:** Wizard flow — step indicator (fixed below header) + full-width step body + nav bar (fixed bottom)
+- **Step body:** Single column for steps 1-3 (max-width 640px centered), split view for steps 4-5 (40/60 left/right)
+- **Max content width:** 1400px (full app), 640px (wizard step inner), 8.5in (resume preview)
 - **Border radius:** sm:4px, md:6px, lg:8px, full:9999px
 
 ## Motion

@@ -20,7 +20,6 @@ import type { ResumeSection, SectionContent } from '../../types/resume';
 import { isSectionEmpty } from '../../utils/sectionEmpty';
 import { SectionRenderer } from './SectionRenderer';
 import { SectionDragHandle } from './SectionDragHandle';
-import { ContentBankDrawer } from '../contentBank/ContentBankDrawer';
 import { UploadResumeModal } from './UploadResumeModal';
 import { ExportMenu } from '../export/ExportMenu';
 import { ModernTemplate } from '../templates/modern/ModernTemplate';
@@ -58,7 +57,6 @@ export function ResumePreview() {
   const activeResumeId = useAppStore((s) => s.activeResumeId);
   const updateResume = useAppStore((s) => s.updateResume);
   const activeResume = resumes.find((r) => r.id === activeResumeId);
-  const [bankOpen, setBankOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -189,12 +187,6 @@ export function ResumePreview() {
       <div className="flex items-center justify-between px-4 h-10 border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex-shrink-0">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setBankOpen(true)}
-            className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors"
-          >
-            Content Bank
-          </button>
-          <button
             onClick={() => setUploadOpen(true)}
             className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors"
           >
@@ -204,7 +196,6 @@ export function ResumePreview() {
         <ExportMenu />
       </div>
 
-      <ContentBankDrawer open={bankOpen} onClose={() => setBankOpen(false)} />
       <UploadResumeModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </div>
   );

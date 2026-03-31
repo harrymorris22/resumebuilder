@@ -1,9 +1,10 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
+import type { Recommendation } from '../types/recommendation';
 
 const DB_NAME = 'resume-builder';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 interface ResumeBuilderDB {
   resumes: Resume;
@@ -11,6 +12,8 @@ interface ResumeBuilderDB {
   contentBank: ContentBankItem;
   contentPool: ContentPoolEntry;
   coverLetters: CoverLetter;
+  jobDescriptions: JobDescription;
+  recommendations: Recommendation;
 }
 
 let dbInstance: IDBPDatabase<ResumeBuilderDB> | null = null;
@@ -39,6 +42,12 @@ async function getDb(): Promise<IDBPDatabase<ResumeBuilderDB> | null> {
         }
         if (!db.objectStoreNames.contains('coverLetters')) {
           db.createObjectStore('coverLetters', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('jobDescriptions')) {
+          db.createObjectStore('jobDescriptions', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('recommendations')) {
+          db.createObjectStore('recommendations', { keyPath: 'id' });
         }
       },
     });
@@ -145,4 +154,45 @@ export async function getCoverLetter(resumeId: string): Promise<CoverLetter | un
   if (!db) return undefined;
   const all = await db.getAll('coverLetters');
   return all.find(l => l.resumeId === resumeId);
+}
+
+// --- Job Descriptions ---
+
+export async function saveJobDescription(jd: JobDescription): Promise<void> {
+  const db = await getDb();
+  if (db) await db.put('jobDescriptions', jd);
+}
+
+export async function getAllJobDescriptions(): Promise<JobDescription[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.getAll('jobDescriptions');
+}
+
+export async function deleteJobDescription(id: string): Promise<void> {
+  const db = await getDb();
+  if (db) await db.delete('jobDescriptions', id);
+}
+
+// --- Recommendations ---
+
+export async function saveRecommendation(rec: Recommendation): Promise<void> {
+  const db = await getDb();
+  if (db) await db.put('recommendations', rec);
+}
+
+export async function getAllRecommendations(): Promise<Recommendation[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.getAll('recommendations');
+}
+
+export async function deleteRecommendation(id: string): Promise<void> {
+  const db = await getDb();
+  if (db) await db.delete('recommendations', id);
+}
+
+export async function clearRecommendations(): Promise<void> {
+  const db = await getDb();
+  if (db) await db.clear('recommendations');
 }
