@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9.2] - 2026-03-31
+
+### Fixed
+- **Generate Recommendations button** now triggers AI analysis (was missing onClick handler after UI refactor)
+- **Analyze Job Description button** now sends job description to AI for resume tailoring (was an empty callback)
+- **AI Coach drawer auto-opens** when recommendations are triggered from the content pool page
+- Button disables while a recommendation request is pending to prevent duplicate requests
+
 ## [0.3.9.1] - 2026-03-28
 
 ### Changed
