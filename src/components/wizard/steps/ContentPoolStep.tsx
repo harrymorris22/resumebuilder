@@ -6,7 +6,8 @@ import { UploadResumeModal } from '../../resume/UploadResumeModal';
 export function ContentPoolStep() {
   const contentPool = useAppStore((s) => s.contentPool);
   const [showUpload, setShowUpload] = useState(false);
-  const isEmpty = contentPool.length === 0;
+  const [showManual, setShowManual] = useState(false);
+  const isEmpty = contentPool.length === 0 && !showManual;
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
@@ -42,12 +43,7 @@ export function ContentPoolStep() {
             {/* Add Manually card */}
             <button
               type="button"
-              onClick={() => {
-                // Scroll to the add form area by triggering a non-empty state
-                // The ContentPoolPage will show with its add forms
-                // For now, we'll just switch to showing the full pool page
-                // and let the user use its built-in add functionality
-              }}
+              onClick={() => setShowManual(true)}
               className="flex-1 flex flex-col items-center gap-3 p-6 border border-stone-200 dark:border-stone-700 rounded-md hover:border-primary-500 dark:hover:border-primary-500 transition-colors bg-white dark:bg-stone-800 group"
             >
               <div className="w-10 h-10 flex items-center justify-center text-stone-400 group-hover:text-primary-600 transition-colors">
