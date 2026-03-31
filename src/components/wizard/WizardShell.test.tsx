@@ -13,9 +13,6 @@ vi.mock('../../stores/useAppStore', () => ({
 vi.mock('./steps/ContentPoolStep', () => ({
   ContentPoolStep: () => <div data-testid="step-content-pool">ContentPoolStep</div>,
 }))
-vi.mock('./steps/RecommendationsStep', () => ({
-  RecommendationsStep: () => <div data-testid="step-recommendations">RecommendationsStep</div>,
-}))
 vi.mock('./steps/JobDescriptionStep', () => ({
   JobDescriptionStep: () => <div data-testid="step-job-description">JobDescriptionStep</div>,
 }))
@@ -53,12 +50,6 @@ describe('WizardShell', () => {
     expect(screen.getByTestId('step-content-pool')).toBeInTheDocument()
   })
 
-  it('renders RecommendationsStep when wizardStep is recommendations', () => {
-    mockState.wizardStep = 'recommendations'
-    render(<WizardShell />)
-    expect(screen.getByTestId('step-recommendations')).toBeInTheDocument()
-  })
-
   it('renders JobDescriptionStep when wizardStep is job-description', () => {
     mockState.wizardStep = 'job-description'
     render(<WizardShell />)
@@ -77,11 +68,11 @@ describe('WizardShell', () => {
     expect(screen.getByTestId('step-refine')).toBeInTheDocument()
   })
 
-  it('Next button advances to next step when gate passes', async () => {
+  it('Next button advances to job-description step when gate passes', async () => {
     const user = userEvent.setup()
     render(<WizardShell />)
     await user.click(screen.getByText('Next'))
-    expect(setWizardStep).toHaveBeenCalledWith('recommendations')
+    expect(setWizardStep).toHaveBeenCalledWith('job-description')
   })
 
   it('Next button is disabled when gate fails (empty pool)', async () => {
@@ -98,7 +89,7 @@ describe('WizardShell', () => {
   })
 
   it('Back button navigates to previous step', async () => {
-    mockState.wizardStep = 'recommendations'
+    mockState.wizardStep = 'job-description'
     const user = userEvent.setup()
     render(<WizardShell />)
     await user.click(screen.getByText('Back'))
@@ -106,12 +97,10 @@ describe('WizardShell', () => {
   })
 
   it('step indicator shows completed checkmark for past steps', () => {
-    mockState.wizardStep = 'recommendations'
+    mockState.wizardStep = 'job-description'
     render(<WizardShell />)
-    // Step 1 should have a checkmark SVG (completed), not the number "1"
     const nav = screen.getByRole('navigation', { name: 'Wizard steps' })
     expect(nav).toBeInTheDocument()
-    // Step 2 should be active (aria-current="step")
     const activeStep = nav.querySelector('[aria-current="step"]')
     expect(activeStep).toBeInTheDocument()
   })

@@ -5,8 +5,6 @@ function canAdvance(step: WizardStep, state: { contentPool: unknown[]; activeJob
   switch (step) {
     case 'content-pool':
       return state.contentPool.length > 0;
-    case 'recommendations':
-      return true; // always skippable
     case 'job-description':
       return state.activeJobDescriptionId !== null;
     case 'generate':

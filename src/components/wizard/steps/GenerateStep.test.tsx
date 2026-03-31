@@ -22,15 +22,9 @@ vi.mock('../../../hooks/useGenerateResume', () => ({
   }),
 }))
 
-vi.mock('../../resume/ResumePreview', () => ({
-  ResumePreview: () => <div data-testid="resume-preview">ResumePreview</div>,
-}))
-
-vi.mock('../../resume/TemplateSelector', () => ({
-  TemplateSelector: () => <div data-testid="template-selector">TemplateSelector</div>,
-}))
 
 const setSettingsOpen = vi.fn()
+const setWizardStep = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -41,6 +35,7 @@ beforeEach(() => {
     jobDescriptions: [{ id: 'jd1', title: 'SWE', company: 'Acme', keywords: ['react'] }],
     resumes: [],
     setSettingsOpen,
+    setWizardStep,
   }
 })
 
@@ -88,8 +83,8 @@ describe('GenerateStep', () => {
     ]
     render(<GenerateStep />)
     expect(screen.getByText('Your CV is ready')).toBeInTheDocument()
-    expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
-    expect(screen.getByTestId('template-selector')).toBeInTheDocument()
+    expect(screen.getByText('Continue to Refine')).toBeInTheDocument()
+    expect(screen.getByText('Regenerate')).toBeInTheDocument()
   })
 
   it('shows warning when resume has empty sections', () => {
@@ -105,6 +100,6 @@ describe('GenerateStep', () => {
     mockState.activeJobDescriptionId = null
     mockState.jobDescriptions = []
     render(<GenerateStep />)
-    expect(screen.getByText(/Go back to Step 3/)).toBeInTheDocument()
+    expect(screen.getByText(/Go back and select a job description/)).toBeInTheDocument()
   })
 })

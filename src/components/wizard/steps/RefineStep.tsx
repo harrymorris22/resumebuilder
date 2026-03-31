@@ -3,6 +3,8 @@ import { useRecommendations } from '../../../hooks/useRecommendations';
 import { RecommendationList } from '../../recommendations/RecommendationList';
 import { ResumePreview } from '../../resume/ResumePreview';
 import { ExportMenu } from '../../export/ExportMenu';
+import { ContentPoolPage } from '../../contentPool/ContentPoolPage';
+import { TemplateSelector } from '../../resume/TemplateSelector';
 
 export function RefineStep() {
   const apiKey = useAppStore((s) => s.apiKey);
@@ -58,7 +60,7 @@ export function RefineStep() {
           Refine Your CV
         </h2>
         <p className="text-sm text-stone-500 dark:text-stone-400 max-w-md text-center mb-6">
-          Go back to Step 4 and generate a CV first.
+          Go back to Step 3 and generate a CV first.
         </p>
       </div>
     );
@@ -66,7 +68,7 @@ export function RefineStep() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-      {/* Left panel: recommendations + export */}
+      {/* Left panel: recommendations + content pool (stacked, scrollable) */}
       <div className="lg:w-[40%] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 dark:border-stone-700 overflow-y-auto">
         <div className="p-6">
           <h2 tabIndex={-1} className="text-xl font-bold font-display text-stone-900 dark:text-white mb-1">
@@ -74,13 +76,14 @@ export function RefineStep() {
           </h2>
           {activeJd && (
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
-              AI suggestions for {activeJd.title} at {activeJd.company}
+              {activeJd.title} at {activeJd.company}
             </p>
           )}
 
-          {/* Export button — prominent */}
-          <div className="mb-6">
+          {/* Export + Template row */}
+          <div className="flex items-center gap-3 mb-6">
             <ExportMenu />
+            <TemplateSelector />
           </div>
 
           {/* Error banner */}
@@ -90,12 +93,26 @@ export function RefineStep() {
             </div>
           )}
 
-          {/* Generate refinement recs */}
-          <div className="flex items-center gap-3 mb-4">
+          {/* AI Recommendations section */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                AI Recommendations
+              </h3>
+              {!isLoading && recommendations.length > 0 && (
+                <button
+                  onClick={generateRefineRecommendations}
+                  className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                >
+                  Regenerate
+                </button>
+              )}
+            </div>
+
             <button
               onClick={generateRefineRecommendations}
               disabled={isLoading}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`w-full mb-3 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 isLoading
                   ? 'bg-primary-600/50 text-white/70 cursor-not-allowed'
                   : 'bg-primary-600 text-white hover:bg-primary-700'
@@ -104,27 +121,25 @@ export function RefineStep() {
               {isLoading
                 ? 'Analyzing...'
                 : recommendations.length > 0
-                ? 'Regenerate Suggestions'
-                : 'Get Refinement Suggestions'}
+                ? 'Refresh Suggestions'
+                : 'Get AI Suggestions'}
             </button>
+
+            <RecommendationList
+              recommendations={recommendations}
+              onAccept={handleAccept}
+              onDismiss={handleDismiss}
+              isLoading={isLoading}
+            />
           </div>
 
-          {/* Recommendations list */}
-          <RecommendationList
-            recommendations={recommendations}
-            onAccept={handleAccept}
-            onDismiss={handleDismiss}
-            isLoading={isLoading}
-          />
-
-          {/* Empty state */}
-          {!isLoading && recommendations.length === 0 && !error && (
-            <div className="text-center py-8">
-              <p className="text-sm text-stone-400 dark:text-stone-500">
-                Click above to get AI suggestions for polishing your CV against the job description.
-              </p>
-            </div>
-          )}
+          {/* Content Pool section (with checkboxes for selection) */}
+          <div className="border-t border-stone-200 dark:border-stone-700 pt-6">
+            <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">
+              Content Pool
+            </h3>
+            <ContentPoolPage showCheckboxes={true} />
+          </div>
         </div>
       </div>
 
