@@ -181,7 +181,7 @@ export function useGenerateResume() {
 
             if (emptySections.length > 0) {
               setWarning(
-                `AI completed most sections but these need attention: ${emptySections.join(', ')}. You can edit them manually or click Retry.`
+                `These sections were not populated: ${emptySections.join(', ')}. Check your content pool for relevant items, or add new ones.`
               );
             }
 

@@ -160,7 +160,14 @@ export function buildGenerateResumePrompt(contentPool: ContentPoolEntry[], jobDe
     2
   );
 
-  return `You are an expert resume writer. Generate a targeted 1-page resume by selecting the BEST items from the user's content pool based on the job description.
+  return `You are an expert resume curator. Generate a targeted 1-page resume by SELECTING the best items from the user's content pool. You must ONLY use content that already exists in the pool — never fabricate, rewrite, or auto-generate any content.
+
+## CRITICAL RULE: POOL CONTENT ONLY
+- Every bullet, skill, summary, education entry, certification, and project on the resume MUST come directly from the content pool below.
+- Use the EXACT text from pool items. Do NOT rewrite, rephrase, embellish, or modify any content.
+- Do NOT add skills, technologies, or keywords that are not already present in the pool.
+- Do NOT write a summary from scratch. Only use a summary if one exists in the pool.
+- If a section has no matching pool items, SKIP that section entirely. Do not fabricate content to fill gaps.
 
 ## Job Description
 **Title:** ${jobDescription.title}
@@ -177,22 +184,21 @@ ${poolJson}
 \`\`\`
 
 ## Your Job
-Build a complete resume by calling these tools IN ORDER:
-1. update_contact — set contact info from pool
-2. set_summary — write a targeted professional summary (2-3 sentences highlighting fit for this role)
-3. add_experience — add the most relevant jobs/bullets. Select bullets that match the JD keywords. Limit to 3-4 roles, 3-4 bullets each. Prioritize recent, relevant experience.
-4. add_education — add education
-5. add_skills — group relevant skills into categories matching the JD
-6. add_certification — if relevant certs exist
-7. add_project — if relevant projects exist
+Build a resume by calling these tools IN ORDER, using ONLY items from the content pool above:
+1. update_contact — set contact info from pool (only if contact info exists in pool)
+2. set_summary — use the summary from the pool verbatim (skip if no summary exists in pool)
+3. add_experience — select the most relevant jobs/bullets from the pool. Choose bullets that best match the JD keywords. Limit to 3-4 roles, 3-4 bullets each. Prioritize recent, relevant experience. Use exact bullet text from the pool.
+4. add_education — add education entries from the pool (skip if none exist)
+5. add_skills — group skills from the pool into categories. Only include skills that exist in the pool.
+6. add_certification — add certifications from the pool (skip if none exist)
+7. add_project — add projects from the pool (skip if none exist)
 
 ## Guidelines
 - ONE PAGE. Be selective. Not everything in the pool belongs on this resume.
-- Prioritize content that matches the job description keywords
-- Rewrite bullets to emphasize relevance to this specific role
-- Skills section should mirror the JD's technology/skills requirements
-- Summary should mention the target role/company type
-- After building the resume, call suggest_actions with 2-3 refinement suggestions`;
+- Prioritize pool items that match the job description keywords.
+- Use the EXACT wording from pool items — do not modify or "improve" them.
+- If the pool lacks content for a section, skip it. Never invent content.
+- After building the resume, call suggest_actions with 2-3 suggestions for content the user could ADD to their pool to strengthen this resume.`;
 }
 
 export function buildRefinePrompt(resume: Resume, jobDescription: JobDescription, contentPool: ContentPoolEntry[]): string {
