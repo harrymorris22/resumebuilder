@@ -16,7 +16,6 @@ export function useRecommendations() {
   const abortRef = useRef<AbortController | null>(null);
 
   const apiKey = useAppStore((s) => s.apiKey);
-  const contentPool = useAppStore((s) => s.contentPool);
   const recommendations = useAppStore((s) => s.recommendations);
   const setRecommendations = useAppStore((s) => s.setRecommendations);
   const updateRecommendation = useAppStore((s) => s.updateRecommendation);

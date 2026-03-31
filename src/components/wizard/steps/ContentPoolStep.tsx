@@ -61,7 +61,7 @@ export function ContentPoolStep() {
       )}
 
       {showUpload && (
-        <UploadResumeModal onClose={() => setShowUpload(false)} />
+        <UploadResumeModal open={showUpload} onClose={() => setShowUpload(false)} />
       )}
     </div>
   );
