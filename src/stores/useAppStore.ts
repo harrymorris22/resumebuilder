@@ -538,7 +538,11 @@ export const useAppStore = create<AppState>()(
 
         // Validate wizard step gates after hydration
         let wizardStep = state.wizardStep;
-        if (wizardStep === 'recommendations' && contentPool.length === 0) {
+        // If persisted step was the old 'recommendations', redirect to content-pool
+        if ((wizardStep as string) === 'recommendations') {
+          wizardStep = 'content-pool';
+        }
+        if (wizardStep === 'job-description' && contentPool.length === 0) {
           wizardStep = 'content-pool';
         }
         if (wizardStep === 'generate' && !jobDescriptions.find((j) => j.id === state.activeJobDescriptionId)) {

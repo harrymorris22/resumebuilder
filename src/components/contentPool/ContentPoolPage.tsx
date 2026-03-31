@@ -352,12 +352,13 @@ function EditableText({ text, onSave, className, allowEmpty }: { text: string; o
 }
 
 // --- Sortable bullet row ---
-function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
+function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove, showCheckbox = false }: {
   entry: ContentPoolEntry;
   isChecked: boolean;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
+  showCheckbox?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: entry.id });
@@ -381,12 +382,14 @@ function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
           <circle cx="5" cy="13" r="1.2" /><circle cx="11" cy="13" r="1.2" />
         </svg>
       </button>
-      <input
-        type="checkbox"
-        checked={isChecked}
-        onChange={() => onToggle(entry, isChecked)}
-        className="mt-0.5 h-3.5 w-3.5 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
-      />
+      {showCheckbox && (
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={() => onToggle(entry, isChecked)}
+          className="mt-0.5 h-3.5 w-3.5 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
+        />
+      )}
       <EditableText
         text={entry.item.type === 'bullet' ? entry.item.data.text : getItemSummary(entry.item)}
         onSave={(newText) => {
@@ -404,7 +407,7 @@ function SortableBulletRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
 }
 
 // --- Job Group Card (with inline add bullet + checkboxes + editable + drag reorder) ---
-function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, onUpdateContext, resumeSections }: {
+function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, onUpdateContext, resumeSections, showCheckboxes = false }: {
   group: JobGroup;
   onAdd: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
@@ -413,6 +416,7 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, o
   onReorder: (orderedIds: string[]) => void;
   onUpdateContext: (entries: ContentPoolEntry[], field: 'title' | 'company' | 'startDate' | 'endDate', value: string | null) => void;
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
+  showCheckboxes?: boolean;
 }) {
   const [addingBullet, setAddingBullet] = useState(false);
 
@@ -490,6 +494,7 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, o
                   onToggle={onToggle}
                   onUpdate={onUpdate}
                   onRemove={onRemove}
+                  showCheckbox={showCheckboxes}
                 />
               );
             })}
@@ -507,12 +512,13 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, o
 }
 
 // --- Sortable non-bullet item row ---
-function SortableItemRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
+function SortableItemRow({ entry, isChecked, onToggle, onUpdate, onRemove, showCheckbox = false }: {
   entry: ContentPoolEntry;
   isChecked: boolean;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
+  showCheckbox?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: entry.id });
@@ -537,12 +543,14 @@ function SortableItemRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
             <circle cx="5" cy="13" r="1.2" /><circle cx="11" cy="13" r="1.2" />
           </svg>
         </button>
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={() => onToggle(entry, isChecked)}
-          className="mt-0.5 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
-        />
+        {showCheckbox && (
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={() => onToggle(entry, isChecked)}
+            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
+          />
+        )}
         {entry.item.type === 'summary' ? (
           <EditableText
             text={entry.item.data.text}
@@ -561,13 +569,14 @@ function SortableItemRow({ entry, isChecked, onToggle, onUpdate, onRemove }: {
 }
 
 // --- Sortable list for non-bullet section items ---
-function SortableItemList({ entries, resumeSections, onToggle, onUpdate, onRemove, onReorder }: {
+function SortableItemList({ entries, resumeSections, onToggle, onUpdate, onRemove, onReorder, showCheckboxes = false }: {
   entries: ContentPoolEntry[];
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
   onRemove: (id: string) => void;
   onReorder: (orderedIds: string[]) => void;
+  showCheckboxes?: boolean;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -603,6 +612,7 @@ function SortableItemList({ entries, resumeSections, onToggle, onUpdate, onRemov
                 onToggle={onToggle}
                 onUpdate={onUpdate}
                 onRemove={onRemove}
+                showCheckbox={showCheckboxes}
               />
             );
           })}
@@ -654,7 +664,7 @@ function SortablePoolSection({
 
 // --- Main Component ---
 
-export function ContentPoolPage() {
+export function ContentPoolPage({ showCheckboxes = false }: { showCheckboxes?: boolean }) {
   const contentPool = useAppStore((s) => s.contentPool);
   const resumes = useAppStore((s) => s.resumes);
   const activeResumeId = useAppStore((s) => s.activeResumeId);
@@ -799,8 +809,10 @@ export function ContentPoolPage() {
           <h2 className="text-sm font-display font-semibold text-stone-900 dark:text-white">CV Content Pool</h2>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             {contentPool.length === 0
-              ? 'Upload a resume or add items manually. Pick items for each resume version.'
-              : 'Check items to include in the current resume version.'}
+              ? 'Upload a resume or add items manually.'
+              : showCheckboxes
+                ? 'Select items to include in this resume version.'
+                : 'Your master library of experience, skills, and education.'}
           </p>
         </div>
 
@@ -883,7 +895,7 @@ export function ContentPoolPage() {
                   {sectionType === 'bullet' && entries.length > 0 && (
                     <div className="space-y-4">
                       {Array.from(groupBulletsByJob(entries).entries()).map(([key, group]) => (
-                        <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} onReorder={handleItemReorder} onUpdateContext={handleUpdateContext} resumeSections={resumeSections} />
+                        <JobGroupCard key={key} group={group} onAdd={handleAdd} onRemove={removePoolEntry} onToggle={handleToggle} onUpdate={updatePoolEntry} onReorder={handleItemReorder} onUpdateContext={handleUpdateContext} resumeSections={resumeSections} showCheckboxes={showCheckboxes} />
                       ))}
                     </div>
                   )}
@@ -897,6 +909,7 @@ export function ContentPoolPage() {
                       onUpdate={updatePoolEntry}
                       onRemove={removePoolEntry}
                       onReorder={handleItemReorder}
+                      showCheckboxes={showCheckboxes}
                     />
                   )}
 

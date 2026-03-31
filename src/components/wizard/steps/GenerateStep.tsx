@@ -1,7 +1,6 @@
 import { useAppStore } from '../../../stores/useAppStore';
 import { useGenerateResume } from '../../../hooks/useGenerateResume';
-import { ResumePreview } from '../../resume/ResumePreview';
-import { TemplateSelector } from '../../resume/TemplateSelector';
+import { WIZARD_STEPS } from '../../../types/wizard';
 import type { GenerationSection } from '../../../hooks/useGenerateResume';
 
 function ProgressChecklist({ sections }: { sections: GenerationSection[] }) {
@@ -38,6 +37,7 @@ function ProgressChecklist({ sections }: { sections: GenerationSection[] }) {
 export function GenerateStep() {
   const apiKey = useAppStore((s) => s.apiKey);
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
+  const setWizardStep = useAppStore((s) => s.setWizardStep);
   const generatedResumeId = useAppStore((s) => s.generatedResumeId);
   const activeJobDescriptionId = useAppStore((s) => s.activeJobDescriptionId);
   const jobDescriptions = useAppStore((s) => s.jobDescriptions);
@@ -72,54 +72,40 @@ export function GenerateStep() {
     );
   }
 
-  // Once generated, show split view with resume preview
+  // Post-generation: show success + continue
   if (hasGenerated && !isGenerating) {
     return (
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-        {/* Left panel: controls */}
-        <div className="lg:w-[40%] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 dark:border-stone-700 overflow-y-auto p-6">
-          <h2 tabIndex={-1} className="text-xl font-bold font-display text-stone-900 dark:text-white mb-1">
-            Your CV is ready
-          </h2>
-          {activeJd && (
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-4">
-              Tailored for {activeJd.title} at {activeJd.company}
-            </p>
-          )}
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-6 py-16">
+        <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
+          <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 tabIndex={-1} className="text-2xl font-bold font-display text-stone-900 dark:text-white mb-1">
+          Your CV is ready
+        </h2>
+        {activeJd && (
+          <p className="text-sm text-stone-500 dark:text-stone-400 mb-2">
+            Tailored for {activeJd.title} at {activeJd.company}
+          </p>
+        )}
 
-          {warning && (
-            <div className="mb-4 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-md text-sm">
-              {warning}
-            </div>
-          )}
-
-          {/* Section completion summary */}
-          <div className="mb-4">
-            <ProgressChecklist sections={sections} />
+        {warning && (
+          <div className="mb-4 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-md text-sm max-w-md w-full">
+            {warning}
           </div>
+        )}
 
-          {/* Template selector */}
-          <div className="mb-4">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-2">
-              Template
-            </h3>
-            <TemplateSelector />
-          </div>
-
-          {/* Regenerate */}
-          <button
-            onClick={() => generate()}
-            disabled={isGenerating}
-            className="w-full px-4 py-2 text-sm text-stone-600 dark:text-stone-400 border border-stone-300 dark:border-stone-600 rounded-md hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-          >
-            Regenerate CV
-          </button>
+        <div className="mb-3">
+          <ProgressChecklist sections={sections} />
         </div>
 
-        {/* Right panel: resume preview */}
-        <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100 dark:bg-stone-950">
-          <ResumePreview />
-        </div>
+        <button
+          onClick={() => setWizardStep(WIZARD_STEPS[WIZARD_STEPS.length - 1])}
+          className="mt-4 px-6 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-md transition-colors"
+        >
+          Continue to Refine
+        </button>
       </div>
     );
   }
@@ -138,7 +124,7 @@ export function GenerateStep() {
         </p>
       ) : (
         <p className="text-sm text-stone-500 dark:text-stone-400 max-w-md text-center mb-6">
-          Go back to Step 3 and select a job description first.
+          Go back and select a job description first.
         </p>
       )}
 

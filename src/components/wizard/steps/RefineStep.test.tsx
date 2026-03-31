@@ -33,6 +33,16 @@ vi.mock('../../export/ExportMenu', () => ({
   ExportMenu: () => <div data-testid="export-menu">ExportMenu</div>,
 }))
 
+vi.mock('../../resume/TemplateSelector', () => ({
+  TemplateSelector: () => <div data-testid="template-selector">TemplateSelector</div>,
+}))
+
+vi.mock('../../contentPool/ContentPoolPage', () => ({
+  ContentPoolPage: ({ showCheckboxes }: { showCheckboxes?: boolean }) => (
+    <div data-testid="content-pool" data-checkboxes={showCheckboxes}>ContentPool</div>
+  ),
+}))
+
 const setSettingsOpen = vi.fn()
 const updateRecommendation = vi.fn()
 
@@ -61,15 +71,23 @@ describe('RefineStep', () => {
     mockState.generatedResumeId = null
     mockState.resumes = []
     render(<RefineStep />)
-    expect(screen.getByText(/Go back to Step 4/)).toBeInTheDocument()
+    expect(screen.getByText(/Go back to Step 3/)).toBeInTheDocument()
   })
 
-  it('shows split view with resume preview and suggestions', () => {
+  it('shows combined layout with resume preview, recommendations, and content pool', () => {
     render(<RefineStep />)
     expect(screen.getByText('Refine Your CV')).toBeInTheDocument()
     expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
     expect(screen.getByTestId('export-menu')).toBeInTheDocument()
-    expect(screen.getByText('Get Refinement Suggestions')).toBeInTheDocument()
+    expect(screen.getByTestId('template-selector')).toBeInTheDocument()
+    expect(screen.getByTestId('content-pool')).toBeInTheDocument()
+    expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
+  })
+
+  it('passes showCheckboxes=true to ContentPoolPage', () => {
+    render(<RefineStep />)
+    const pool = screen.getByTestId('content-pool')
+    expect(pool).toHaveAttribute('data-checkboxes', 'true')
   })
 
   it('shows job context in subtitle', () => {
@@ -80,7 +98,7 @@ describe('RefineStep', () => {
   it('calls generateRefineRecommendations when button clicked', async () => {
     const user = userEvent.setup()
     render(<RefineStep />)
-    await user.click(screen.getByText('Get Refinement Suggestions'))
+    await user.click(screen.getByText('Get AI Suggestions'))
     expect(mockGenerateRefine).toHaveBeenCalledOnce()
   })
 
