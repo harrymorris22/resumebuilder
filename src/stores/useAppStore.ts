@@ -23,7 +23,6 @@ import {
   deleteJobDescription as deleteJdFromDb,
   saveRecommendation,
   getAllRecommendations,
-  deleteRecommendation as deleteRecFromDb,
   clearRecommendations as clearRecsFromDb,
 } from '../db/indexedDb';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
