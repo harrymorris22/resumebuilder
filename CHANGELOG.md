@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1.0] - 2026-03-31
+
+### Fixed
+- **CV generation no longer fabricates content** — generated resumes now use your exact content pool text, word for word. Previously, the AI could rewrite bullets, invent summaries, and add skills not in your pool. Now it selects from your pool only, skipping sections with no matching content.
+
 ## [0.4.0.0] - 2026-03-31
 
 ### Added
