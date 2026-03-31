@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.9.3] - 2026-03-31
+
+### Fixed
+- **"e.keywords.join is not a function" crash** — `analyze_job_description` tool handler assumed `keywords` was always an array, but Claude sometimes returns a comma-separated string; now handles both formats gracefully
+
 ## [0.3.9.2] - 2026-03-31
 
 ### Fixed
