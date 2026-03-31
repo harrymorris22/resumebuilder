@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAppStore } from '../../stores/useAppStore';
 import { ActionPanel } from '../actions/ActionPanel';
 
 export function FloatingChat() {
   const [open, setOpen] = useState(false);
+  const pendingAutoMessage = useAppStore((s) => s.pendingAutoMessage);
+
+  // Auto-open when a pending message arrives (e.g. from Generate Recommendations)
+  useEffect(() => {
+    if (pendingAutoMessage) {
+      setOpen(true);
+    }
+  }, [pendingAutoMessage]);
 
   return (
     <>

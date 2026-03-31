@@ -668,6 +668,8 @@ export function ContentPoolPage() {
   const addPoolItemToResume = useAppStore((s) => s.addPoolItemToResume);
   const removePoolItemFromResume = useAppStore((s) => s.removePoolItemFromResume);
   const [addingSection, setAddingSection] = useState<ContentPoolItemType | null>(null);
+  const setPendingAutoMessage = useAppStore((s) => s.setPendingAutoMessage);
+  const pendingAutoMessage = useAppStore((s) => s.pendingAutoMessage);
 
   const activeResume = resumes.find((r) => r.id === activeResumeId);
   const resumeSections = activeResume?.sections ?? null;
@@ -849,7 +851,9 @@ export function ContentPoolPage() {
               <ModeToggle />
               {contentPool.length > 0 && (
                 <button
-                  className="py-1.5 px-4 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+                  onClick={() => setPendingAutoMessage('Analyze my CV content pool and suggest improvements. Use the suggest_actions tool to provide actionable recommendations for each section.')}
+                  disabled={!!pendingAutoMessage}
+                  className="py-1.5 px-4 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
                   title="AI will analyze your resume and suggest improvements"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -863,7 +867,7 @@ export function ContentPoolPage() {
 
           {/* Job Description input when in Job Match mode */}
           {isJobMode && (
-            <JobDescriptionInput onSubmit={() => { /* TODO: wire to AI analysis */ }} />
+            <JobDescriptionInput onSubmit={(text) => setPendingAutoMessage(`Here is the job description I'm targeting:\n\n${text}\n\nAnalyze my resume against this job description. Use suggest_actions to recommend specific improvements to better match this role.`)} />
           )}
         </div>
 

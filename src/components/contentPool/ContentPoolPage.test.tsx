@@ -36,6 +36,7 @@ const reorderPoolEntries = vi.fn()
 const addPoolItemToResume = vi.fn()
 const removePoolItemFromResume = vi.fn()
 const updateResume = vi.fn()
+const setPendingAutoMessage = vi.fn()
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let mockState: any
@@ -87,6 +88,7 @@ beforeEach(() => {
     addPoolItemToResume,
     removePoolItemFromResume,
     updateResume,
+    setPendingAutoMessage,
   }
 })
 
@@ -189,5 +191,37 @@ describe('ContentPoolPage — editable job headers', () => {
     await user.keyboard('{Enter}')
 
     expect(updatePoolEntry).not.toHaveBeenCalled()
+  })
+})
+
+describe('ContentPoolPage — Generate Recommendations', () => {
+  it('calls setPendingAutoMessage when Generate Recommendations is clicked', async () => {
+    const user = userEvent.setup()
+    mockState.contentPool = [makeBullet()]
+    mockState.apiKey = 'sk-test-key'
+    render(<ContentPoolPage />)
+
+    const btn = screen.getByTitle('AI will analyze your resume and suggest improvements')
+    await user.click(btn)
+
+    expect(setPendingAutoMessage).toHaveBeenCalledWith(
+      expect.stringContaining('Analyze my CV content pool')
+    )
+  })
+
+  it('does not render Generate Recommendations without an API key', () => {
+    mockState.contentPool = [makeBullet()]
+    mockState.apiKey = null
+    render(<ContentPoolPage />)
+
+    expect(screen.queryByText('Generate Recommendations')).not.toBeInTheDocument()
+  })
+
+  it('does not render Generate Recommendations with empty content pool', () => {
+    mockState.contentPool = []
+    mockState.apiKey = 'sk-test-key'
+    render(<ContentPoolPage />)
+
+    expect(screen.queryByText('Generate Recommendations')).not.toBeInTheDocument()
   })
 })
