@@ -23,9 +23,25 @@ function StepBody() {
   }
 }
 
+function ResumeTitle() {
+  const resumes = useAppStore((s) => s.resumes);
+  const activeResumeId = useAppStore((s) => s.activeResumeId);
+  const resume = resumes.find((r) => r.id === activeResumeId);
+  if (!resume) return null;
+
+  return (
+    <div className="px-6 pt-3 pb-1 bg-white border-b border-stone-100 flex-shrink-0">
+      <h1 className="text-sm font-semibold text-stone-800 text-center truncate">
+        {resume.name}
+      </h1>
+    </div>
+  );
+}
+
 export function WizardShell() {
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      <ResumeTitle />
       <WizardStepIndicator />
       <StepBody />
       <WizardNav />
