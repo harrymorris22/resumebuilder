@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Resume, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
+import type { Resume, ResumeSection, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
 import type { ContentBankItem, CoverLetter } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
@@ -54,6 +54,7 @@ interface AppState {
   activeCoverLetter: CoverLetter | null;
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
+  diffSnapshot: ResumeSection[] | null;
 
   // Actions — settings
   setApiKey: (key: string) => void;
@@ -110,6 +111,10 @@ interface AppState {
   clearRecommendations: () => void;
   setRecommendationsLoading: (loading: boolean) => void;
 
+  // Actions — diff snapshot
+  setDiffSnapshot: (sections: ResumeSection[]) => void;
+  clearDiffSnapshot: () => void;
+
   // Actions — auto-message & coach
   setPendingAutoMessage: (msg: string | null) => void;
   setLatestCoachSuggestion: (s: { text: string; prompt: string } | null) => void;
@@ -145,6 +150,7 @@ export const useAppStore = create<AppState>()(
       activeCoverLetter: null,
       pendingAutoMessage: null,
       latestCoachSuggestion: null,
+      diffSnapshot: null,
       settingsOpen: false,
 
       // Settings
@@ -453,7 +459,7 @@ export const useAppStore = create<AppState>()(
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
 
       // Wizard
-      setWizardStep: (step) => set({ wizardStep: step }),
+      setWizardStep: (step) => set({ wizardStep: step, diffSnapshot: step !== 'refine' ? null : get().diffSnapshot }),
       setActiveJobDescriptionId: (id) => set({ activeJobDescriptionId: id }),
       setGeneratedResumeId: (id) => set({ generatedResumeId: id }),
 
@@ -492,6 +498,10 @@ export const useAppStore = create<AppState>()(
         clearRecsFromDb();
       },
       setRecommendationsLoading: (loading) => set({ recommendationsLoading: loading }),
+
+      // Diff snapshot
+      setDiffSnapshot: (sections) => set({ diffSnapshot: sections }),
+      clearDiffSnapshot: () => set({ diffSnapshot: null }),
 
       // Auto-message & coach
       setPendingAutoMessage: (msg) => set({ pendingAutoMessage: msg }),

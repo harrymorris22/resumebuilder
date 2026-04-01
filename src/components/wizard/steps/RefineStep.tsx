@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useAppStore } from '../../../stores/useAppStore';
 import { useRecommendations } from '../../../hooks/useRecommendations';
 import { RecommendationList } from '../../recommendations/RecommendationList';
 import { ResumePreview } from '../../resume/ResumePreview';
+import { DiffResumePreview } from '../../resume/DiffResumePreview';
 import { ExportMenu } from '../../export/ExportMenu';
 import { ContentPoolPage } from '../../contentPool/ContentPoolPage';
 import { TemplateSelector } from '../../resume/TemplateSelector';
@@ -22,6 +24,9 @@ export function RefineStep() {
     generateRefineRecommendations,
     executeRecommendation,
   } = useRecommendations();
+
+  const diffSnapshot = useAppStore((s) => s.diffSnapshot);
+  const [showDiff, setShowDiff] = useState(false);
 
   const activeJd = jobDescriptions.find((j) => j.id === activeJobDescriptionId);
   const generatedResume = resumes.find((r) => r.id === generatedResumeId);
@@ -80,10 +85,22 @@ export function RefineStep() {
             </p>
           )}
 
-          {/* Export + Template row */}
+          {/* Export + Template + Diff toggle row */}
           <div className="flex items-center gap-3 mb-6">
             <ExportMenu />
             <TemplateSelector />
+            {diffSnapshot && (
+              <button
+                onClick={() => setShowDiff(!showDiff)}
+                className={`ml-auto px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  showDiff
+                    ? 'bg-primary-100 text-primary-700 border border-primary-300'
+                    : 'text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300'
+                }`}
+              >
+                {showDiff ? 'Hide Changes' : 'Show Changes'}
+              </button>
+            )}
           </div>
 
           {/* Error banner */}
@@ -143,9 +160,13 @@ export function RefineStep() {
         </div>
       </div>
 
-      {/* Right panel: resume preview */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100 dark:bg-stone-950">
-        <ResumePreview />
+      {/* Right panel: resume preview or diff view */}
+      <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100">
+        {showDiff && diffSnapshot ? (
+          <DiffResumePreview snapshot={diffSnapshot} />
+        ) : (
+          <ResumePreview />
+        )}
       </div>
     </div>
   );

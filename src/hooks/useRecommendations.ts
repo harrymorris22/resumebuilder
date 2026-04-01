@@ -173,6 +173,9 @@ export function useRecommendations() {
         const resume = state.resumes.find((r) => r.id === state.activeResumeId);
         if (!resume) return;
 
+        // Snapshot current sections for before/after diff
+        useAppStore.getState().setDiffSnapshot(structuredClone(resume.sections));
+
         const stream = client.messages.stream({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
