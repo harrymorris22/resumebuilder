@@ -32,11 +32,18 @@ beforeEach(() => {
     contentPool: [{ id: '1' }],
     activeJobDescriptionId: null,
     generatedResumeId: null,
+    resumes: [{ id: 'r1', name: 'Master Resume', sections: [] }],
+    activeResumeId: 'r1',
     setWizardStep,
   }
 })
 
 describe('WizardShell', () => {
+  it('renders resume title above step indicator', () => {
+    render(<WizardShell />)
+    expect(screen.getByText('Master Resume')).toBeInTheDocument()
+  })
+
   it('renders step indicator, step body, and nav bar', () => {
     render(<WizardShell />)
     expect(screen.getByRole('navigation', { name: 'Wizard steps' })).toBeInTheDocument()
