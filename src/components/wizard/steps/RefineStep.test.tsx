@@ -29,6 +29,10 @@ vi.mock('../../resume/ResumePreview', () => ({
   ResumePreview: () => <div data-testid="resume-preview">ResumePreview</div>,
 }))
 
+vi.mock('../../resume/DiffResumePreview', () => ({
+  DiffResumePreview: () => <div data-testid="diff-preview">DiffResumePreview</div>,
+}))
+
 vi.mock('../../export/ExportMenu', () => ({
   ExportMenu: () => <div data-testid="export-menu">ExportMenu</div>,
 }))
@@ -55,6 +59,7 @@ beforeEach(() => {
     jobDescriptions: [{ id: 'jd1', title: 'SWE', company: 'Acme', keywords: ['react'] }],
     resumes: [{ id: 'r1', name: 'Test Resume', sections: [] }],
     recommendations: [],
+    diffSnapshot: null,
     setSettingsOpen,
     updateRecommendation,
   }
@@ -108,5 +113,36 @@ describe('RefineStep', () => {
     ]
     render(<RefineStep />)
     expect(screen.getByText('Add React keyword to bullet 3')).toBeInTheDocument()
+  })
+
+  it('does not show Show Changes button when no diff snapshot', () => {
+    render(<RefineStep />)
+    expect(screen.queryByText('Show Changes')).not.toBeInTheDocument()
+  })
+
+  it('shows Show Changes button when diff snapshot exists', () => {
+    mockState.diffSnapshot = [{ id: 's1', order: 0, visible: true, content: { type: 'summary', data: { text: 'old' } } }]
+    render(<RefineStep />)
+    expect(screen.getByText('Show Changes')).toBeInTheDocument()
+  })
+
+  it('toggles between resume preview and diff preview', async () => {
+    const user = userEvent.setup()
+    mockState.diffSnapshot = [{ id: 's1', order: 0, visible: true, content: { type: 'summary', data: { text: 'old' } } }]
+    render(<RefineStep />)
+
+    // Initially shows resume preview
+    expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
+    expect(screen.queryByTestId('diff-preview')).not.toBeInTheDocument()
+
+    // Click Show Changes
+    await user.click(screen.getByText('Show Changes'))
+    expect(screen.getByTestId('diff-preview')).toBeInTheDocument()
+    expect(screen.queryByTestId('resume-preview')).not.toBeInTheDocument()
+
+    // Click Hide Changes
+    await user.click(screen.getByText('Hide Changes'))
+    expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
+    expect(screen.queryByTestId('diff-preview')).not.toBeInTheDocument()
   })
 })

@@ -8,12 +8,6 @@ Cmd+K keyboard shortcut opens a "paste job description" modal for instant resume
 - **Effort:** S (CC: ~15 min)
 - **Depends on:** Action Suggestions feature
 
-**Priority:** P2
-### Before/After Resume Diff
-Toggle button in resume preview showing visual diff of AI rewrites (original crossed out in red, improved in green). Builds trust, creates "whoa" moment, helps users learn good resume writing. Great for demos/pitches.
-- **Effort:** S (CC: ~15 min)
-- **Depends on:** Sections must store original text alongside current text
-
 **Priority:** P3
 ### Completed Actions Log
 Collapsible "Completed (N)" section at bottom of action panel showing what the AI already fixed. Users can expand to see history and re-open any action. Gives sense of accomplishment and answers "what did it change?"
@@ -21,3 +15,6 @@ Collapsible "Completed (N)" section at bottom of action panel showing what the A
 - **Depends on:** Action-list UI (shipped)
 
 ## Completed
+
+### Before/After Resume Diff ✓
+Shipped in v0.4.2.0. Toggle in RefineStep shows word-level inline diff after AI suggestions.
