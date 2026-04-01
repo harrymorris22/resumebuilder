@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.2.0] - 2026-04-01
+
+### Added
+- **Before/after resume diff** — after accepting an AI suggestion in the Refine step, a "Show Changes" toggle appears. Flip it to see exactly what changed: removed text crossed out in red, new text highlighted in green. Word-level precision so you can see individual keyword swaps, not just "something changed."
+- `diffWords` utility using LCS algorithm for word-level diffing
+- `DiffText` component rendering inline red/green diff spans
+- `DiffResumePreview` component showing section-by-section diff across summary, experience, skills, education, and projects
+- 17 new tests covering diff utility, diff components, and RefineStep toggle behavior
+
 ## [0.4.1.0] - 2026-03-31
 
 ### Fixed
