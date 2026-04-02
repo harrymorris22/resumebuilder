@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3.0] - 2026-04-01
+
+### Added
+- **Tabbed left panel in Refine step** — swap between Suggestions, Content Pool, and Job Description without leaving the refine view. No more scrolling past AI recommendations to find your content pool. Each tab loads instantly, and the resume preview stays locked on the right.
+- **Resume name in wizard header** — always shows which resume you're editing above the step indicator
+
+### Changed
+- Refine step left panel restructured from stacked sections to tabbed layout
+- Removed remaining `dark:` class variants from Refine step (light-mode-only enforcement)
+
 ## [0.4.2.0] - 2026-04-01
 
 ### Added

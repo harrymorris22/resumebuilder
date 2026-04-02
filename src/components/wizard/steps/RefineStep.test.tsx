@@ -25,6 +25,16 @@ vi.mock('../../../hooks/useRecommendations', () => ({
   }),
 }))
 
+const mockAnalyze = vi.fn()
+
+vi.mock('../../../hooks/useAnalyzeJobDescription', () => ({
+  useAnalyzeJobDescription: () => ({
+    analyze: mockAnalyze,
+    isLoading: false,
+    error: null,
+  }),
+}))
+
 vi.mock('../../resume/ResumePreview', () => ({
   ResumePreview: () => <div data-testid="resume-preview">ResumePreview</div>,
 }))
@@ -47,8 +57,18 @@ vi.mock('../../contentPool/ContentPoolPage', () => ({
   ),
 }))
 
+vi.mock('../../jobDescription/JobDescriptionForm', () => ({
+  JobDescriptionForm: () => <div data-testid="jd-form">JobDescriptionForm</div>,
+}))
+
+vi.mock('../../jobDescription/SavedJobList', () => ({
+  SavedJobList: () => <div data-testid="saved-job-list">SavedJobList</div>,
+}))
+
 const setSettingsOpen = vi.fn()
 const updateRecommendation = vi.fn()
+const setActiveJobDescriptionId = vi.fn()
+const removeJobDescription = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -62,6 +82,8 @@ beforeEach(() => {
     diffSnapshot: null,
     setSettingsOpen,
     updateRecommendation,
+    setActiveJobDescriptionId,
+    removeJobDescription,
   }
 })
 
@@ -79,20 +101,42 @@ describe('RefineStep', () => {
     expect(screen.getByText(/Go back to Step 3/)).toBeInTheDocument()
   })
 
-  it('shows combined layout with resume preview, recommendations, and content pool', () => {
+  it('shows combined layout with resume preview, recommendations, and tabs', () => {
     render(<RefineStep />)
     expect(screen.getByText('Refine Your CV')).toBeInTheDocument()
     expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
     expect(screen.getByTestId('export-menu')).toBeInTheDocument()
     expect(screen.getByTestId('template-selector')).toBeInTheDocument()
-    expect(screen.getByTestId('content-pool')).toBeInTheDocument()
+    expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
+    // Tab bar present
+    expect(screen.getByRole('tablist', { name: 'Left panel tabs' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Suggestions' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Content Pool' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Job Description' })).toBeInTheDocument()
+  })
+
+  it('defaults to Suggestions tab', () => {
+    render(<RefineStep />)
+    expect(screen.getByRole('tab', { name: 'Suggestions' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
   })
 
-  it('passes showCheckboxes=true to ContentPoolPage', () => {
+  it('switches to Content Pool tab', async () => {
+    const user = userEvent.setup()
     render(<RefineStep />)
-    const pool = screen.getByTestId('content-pool')
-    expect(pool).toHaveAttribute('data-checkboxes', 'true')
+    await user.click(screen.getByRole('tab', { name: 'Content Pool' }))
+    expect(screen.getByTestId('content-pool')).toBeInTheDocument()
+    expect(screen.getByTestId('content-pool')).toHaveAttribute('data-checkboxes', 'true')
+    expect(screen.queryByText('Get AI Suggestions')).not.toBeInTheDocument()
+  })
+
+  it('switches to Job Description tab', async () => {
+    const user = userEvent.setup()
+    render(<RefineStep />)
+    await user.click(screen.getByRole('tab', { name: 'Job Description' }))
+    expect(screen.getByTestId('jd-form')).toBeInTheDocument()
+    expect(screen.getByTestId('saved-job-list')).toBeInTheDocument()
+    expect(screen.queryByText('Get AI Suggestions')).not.toBeInTheDocument()
   })
 
   it('shows job context in subtitle', () => {
