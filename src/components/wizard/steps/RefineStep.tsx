@@ -199,55 +199,70 @@ export function RefineStep() {
 
           {leftTab === 'job-description' && (
             <>
+              {/* 1) Active job description with full text */}
+              {activeJd && (
+                <div className="mb-6 p-4 border border-primary-200 bg-primary-50/50 rounded-md">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-sm font-medium text-stone-800">
+                        {activeJd.title} at {activeJd.company}
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-medium px-2 py-1 bg-primary-100 text-primary-700 rounded">
+                      SELECTED
+                    </span>
+                  </div>
+                  {activeJd.rawText && (
+                    <p className="text-xs text-stone-600 whitespace-pre-wrap leading-relaxed mb-3 max-h-60 overflow-y-auto">
+                      {activeJd.rawText}
+                    </p>
+                  )}
+                  {/* 2) Keywords */}
+                  {activeJd.keywords.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-medium text-stone-500 uppercase tracking-wider mb-1.5">
+                        {activeJd.keywords.length} keywords extracted
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeJd.keywords.map((kw, i) => (
+                          <span
+                            key={i}
+                            className="text-xs px-2 py-0.5 bg-white border border-stone-200 text-stone-600 rounded"
+                          >
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Saved job descriptions (for switching) */}
+              {jobDescriptions.length > 1 && (
+                <div className="mb-6">
+                  <SavedJobList
+                    jobs={jobDescriptions}
+                    activeId={activeJobDescriptionId}
+                    onSelect={(id) => setActiveJobDescriptionId(id)}
+                    onDelete={(id) => removeJobDescription(id)}
+                  />
+                </div>
+              )}
+
+              {/* 3) New job description form */}
               {jdError && (
                 <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-md text-sm">
                   {jdError}
                 </div>
               )}
 
-              <div className="mb-6">
+              <div className="border-t border-stone-200 pt-4">
                 <h3 className="text-sm font-medium text-stone-700 mb-2">
-                  New Job Description
+                  {activeJd ? 'Switch Job Description' : 'Add Job Description'}
                 </h3>
                 <JobDescriptionForm onSubmit={analyze} isLoading={isAnalyzing} />
               </div>
-
-              <SavedJobList
-                jobs={jobDescriptions}
-                activeId={activeJobDescriptionId}
-                onSelect={(id) => setActiveJobDescriptionId(id)}
-                onDelete={(id) => removeJobDescription(id)}
-              />
-
-              {activeJd && (
-                <div className="mt-6 p-4 border border-primary-200 bg-primary-50/50 rounded-md">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="text-sm font-medium text-stone-800">
-                        {activeJd.title} at {activeJd.company}
-                      </h3>
-                      <p className="text-xs text-stone-500">
-                        {activeJd.keywords.length} keywords extracted
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-medium px-2 py-1 bg-primary-100 text-primary-700 rounded">
-                      SELECTED
-                    </span>
-                  </div>
-                  {activeJd.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {activeJd.keywords.map((kw, i) => (
-                        <span
-                          key={i}
-                          className="text-xs px-2 py-0.5 bg-white border border-stone-200 text-stone-600 rounded"
-                        >
-                          {kw}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
             </>
           )}
         </div>
