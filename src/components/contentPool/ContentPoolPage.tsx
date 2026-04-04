@@ -17,6 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useAppStore } from '../../stores/useAppStore';
 import { generateId } from '../../utils/id';
+import { ContactInfoForm } from './ContactInfoForm';
 import type { ContentPoolEntry, ContentPoolItemData, ContentPoolItemType } from '../../types/resume';
 
 const DEFAULT_SECTION_ORDER: ContentPoolItemType[] = [
@@ -846,6 +847,8 @@ export function ContentPoolPage({ showCheckboxes = false }: { showCheckboxes?: b
             Seed Test Data
           </button>
         )}
+
+        <ContactInfoForm />
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
           <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>

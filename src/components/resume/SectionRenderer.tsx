@@ -20,7 +20,6 @@ export function SectionRenderer({ section, onUpdate }: SectionRendererProps) {
       return (
         <ContactSection
           data={content.data}
-          onUpdate={(data) => onUpdate({ type: 'contact', data })}
         />
       );
     case 'summary':
