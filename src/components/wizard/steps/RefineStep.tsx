@@ -5,7 +5,6 @@ import { useAnalyzeJobDescription } from '../../../hooks/useAnalyzeJobDescriptio
 import { RecommendationList } from '../../recommendations/RecommendationList';
 import { ResumePreview } from '../../resume/ResumePreview';
 import { DiffResumePreview } from '../../resume/DiffResumePreview';
-import { ExportMenu } from '../../export/ExportMenu';
 import { ContentPoolPage } from '../../contentPool/ContentPoolPage';
 import { TemplateSelector } from '../../resume/TemplateSelector';
 import { JobDescriptionForm } from '../../jobDescription/JobDescriptionForm';
@@ -91,56 +90,26 @@ export function RefineStep() {
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
       {/* Left panel */}
       <div className="lg:w-[40%] flex-shrink-0 border-b lg:border-b-0 lg:border-r border-stone-200 flex flex-col min-h-0">
-        {/* Header area */}
-        <div className="p-6 pb-0 flex-shrink-0">
-          <h2 tabIndex={-1} className="text-xl font-bold font-display text-stone-900 mb-1">
-            Refine Your CV
-          </h2>
-          {activeJd && (
-            <p className="text-sm text-stone-500 mb-4">
-              {activeJd.title} at {activeJd.company}
-            </p>
-          )}
-
-          {/* Export + Template + Diff toggle row */}
-          <div className="flex items-center gap-3 mb-4">
-            <ExportMenu />
-            <TemplateSelector />
-            {diffSnapshot && (
-              <button
-                onClick={() => setShowDiff(!showDiff)}
-                className={`ml-auto px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  showDiff
-                    ? 'bg-primary-100 text-primary-700 border border-primary-300'
-                    : 'text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300'
-                }`}
-              >
-                {showDiff ? 'Hide Changes' : 'Show Changes'}
-              </button>
-            )}
-          </div>
-
-          {/* Tab bar */}
-          <div className="flex border-b border-stone-200" role="tablist" aria-label="Left panel tabs">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                role="tab"
-                aria-selected={leftTab === tab.key}
-                onClick={() => setLeftTab(tab.key)}
-                className={`px-3 py-2 text-xs font-medium transition-colors relative ${
-                  leftTab === tab.key
-                    ? 'text-primary-600'
-                    : 'text-stone-500 hover:text-stone-700'
-                }`}
-              >
-                {tab.label}
-                {leftTab === tab.key && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
-                )}
-              </button>
-            ))}
-          </div>
+        {/* Tab bar */}
+        <div className="flex border-b border-stone-200 flex-shrink-0" role="tablist" aria-label="Left panel tabs">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              role="tab"
+              aria-selected={leftTab === tab.key}
+              onClick={() => setLeftTab(tab.key)}
+              className={`px-4 py-2.5 text-xs font-medium transition-colors relative ${
+                leftTab === tab.key
+                  ? 'text-primary-600'
+                  : 'text-stone-500 hover:text-stone-700'
+              }`}
+            >
+              {tab.label}
+              {leftTab === tab.key && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Tab content (scrollable) */}
@@ -268,13 +237,30 @@ export function RefineStep() {
         </div>
       </div>
 
-      {/* Right panel: resume preview or diff view */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100">
-        {showDiff && diffSnapshot ? (
-          <DiffResumePreview snapshot={diffSnapshot} />
-        ) : (
-          <ResumePreview />
-        )}
+      {/* Right panel: toolbar + resume preview or diff view */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
+          <TemplateSelector />
+          {diffSnapshot && (
+            <button
+              onClick={() => setShowDiff(!showDiff)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                showDiff
+                  ? 'bg-primary-100 text-primary-700 border border-primary-300'
+                  : 'text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300'
+              }`}
+            >
+              {showDiff ? 'Hide Changes' : 'Show Changes'}
+            </button>
+          )}
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100">
+          {showDiff && diffSnapshot ? (
+            <DiffResumePreview snapshot={diffSnapshot} />
+          ) : (
+            <ResumePreview />
+          )}
+        </div>
       </div>
     </div>
   );
