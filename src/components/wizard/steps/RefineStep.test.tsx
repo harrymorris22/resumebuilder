@@ -43,10 +43,6 @@ vi.mock('../../resume/DiffResumePreview', () => ({
   DiffResumePreview: () => <div data-testid="diff-preview">DiffResumePreview</div>,
 }))
 
-vi.mock('../../export/ExportMenu', () => ({
-  ExportMenu: () => <div data-testid="export-menu">ExportMenu</div>,
-}))
-
 vi.mock('../../resume/TemplateSelector', () => ({
   TemplateSelector: () => <div data-testid="template-selector">TemplateSelector</div>,
 }))
@@ -101,11 +97,9 @@ describe('RefineStep', () => {
     expect(screen.getByText(/Go back to Step 3/)).toBeInTheDocument()
   })
 
-  it('shows combined layout with resume preview, recommendations, and tabs', () => {
+  it('shows combined layout with tabs, template selector, and resume preview', () => {
     render(<RefineStep />)
-    expect(screen.getByText('Refine Your CV')).toBeInTheDocument()
     expect(screen.getByTestId('resume-preview')).toBeInTheDocument()
-    expect(screen.getByTestId('export-menu')).toBeInTheDocument()
     expect(screen.getByTestId('template-selector')).toBeInTheDocument()
     expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
     // Tab bar present
@@ -154,11 +148,6 @@ describe('RefineStep', () => {
     render(<RefineStep />)
     await user.click(screen.getByRole('tab', { name: 'Job Description' }))
     expect(screen.getByTestId('saved-job-list')).toBeInTheDocument()
-  })
-
-  it('shows job context in subtitle', () => {
-    render(<RefineStep />)
-    expect(screen.getByText(/SWE at Acme/)).toBeInTheDocument()
   })
 
   it('calls generateRefineRecommendations when button clicked', async () => {

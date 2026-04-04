@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.4.0] - 2026-04-04
+
+### Changed
+- **Decluttered RefineStep left panel** — removed redundant "Refine Your CV" heading, job subtitle, and Export/Template row. Left panel now starts directly with the tab bar, giving more vertical space to actual content.
+- **TemplateSelector moved to right panel toolbar** — template picker now sits above the resume preview where it belongs, alongside the Show Changes diff toggle.
+- Removed unused `ExportMenu` import from RefineStep (Export lives in ResumePreview bottom bar)
+
 ## [0.4.3.0] - 2026-04-01
 
 ### Added
