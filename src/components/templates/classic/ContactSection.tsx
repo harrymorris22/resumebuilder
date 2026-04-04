@@ -1,73 +1,40 @@
 import type { ContactInfo } from '../../../types/resume';
-import { InlineEditor } from '../../resume/InlineEditor';
 
 interface ContactSectionProps {
   data: ContactInfo;
-  onUpdate: (data: ContactInfo) => void;
 }
 
-export function ContactSection({ data, onUpdate }: ContactSectionProps) {
-  const update = (field: keyof ContactInfo, value: string) => {
-    onUpdate({ ...data, [field]: value });
-  };
+export function ContactSection({ data }: ContactSectionProps) {
+  const details = [data.email, data.phone, data.location].filter(Boolean);
+  const urls = [data.linkedin, data.github, data.website].filter(Boolean);
 
   return (
     <div className="text-center mb-6 border-b border-stone-300 pb-4">
-      <InlineEditor
-        value={data.fullName}
-        onChange={(v) => update('fullName', v)}
-        placeholder="Your Name"
-        tag="h1"
-        className="text-2xl font-bold text-stone-900"
-      />
+      {data.fullName && (
+        <h1 className="text-2xl font-bold text-stone-900">{data.fullName}</h1>
+      )}
 
-      <div className="flex items-center justify-center gap-1 mt-1 text-sm text-stone-600 flex-wrap">
-        <InlineEditor
-          value={data.email}
-          onChange={(v) => update('email', v)}
-          placeholder="email@example.com"
-        />
-        {(data.email || data.phone) && <span className="text-stone-400">|</span>}
-        <InlineEditor
-          value={data.phone}
-          onChange={(v) => update('phone', v)}
-          placeholder="(555) 123-4567"
-        />
-        {(data.phone || data.location) && <span className="text-stone-400">|</span>}
-        <InlineEditor
-          value={data.location}
-          onChange={(v) => update('location', v)}
-          placeholder="City, State"
-        />
-      </div>
+      {details.length > 0 && (
+        <div className="flex items-center justify-center gap-1 mt-1 text-sm text-stone-600 flex-wrap">
+          {details.map((d, i) => (
+            <span key={i}>
+              {i > 0 && <span className="text-stone-400 mr-1">|</span>}
+              {d}
+            </span>
+          ))}
+        </div>
+      )}
 
-      <div className="flex items-center justify-center gap-1 mt-0.5 text-sm text-stone-500 flex-wrap">
-        {(data.linkedin || data.github || data.website || !data.fullName) && (
-          <>
-            <InlineEditor
-              value={data.linkedin ?? ''}
-              onChange={(v) => update('linkedin', v)}
-              placeholder="LinkedIn"
-            />
-            {(data.linkedin && (data.github || data.website)) && (
-              <span className="text-stone-400">|</span>
-            )}
-            <InlineEditor
-              value={data.github ?? ''}
-              onChange={(v) => update('github', v)}
-              placeholder="GitHub"
-            />
-            {(data.github && data.website) && (
-              <span className="text-stone-400">|</span>
-            )}
-            <InlineEditor
-              value={data.website ?? ''}
-              onChange={(v) => update('website', v)}
-              placeholder="Website"
-            />
-          </>
-        )}
-      </div>
+      {urls.length > 0 && (
+        <div className="flex items-center justify-center gap-1 mt-0.5 text-sm text-stone-500 flex-wrap">
+          {urls.map((u, i) => (
+            <span key={i}>
+              {i > 0 && <span className="text-stone-400 mr-1">|</span>}
+              {u}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

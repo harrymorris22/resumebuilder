@@ -15,19 +15,18 @@ export function ModernTemplate({ sections, onUpdate }: ModernTemplateProps) {
   return (
     <div className="font-sans text-stone-800">
       {/* Header — accent bar */}
-      {contactData && contact && (
+      {contactData && (
         <div className="bg-primary-600 text-white px-8 py-6 -mx-8 -mt-8 mb-6">
-          <InlineEditor
-            value={contactData.fullName}
-            onChange={(v) => onUpdate(contact.id, { type: 'contact', data: { ...contactData, fullName: v } })}
-            placeholder="Your Name"
-            tag="h1"
-            className="text-3xl font-light tracking-wide text-white"
-          />
+          {contactData.fullName && (
+            <h1 className="text-3xl font-light tracking-wide text-white">{contactData.fullName}</h1>
+          )}
           <div className="flex gap-3 mt-2 text-sm text-white/80 flex-wrap">
             {contactData.email && <span>{contactData.email}</span>}
             {contactData.phone && <span>{contactData.phone}</span>}
             {contactData.location && <span>{contactData.location}</span>}
+            {contactData.linkedin && <span>{contactData.linkedin}</span>}
+            {contactData.github && <span>{contactData.github}</span>}
+            {contactData.website && <span>{contactData.website}</span>}
           </div>
         </div>
       )}

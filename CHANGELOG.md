@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.5.0] - 2026-04-04
+
+### Added
+- **Personal Details form in Content Pool** — set your name, email, phone, location, LinkedIn, GitHub, and portfolio URL in one place. Values sync to the resume automatically. Blank URL fields don't appear in the CV.
+- All 4 resume templates (classic, modern, minimal, creative) now render LinkedIn, GitHub, and website URLs when present
+
+### Changed
+- Contact info in resume preview is now read-only (edit via Content Pool only, not inline on the resume)
+
 ## [0.4.4.0] - 2026-04-04
 
 ### Changed

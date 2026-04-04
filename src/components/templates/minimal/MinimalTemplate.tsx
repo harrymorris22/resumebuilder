@@ -15,18 +15,16 @@ export function MinimalTemplate({ sections, onUpdate }: MinimalTemplateProps) {
   return (
     <div className="font-sans text-stone-900 max-w-2xl mx-auto">
       {/* Minimal header — just name and details */}
-      {contactData && contact && (
+      {contactData && (
         <div className="mb-8">
-          <InlineEditor
-            value={contactData.fullName}
-            onChange={(v) => onUpdate(contact.id, { type: 'contact', data: { ...contactData, fullName: v } })}
-            placeholder="Your Name"
-            tag="h1"
-            className="text-2xl font-normal text-stone-900"
-          />
-          <div className="text-sm text-stone-400 mt-1">
-            {[contactData.email, contactData.phone, contactData.location].filter(Boolean).join(' / ')}
-          </div>
+          {contactData.fullName && (
+            <h1 className="text-2xl font-normal text-stone-900">{contactData.fullName}</h1>
+          )}
+          {[contactData.email, contactData.phone, contactData.location, contactData.linkedin, contactData.github, contactData.website].filter(Boolean).length > 0 && (
+            <div className="text-sm text-stone-400 mt-1">
+              {[contactData.email, contactData.phone, contactData.location, contactData.linkedin, contactData.github, contactData.website].filter(Boolean).join(' / ')}
+            </div>
+          )}
         </div>
       )}
 

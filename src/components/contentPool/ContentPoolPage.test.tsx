@@ -45,6 +45,10 @@ vi.mock('../../stores/useAppStore', () => ({
 }))
 
 // DnD kit needs pointer events
+vi.mock('./ContactInfoForm', () => ({
+  ContactInfoForm: () => <div data-testid="contact-info-form">ContactInfoForm</div>,
+}))
+
 vi.mock('@dnd-kit/core', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@dnd-kit/core')>()
   return {
