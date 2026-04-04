@@ -76,7 +76,7 @@ beforeEach(() => {
     apiKey: 'test-key',
     generatedResumeId: 'r1',
     activeJobDescriptionId: 'jd1',
-    jobDescriptions: [{ id: 'jd1', title: 'SWE', company: 'Acme', keywords: ['react'] }],
+    jobDescriptions: [{ id: 'jd1', title: 'SWE', company: 'Acme', rawText: 'We are looking for a React developer...', keywords: ['react'] }],
     resumes: [{ id: 'r1', name: 'Test Resume', sections: [] }],
     recommendations: [],
     diffSnapshot: null,
@@ -130,13 +130,30 @@ describe('RefineStep', () => {
     expect(screen.queryByText('Get AI Suggestions')).not.toBeInTheDocument()
   })
 
-  it('switches to Job Description tab', async () => {
+  it('switches to Job Description tab and shows active JD text + keywords', async () => {
     const user = userEvent.setup()
     render(<RefineStep />)
     await user.click(screen.getByRole('tab', { name: 'Job Description' }))
+    // Active JD full text shown
+    expect(screen.getByText('We are looking for a React developer...')).toBeInTheDocument()
+    // Keywords shown
+    expect(screen.getByText('react')).toBeInTheDocument()
+    // JD form shown at bottom
     expect(screen.getByTestId('jd-form')).toBeInTheDocument()
-    expect(screen.getByTestId('saved-job-list')).toBeInTheDocument()
+    // Saved list hidden when only 1 JD
+    expect(screen.queryByTestId('saved-job-list')).not.toBeInTheDocument()
     expect(screen.queryByText('Get AI Suggestions')).not.toBeInTheDocument()
+  })
+
+  it('shows saved job list when multiple JDs exist', async () => {
+    mockState.jobDescriptions = [
+      { id: 'jd1', title: 'SWE', company: 'Acme', rawText: 'React dev...', keywords: ['react'] },
+      { id: 'jd2', title: 'FE', company: 'BigCo', rawText: 'Frontend...', keywords: ['vue'] },
+    ]
+    const user = userEvent.setup()
+    render(<RefineStep />)
+    await user.click(screen.getByRole('tab', { name: 'Job Description' }))
+    expect(screen.getByTestId('saved-job-list')).toBeInTheDocument()
   })
 
   it('shows job context in subtitle', () => {
