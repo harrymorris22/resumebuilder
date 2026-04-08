@@ -1,6 +1,6 @@
 import type { ExperienceItem } from '../../../types/resume';
 import { InlineEditor } from '../../resume/InlineEditor';
-import { hasVisibleText } from '../../../utils/textClean';
+import { hasVisibleText, formatEndDate } from '../../../utils/textClean';
 
 interface ExperienceSectionProps {
   data: { items: ExperienceItem[] };
@@ -9,8 +9,7 @@ interface ExperienceSectionProps {
 
 function formatDateRange(dr: ExperienceItem['dateRange']) {
   const start = dr.start || 'Start Date';
-  const end = dr.end ?? 'Present';
-  return `${start} - ${end}`;
+  return `${start} - ${formatEndDate(dr.end)}`;
 }
 
 export function ExperienceSection({ data, onUpdate }: ExperienceSectionProps) {

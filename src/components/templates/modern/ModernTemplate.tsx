@@ -1,7 +1,7 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { getContactLinks } from '../../../utils/contactLinks';
-import { hasVisibleText } from '../../../utils/textClean';
+import { hasVisibleText, formatEndDate } from '../../../utils/textClean';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface ModernTemplateProps {
@@ -86,7 +86,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
           <div key={item.id}>
             <div className="flex justify-between items-baseline">
               <span className="font-medium text-sm">{item.title}</span>
-              <span className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
+              <span className="text-xs text-stone-400">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</span>
             </div>
             <div className="text-sm text-primary-600">{item.company}</div>
             {item.bullets.filter(hasVisibleText).length > 0 && (
@@ -112,7 +112,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="font-medium">{item.degree} in {item.field}</span>
               <span className="text-stone-500"> — {item.institution}</span>
             </span>
-            <span className="text-xs text-stone-400 whitespace-nowrap ml-2">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
+            <span className="text-xs text-stone-400 whitespace-nowrap ml-2">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</span>
           </div>
         ))}
       </div>

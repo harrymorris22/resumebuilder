@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.13.0] - 2026-04-08
+
+### Fixed
+- **Current jobs show "Present" instead of "null"** — jobs with no end date displayed the literal string "null" in the resume preview and PDF export. New `formatEndDate()` utility handles null, undefined, empty string, and the string "null" across all templates and exports.
+
+### Added
+- 6 new tests for `formatEndDate` utility
+
 ## [0.4.12.0] - 2026-04-08
 
 ### Changed

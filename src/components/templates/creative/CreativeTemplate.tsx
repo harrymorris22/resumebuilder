@@ -1,7 +1,7 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { getContactLinks } from '../../../utils/contactLinks';
-import { hasVisibleText } from '../../../utils/textClean';
+import { hasVisibleText, formatEndDate } from '../../../utils/textClean';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface CreativeTemplateProps {
@@ -109,7 +109,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
             <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-primary-600 rounded-full" />
             <div className="font-medium text-sm">{item.title}</div>
             <div className="text-sm text-primary-600">{item.company}</div>
-            <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
+            <div className="text-xs text-stone-400">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</div>
             {item.bullets.filter(hasVisibleText).length > 0 && (
               <ul className="list-disc ml-4 mt-1 space-y-0.5">
                 {item.bullets.filter(hasVisibleText).map((b, bi) => (
@@ -133,7 +133,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="font-medium">{item.degree} in {item.field}</span>
               <span className="text-stone-500"> — {item.institution}</span>
             </span>
-            <span className="text-xs text-stone-400 whitespace-nowrap ml-2">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
+            <span className="text-xs text-stone-400 whitespace-nowrap ml-2">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</span>
           </div>
         ))}
       </div>
