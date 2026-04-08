@@ -111,8 +111,9 @@ export function useChat() {
         startUndoCountdown(id);
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [actionSuggestions, isStreaming, activeResumeId, startUndoCountdown]
-    // Note: sendMessage is referenced but defined in the same scope — added below
+    // sendMessage is defined later in this hook — circular dep is intentional
   );
 
   // Undo an action

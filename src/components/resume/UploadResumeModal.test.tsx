@@ -25,6 +25,7 @@ vi.mock('../../services/resumeParser', () => ({
   extractText: vi.fn(),
   parseResumeWithClaude: vi.fn(),
   extractPoolEntries: vi.fn(() => []),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   deduplicateAgainstPool: vi.fn((_new: unknown[]) => []),
 }))
 

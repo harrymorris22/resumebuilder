@@ -90,7 +90,7 @@ export function UploadResumeModal({
         setStatus('error');
       }
     },
-    [apiKey, addResume, setActiveResumeId, handleClose]
+    [apiKey, addResume, setActiveResumeId, addPoolEntry, contentPool, handleClose]
   );
 
   const handleFileChange = useCallback(
