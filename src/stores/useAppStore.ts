@@ -27,6 +27,7 @@ import {
 } from '../db/indexedDb';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
+import { hasVisibleText } from '../utils/textClean';
 
 interface AppState {
   // Persisted scalars (localStorage)
@@ -526,7 +527,7 @@ export const useAppStore = create<AppState>()(
             if (!expData.items) continue;
             let dirty = false;
             for (const job of expData.items) {
-              const deduped = [...new Set(job.bullets)].filter((b) => b.trim());
+              const deduped = [...new Set(job.bullets)].filter(hasVisibleText);
               if (deduped.length !== job.bullets.length) {
                 job.bullets = deduped;
                 dirty = true;

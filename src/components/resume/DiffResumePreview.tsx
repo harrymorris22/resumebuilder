@@ -1,6 +1,7 @@
 import type { ResumeSection, ExperienceItem, EducationItem, ProjectItem, SkillCategory } from '../../types/resume';
 import { useAppStore } from '../../stores/useAppStore';
 import { DiffText } from './DiffText';
+import { hasVisibleText } from '../../utils/textClean';
 
 interface DiffResumePreviewProps {
   snapshot: ResumeSection[];
@@ -26,8 +27,8 @@ function DiffSummary({ oldText, newText }: { oldText: string; newText: string })
 function DiffExperienceItem({ oldItem, newItem }: { oldItem?: ExperienceItem; newItem?: ExperienceItem }) {
   const title = newItem?.title ?? oldItem?.title ?? '';
   const company = newItem?.company ?? oldItem?.company ?? '';
-  const oldBullets = (oldItem?.bullets ?? []).filter((b) => b.trim());
-  const newBullets = (newItem?.bullets ?? []).filter((b) => b.trim());
+  const oldBullets = (oldItem?.bullets ?? []).filter(hasVisibleText);
+  const newBullets = (newItem?.bullets ?? []).filter(hasVisibleText);
   const maxLen = Math.max(oldBullets.length, newBullets.length);
 
   return (
@@ -176,8 +177,8 @@ function DiffProjects({ oldItems, newItems }: { oldItems: ProjectItem[]; newItem
       </h2>
       {pairs.map((pair, i) => {
         const name = pair.new?.name ?? pair.old?.name ?? '';
-        const oldBullets = (pair.old?.bullets ?? []).filter((b) => b.trim());
-        const newBullets = (pair.new?.bullets ?? []).filter((b) => b.trim());
+        const oldBullets = (pair.old?.bullets ?? []).filter(hasVisibleText);
+        const newBullets = (pair.new?.bullets ?? []).filter(hasVisibleText);
         const maxLen = Math.max(oldBullets.length, newBullets.length);
         return (
           <div key={pair.new?.id ?? pair.old?.id ?? i} className="mb-3">

@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import type { Resume } from '../../types/resume';
 import { getContactLinks } from '../../utils/contactLinks';
+import { hasVisibleText } from '../../utils/textClean';
 
 const styles = StyleSheet.create({
   page: {
@@ -131,7 +132,7 @@ export function PdfDocument({ resume }: PdfDocumentProps) {
                         {item.dateRange.start} - {item.dateRange.end ?? 'Present'}
                       </Text>
                     </View>
-                    {item.bullets.filter((b) => b.trim()).map((b, i) => (
+                    {item.bullets.filter(hasVisibleText).map((b, i) => (
                       <Text key={i} style={styles.bullet}>• {b}</Text>
                     ))}
                   </View>
@@ -199,7 +200,7 @@ export function PdfDocument({ resume }: PdfDocumentProps) {
                       <Text style={styles.itemSubtitle}>({item.technologies.join(', ')})</Text>
                     )}
                     <Text style={styles.text}>{item.description}</Text>
-                    {item.bullets.filter((b) => b.trim()).map((b, i) => (
+                    {item.bullets.filter(hasVisibleText).map((b, i) => (
                       <Text key={i} style={styles.bullet}>• {b}</Text>
                     ))}
                   </View>
