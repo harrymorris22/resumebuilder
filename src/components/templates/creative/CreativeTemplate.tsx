@@ -1,6 +1,7 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { getContactLinks } from '../../../utils/contactLinks';
+import { hasVisibleText } from '../../../utils/textClean';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface CreativeTemplateProps {
@@ -109,9 +110,9 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
             <div className="font-medium text-sm">{item.title}</div>
             <div className="text-sm text-primary-600">{item.company}</div>
             <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
-            {item.bullets.filter((b) => b.trim()).length > 0 && (
+            {item.bullets.filter(hasVisibleText).length > 0 && (
               <ul className="list-disc ml-4 mt-1 space-y-0.5">
-                {item.bullets.filter((b) => b.trim()).map((b, bi) => (
+                {item.bullets.filter(hasVisibleText).map((b, bi) => (
                   <li key={bi} className="text-sm text-stone-600">{b}</li>
                 ))}
               </ul>

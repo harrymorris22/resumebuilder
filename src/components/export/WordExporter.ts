@@ -11,6 +11,7 @@ import {
 import { saveAs } from 'file-saver';
 import type { Resume } from '../../types/resume';
 import { getContactLinks } from '../../utils/contactLinks';
+import { hasVisibleText } from '../../utils/textClean';
 
 export async function exportToWord(resume: Resume) {
   const sections = resume.sections.filter((s) => s.visible).sort((a, b) => a.order - b.order);
@@ -101,7 +102,7 @@ export async function exportToWord(resume: Resume) {
             ],
           })
         );
-        for (const bullet of item.bullets.filter((b) => b.trim())) {
+        for (const bullet of item.bullets.filter(hasVisibleText)) {
           children.push(
             new Paragraph({
               children: [new TextRun({ text: bullet, size: 20 })],
@@ -176,7 +177,7 @@ export async function exportToWord(resume: Resume) {
             children: [new TextRun({ text: item.description, size: 20 })],
           })
         );
-        for (const bullet of item.bullets.filter((b) => b.trim())) {
+        for (const bullet of item.bullets.filter(hasVisibleText)) {
           children.push(
             new Paragraph({
               children: [new TextRun({ text: bullet, size: 20 })],
