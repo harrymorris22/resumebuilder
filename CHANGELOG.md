@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.8.0] - 2026-04-08
+
+### Changed
+- **Contact links are now clickable and on one line** — LinkedIn, GitHub, and Portfolio URLs display as labeled clickable links on the same line as email, phone, and location across all 4 templates, PDF export, and Word export
+
 ## [0.4.7.0] - 2026-04-08
 
 ### Changed
