@@ -15,8 +15,8 @@ export function EducationSection({ data, onUpdate }: EducationSectionProps) {
 
   if (data.items.length === 0) {
     return (
-      <div className="mb-5">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
+      <div className="mb-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-1">
           Education
         </h2>
         <p className="text-sm text-stone-300 italic">
@@ -27,8 +27,8 @@ export function EducationSection({ data, onUpdate }: EducationSectionProps) {
   }
 
   return (
-    <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
+    <div className="mb-3">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-1">
         Education
       </h2>
       {data.items.map((item, i) => (

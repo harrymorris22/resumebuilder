@@ -66,8 +66,8 @@ export function ResumePreview() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // 10in usable content height = 11in page - 2 * 0.5in padding
-  const PAGE_CONTENT_HEIGHT = 10 * 96; // 960px at 96dpi
+  // 10.2in usable content height = 11in page - 2 * 0.4in padding
+  const PAGE_CONTENT_HEIGHT = 10.2 * 96; // 979px at 96dpi
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -131,7 +131,7 @@ export function ResumePreview() {
   return (
     <div className="flex flex-col h-full bg-stone-100 dark:bg-stone-900">
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-        <div id="resume-print-area" className="relative bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] text-stone-900" style={{ padding: '0.5in', fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
+        <div id="resume-print-area" className="relative bg-white shadow-lg w-full max-w-[8.5in] min-h-[11in] text-stone-900" style={{ padding: '0.4in', fontFamily: activeResume.templateId === 'classic' ? 'Georgia, serif' : undefined }}>
           {overflows && (
             <div className="page-boundary-line absolute left-0 right-0 border-t-2 border-dashed border-amber-400 pointer-events-none" style={{ top: '11in' }}>
               <span className="absolute right-2 -top-5 text-[10px] text-amber-500 bg-white px-1">page limit</span>

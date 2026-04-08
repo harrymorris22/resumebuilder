@@ -15,8 +15,8 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
 
   if (data.categories.length === 0) {
     return (
-      <div className="mb-5">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
+      <div className="mb-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-1">
           Skills
         </h2>
         <p className="text-sm text-stone-300 italic">
@@ -27,8 +27,8 @@ export function SkillsSection({ data, onUpdate }: SkillsSectionProps) {
   }
 
   return (
-    <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
+    <div className="mb-3">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-1">
         Skills
       </h2>
       {data.categories.map((cat, i) => (
