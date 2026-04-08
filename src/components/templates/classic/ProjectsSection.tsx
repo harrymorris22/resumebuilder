@@ -51,9 +51,9 @@ export function ProjectsSection({ data, onUpdate }: ProjectsSectionProps) {
             tag="p"
             className="text-sm text-stone-600 mt-0.5"
           />
-          {item.bullets.length > 0 && (
+          {item.bullets.filter((b) => b.trim()).length > 0 && (
             <ul className="list-disc ml-4 mt-1 space-y-0.5">
-              {item.bullets.map((bullet, bi) => (
+              {item.bullets.filter((b) => b.trim()).map((bullet, bi) => (
                 <li key={bi} className="text-sm text-stone-700">
                   <InlineEditor
                     value={bullet}

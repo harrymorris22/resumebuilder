@@ -101,7 +101,7 @@ export async function exportToWord(resume: Resume) {
             ],
           })
         );
-        for (const bullet of item.bullets) {
+        for (const bullet of item.bullets.filter((b) => b.trim())) {
           children.push(
             new Paragraph({
               children: [new TextRun({ text: bullet, size: 20 })],
@@ -176,7 +176,7 @@ export async function exportToWord(resume: Resume) {
             children: [new TextRun({ text: item.description, size: 20 })],
           })
         );
-        for (const bullet of item.bullets) {
+        for (const bullet of item.bullets.filter((b) => b.trim())) {
           children.push(
             new Paragraph({
               children: [new TextRun({ text: bullet, size: 20 })],
