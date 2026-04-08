@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.10.0] - 2026-04-08
+
+### Fixed
+- **Invisible Unicode characters no longer produce ghost bullets** — PDF text extraction introduces zero-width spaces, BOM, and other invisible chars that passed `.trim()`. New `hasVisibleText()` utility strips them across all 11 bullet rendering sites.
+
+### Added
+- 13 new tests for `hasVisibleText` utility covering all invisible Unicode code points
+
 ## [0.4.9.0] - 2026-04-08
 
 ### Fixed
