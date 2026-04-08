@@ -54,6 +54,21 @@ export function EducationSection({ data, onUpdate }: EducationSectionProps) {
                   />
                 </>
               )}
+              {item.institution && (
+                <>
+                  <span className="text-stone-400 mx-1">—</span>
+                  <InlineEditor
+                    value={item.institution}
+                    onChange={(v) => updateItem(i, { institution: v })}
+                    placeholder="Institution Name"
+                    tag="span"
+                    className="text-sm text-stone-600"
+                  />
+                </>
+              )}
+              {item.gpa && (
+                <span className="text-xs text-stone-500 ml-1">(GPA: {item.gpa})</span>
+              )}
             </div>
             <span className="text-xs text-stone-500 whitespace-nowrap ml-2">
               {item.dateRange.start}
@@ -61,16 +76,6 @@ export function EducationSection({ data, onUpdate }: EducationSectionProps) {
               {item.dateRange.end ?? 'Present'}
             </span>
           </div>
-          <InlineEditor
-            value={item.institution}
-            onChange={(v) => updateItem(i, { institution: v })}
-            placeholder="Institution Name"
-            tag="div"
-            className="text-sm text-stone-600"
-          />
-          {item.gpa && (
-            <span className="text-xs text-stone-500">GPA: {item.gpa}</span>
-          )}
         </div>
       ))}
     </div>

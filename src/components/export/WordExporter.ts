@@ -125,6 +125,11 @@ export async function exportToWord(resume: Resume) {
                 size: 20,
                 color: '666666',
               }),
+              new TextRun({
+                text: `  ${item.dateRange.start} - ${item.dateRange.end ?? 'Present'}`,
+                size: 16,
+                color: '999999',
+              }),
             ],
           })
         );

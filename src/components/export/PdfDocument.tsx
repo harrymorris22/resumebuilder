@@ -148,13 +148,15 @@ export function PdfDocument({ resume }: PdfDocumentProps) {
                 {content.data.items.map((item) => (
                   <View key={item.id} style={{ marginBottom: 4 }}>
                     <View style={styles.itemHeader}>
-                      <Text style={styles.itemTitle}>{item.degree} in {item.field}</Text>
+                      <Text style={styles.text}>
+                        <Text style={styles.itemTitle}>{item.degree} in {item.field}</Text>
+                        <Text style={styles.itemSubtitle}> — {item.institution}</Text>
+                        {item.gpa ? <Text style={styles.itemSubtitle}> (GPA: {item.gpa})</Text> : null}
+                      </Text>
                       <Text style={styles.dateText}>
                         {item.dateRange.start} - {item.dateRange.end ?? 'Present'}
                       </Text>
                     </View>
-                    <Text style={styles.itemSubtitle}>{item.institution}</Text>
-                    {item.gpa && <Text style={styles.itemSubtitle}>GPA: {item.gpa}</Text>}
                   </View>
                 ))}
               </View>
