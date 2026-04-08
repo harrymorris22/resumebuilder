@@ -1,5 +1,6 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import type { Resume } from '../../types/resume';
+import { getContactLinks } from '../../utils/contactLinks';
 
 const styles = StyleSheet.create({
   page: {
@@ -98,12 +99,10 @@ export function PdfDocument({ resume }: PdfDocumentProps) {
             <Text style={styles.name}>{contactData.fullName || 'Your Name'}</Text>
             <Text style={styles.contactLine}>
               {[contactData.email, contactData.phone, contactData.location].filter(Boolean).join(' | ')}
+              {getContactLinks(contactData).map((link) => (
+                <Text key={link.label}> | <Link src={link.url} style={{ color: '#1a1a1a', textDecoration: 'underline' }}>{link.label}</Link></Text>
+              ))}
             </Text>
-            {(contactData.linkedin || contactData.github || contactData.website) && (
-              <Text style={styles.contactLine}>
-                {[contactData.linkedin, contactData.github, contactData.website].filter(Boolean).join(' | ')}
-              </Text>
-            )}
           </View>
         )}
 

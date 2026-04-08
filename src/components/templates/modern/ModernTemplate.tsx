@@ -1,5 +1,6 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
+import { getContactLinks } from '../../../utils/contactLinks';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface ModernTemplateProps {
@@ -24,9 +25,11 @@ export function ModernTemplate({ sections, onUpdate }: ModernTemplateProps) {
             {contactData.email && <span>{contactData.email}</span>}
             {contactData.phone && <span>{contactData.phone}</span>}
             {contactData.location && <span>{contactData.location}</span>}
-            {contactData.linkedin && <span>{contactData.linkedin}</span>}
-            {contactData.github && <span>{contactData.github}</span>}
-            {contactData.website && <span>{contactData.website}</span>}
+            {getContactLinks(contactData).map((link) => (
+              <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="text-white/80 underline decoration-white/40 hover:text-white">
+                {link.label}
+              </a>
+            ))}
           </div>
         </div>
       )}

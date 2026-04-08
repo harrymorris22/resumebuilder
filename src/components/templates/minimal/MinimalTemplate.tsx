@@ -1,5 +1,6 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
+import { getContactLinks } from '../../../utils/contactLinks';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface MinimalTemplateProps {
@@ -20,11 +21,22 @@ export function MinimalTemplate({ sections, onUpdate }: MinimalTemplateProps) {
           {contactData.fullName && (
             <h1 className="text-2xl font-normal text-stone-900">{contactData.fullName}</h1>
           )}
-          {[contactData.email, contactData.phone, contactData.location, contactData.linkedin, contactData.github, contactData.website].filter(Boolean).length > 0 && (
-            <div className="text-sm text-stone-400 mt-1">
-              {[contactData.email, contactData.phone, contactData.location, contactData.linkedin, contactData.github, contactData.website].filter(Boolean).join(' / ')}
-            </div>
-          )}
+          {(() => {
+            const details = [contactData.email, contactData.phone, contactData.location].filter(Boolean);
+            const links = getContactLinks(contactData);
+            if (details.length === 0 && links.length === 0) return null;
+            return (
+              <div className="text-sm text-stone-400 mt-1">
+                {details.join(' / ')}
+                {links.map((link, i) => (
+                  <span key={link.label}>
+                    {(details.length > 0 || i > 0) ? ' / ' : ''}
+                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-stone-400 underline decoration-stone-300 hover:text-stone-600">{link.label}</a>
+                  </span>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
