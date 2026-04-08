@@ -11,7 +11,7 @@ import {
 import { saveAs } from 'file-saver';
 import type { Resume } from '../../types/resume';
 import { getContactLinks } from '../../utils/contactLinks';
-import { hasVisibleText } from '../../utils/textClean';
+import { hasVisibleText, formatEndDate } from '../../utils/textClean';
 
 export async function exportToWord(resume: Resume) {
   const sections = resume.sections.filter((s) => s.visible).sort((a, b) => a.order - b.order);
@@ -95,7 +95,7 @@ export async function exportToWord(resume: Resume) {
             children: [
               new TextRun({ text: `${item.title} at ${item.company}`, bold: true, size: 20 }),
               new TextRun({
-                text: `  ${item.dateRange.start} - ${item.dateRange.end ?? 'Present'}`,
+                text: `  ${item.dateRange.start} - ${formatEndDate(item.dateRange.end)}`,
                 size: 16,
                 color: '999999',
               }),
@@ -126,7 +126,7 @@ export async function exportToWord(resume: Resume) {
                 color: '666666',
               }),
               new TextRun({
-                text: `  ${item.dateRange.start} - ${item.dateRange.end ?? 'Present'}`,
+                text: `  ${item.dateRange.start} - ${formatEndDate(item.dateRange.end)}`,
                 size: 16,
                 color: '999999',
               }),

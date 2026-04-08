@@ -1,7 +1,7 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
 import { getContactLinks } from '../../../utils/contactLinks';
-import { hasVisibleText } from '../../../utils/textClean';
+import { hasVisibleText, formatEndDate } from '../../../utils/textClean';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface MinimalTemplateProps {
@@ -92,7 +92,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="font-medium">{item.title}</span>
               <span className="text-stone-400"> — {item.company}</span>
             </div>
-            <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
+            <div className="text-xs text-stone-400">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</div>
             {item.bullets.filter(hasVisibleText).length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.bullets.filter(hasVisibleText).map((b, bi) => (

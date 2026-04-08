@@ -1,5 +1,6 @@
 import type { EducationItem } from '../../../types/resume';
 import { InlineEditor } from '../../resume/InlineEditor';
+import { formatEndDate } from '../../../utils/textClean';
 
 interface EducationSectionProps {
   data: { items: EducationItem[] };
@@ -73,7 +74,7 @@ export function EducationSection({ data, onUpdate }: EducationSectionProps) {
             <span className="text-xs text-stone-500 whitespace-nowrap ml-2">
               {item.dateRange.start}
               {item.dateRange.start && ' - '}
-              {item.dateRange.end ?? 'Present'}
+              {formatEndDate(item.dateRange.end)}
             </span>
           </div>
         </div>

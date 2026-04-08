@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { hasVisibleText } from './textClean';
+import { hasVisibleText, formatEndDate } from './textClean';
 
 describe('hasVisibleText', () => {
   it('returns false for empty string', () => {
@@ -90,4 +90,30 @@ describe('hasVisibleText with PDF-extracted strings', () => {
       expect(hasVisibleText(s)).toBe(true);
     }
   );
+});
+
+describe('formatEndDate', () => {
+  it('returns "Present" for null', () => {
+    expect(formatEndDate(null)).toBe('Present');
+  });
+
+  it('returns "Present" for undefined', () => {
+    expect(formatEndDate(undefined)).toBe('Present');
+  });
+
+  it('returns "Present" for empty string', () => {
+    expect(formatEndDate('')).toBe('Present');
+  });
+
+  it('returns "Present" for literal string "null"', () => {
+    expect(formatEndDate('null')).toBe('Present');
+  });
+
+  it('returns the date string when valid', () => {
+    expect(formatEndDate('Dec 2019')).toBe('Dec 2019');
+  });
+
+  it('returns "Present" string as-is', () => {
+    expect(formatEndDate('Present')).toBe('Present');
+  });
 });
