@@ -127,7 +127,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       // Persisted scalars
-      apiKey: '',
+      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
       darkMode: false,
       activeResumeId: null,
       activeChatSessionId: null,
@@ -616,6 +616,12 @@ export const useAppStore = create<AppState>()(
         wizardStep: state.wizardStep,
         activeJobDescriptionId: state.activeJobDescriptionId,
         generatedResumeId: state.generatedResumeId,
+      }),
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<AppState>),
+        // If saved apiKey is empty, fall back to env var
+        apiKey: (persisted as Partial<AppState>)?.apiKey || current.apiKey,
       }),
     }
   )
