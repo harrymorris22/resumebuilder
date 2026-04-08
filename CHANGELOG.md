@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.11.0] - 2026-04-08
+
+### Changed
+- **CI now runs lint + build on PRs** — type errors and lint failures caught before merge
+- **Build version stamp** — console logs version/commit on startup, hover app title to verify which build is live
+- **Post-deploy smoke check** — curls live site after deploy, verifies HTTP 200 and correct commit hash
+- **13 new PDF Unicode test fixtures** — real pdf.js garbage patterns in textClean tests
+
 ## [0.4.10.0] - 2026-04-08
 
 ### Fixed
