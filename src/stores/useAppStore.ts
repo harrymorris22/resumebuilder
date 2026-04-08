@@ -345,7 +345,7 @@ export const useAppStore = create<AppState>()(
           // Bullets get added to the matching experience entry's bullets array
           // For now, add as a new experience entry with just this bullet
           const bulletText = (clonedData as { text: string }).text;
-          const ctx = (itemData as { context: { company: string; title: string; location: string; startDate: string; endDate: string | null } }).context;
+          const ctx = (itemData as { context: { company: string; title: string; startDate: string; endDate: string | null } }).context;
           // Clone items array to avoid mutating store state directly
           const expItems = ((sectionData.items as Array<{ company: string; title: string; bullets: string[]; [key: string]: unknown }>) || []).map((item) => ({ ...item, bullets: [...item.bullets] }));
           const existing = expItems.find((e) => e.company === ctx.company && e.title === ctx.title);
@@ -355,7 +355,7 @@ export const useAppStore = create<AppState>()(
               existing.bullets.push(bulletText);
             }
           } else {
-            expItems.push({ company: ctx.company, title: ctx.title, id: generateId(), location: ctx.location, dateRange: { start: ctx.startDate, end: ctx.endDate }, bullets: [bulletText] } as never);
+            expItems.push({ company: ctx.company, title: ctx.title, id: generateId(), dateRange: { start: ctx.startDate, end: ctx.endDate }, bullets: [bulletText] } as never);
           }
           // Sort experience items: current jobs first, then by start date descending
           const parseJobDate = (d: string): number => {
@@ -518,17 +518,21 @@ export const useAppStore = create<AppState>()(
           getAllRecommendations(),
         ]);
 
-        // Deduplicate experience bullets (repair any data corrupted by prior bug)
+        // Migrate persisted data: deduplicate bullets + strip location from experience items
         for (const resume of resumes) {
           for (const section of resume.sections) {
             if (section.content.type !== 'experience') continue;
-            const expData = section.content.data as { items?: Array<{ bullets: string[] }> };
+            const expData = section.content.data as { items?: Array<{ bullets: string[]; location?: string }> };
             if (!expData.items) continue;
             let dirty = false;
             for (const job of expData.items) {
               const deduped = [...new Set(job.bullets)];
               if (deduped.length !== job.bullets.length) {
                 job.bullets = deduped;
+                dirty = true;
+              }
+              if ('location' in job) {
+                delete job.location;
                 dirty = true;
               }
             }

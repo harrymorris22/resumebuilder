@@ -49,7 +49,7 @@ const makeResume = (id: string, name: string) => ({
   templateId: 'classic' as const,
   sections: [
     { id: 'c1', order: 0, visible: true, content: { type: 'contact' as const, data: { name: 'Test', email: 'test@test.com', phone: '', location: '' } } },
-    { id: 's1', order: 1, visible: true, content: { type: 'experience' as const, data: { items: [{ id: 'i1', company: 'Acme', title: 'Eng', dateRange: { start: 'Jan 2020', end: 'Present' }, location: '', bullets: ['Did stuff'] }] } } },
+    { id: 's1', order: 1, visible: true, content: { type: 'experience' as const, data: { items: [{ id: 'i1', company: 'Acme', title: 'Eng', dateRange: { start: 'Jan 2020', end: 'Present' }, bullets: ['Did stuff'] }] } } },
   ],
 })
 

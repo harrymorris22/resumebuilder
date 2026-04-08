@@ -92,13 +92,6 @@ export async function exportToWord(resume: Resume) {
             ],
           })
         );
-        if (item.location) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: item.location, size: 18, color: '666666' })],
-            })
-          );
-        }
         for (const bullet of item.bullets) {
           children.push(
             new Paragraph({

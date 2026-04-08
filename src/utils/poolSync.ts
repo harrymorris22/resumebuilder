@@ -35,7 +35,6 @@ export function createPoolEntriesFromTool(
           context: {
             company: (input.company as string) || '',
             title: (input.title as string) || '',
-            location: (input.location as string) || '',
             startDate: (input.startDate as string) || '',
             endDate: input.endDate === null || input.endDate === undefined ? null : (input.endDate as string),
           },
@@ -46,7 +45,6 @@ export function createPoolEntriesFromTool(
       // Look up the experience item from the resume to get company/title context
       let company = '';
       let title = '';
-      let location = '';
       let startDate = '';
       let endDate: string | null = null;
       if (resume) {
@@ -56,7 +54,6 @@ export function createPoolEntriesFromTool(
           if (item) {
             company = item.company;
             title = item.title;
-            location = item.location;
             startDate = item.dateRange.start;
             endDate = item.dateRange.end;
           }
@@ -66,7 +63,7 @@ export function createPoolEntriesFromTool(
         makeEntry({
           type: 'bullet',
           data: { text },
-          context: { company, title, location, startDate, endDate },
+          context: { company, title, startDate, endDate },
         }),
       );
     }

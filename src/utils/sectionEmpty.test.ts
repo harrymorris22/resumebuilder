@@ -31,7 +31,7 @@ describe('isSectionEmpty', () => {
   it('returns false for non-empty items arrays', () => {
     expect(isSectionEmpty({
       type: 'experience',
-      data: { items: [{ id: '1', company: 'Co', title: 'Dev', location: '', dateRange: { start: '2020', end: null }, bullets: [] }] },
+      data: { items: [{ id: '1', company: 'Co', title: 'Dev', dateRange: { start: '2020', end: null }, bullets: [] }] },
     })).toBe(false);
   });
 

@@ -26,7 +26,6 @@ function DiffSummary({ oldText, newText }: { oldText: string; newText: string })
 function DiffExperienceItem({ oldItem, newItem }: { oldItem?: ExperienceItem; newItem?: ExperienceItem }) {
   const title = newItem?.title ?? oldItem?.title ?? '';
   const company = newItem?.company ?? oldItem?.company ?? '';
-  const location = newItem?.location ?? oldItem?.location ?? '';
   const oldBullets = oldItem?.bullets ?? [];
   const newBullets = newItem?.bullets ?? [];
   const maxLen = Math.max(oldBullets.length, newBullets.length);
@@ -38,7 +37,6 @@ function DiffExperienceItem({ oldItem, newItem }: { oldItem?: ExperienceItem; ne
           <span className="text-sm font-semibold">{title}</span>
           {company && <span className="text-sm text-stone-600"> — {company}</span>}
         </div>
-        {location && <span className="text-xs text-stone-500">{location}</span>}
       </div>
       <ul className="list-disc ml-5 mt-1 space-y-0.5">
         {Array.from({ length: maxLen }, (_, i) => (

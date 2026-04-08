@@ -132,7 +132,6 @@ export function PdfDocument({ resume }: PdfDocumentProps) {
                         {item.dateRange.start} - {item.dateRange.end ?? 'Present'}
                       </Text>
                     </View>
-                    {item.location && <Text style={styles.itemSubtitle}>{item.location}</Text>}
                     {item.bullets.map((b, i) => (
                       <Text key={i} style={styles.bullet}>• {b}</Text>
                     ))}

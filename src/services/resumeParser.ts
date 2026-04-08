@@ -67,7 +67,6 @@ const PARSE_TOOL = {
           properties: {
             company: { type: 'string' as const },
             title: { type: 'string' as const },
-            location: { type: 'string' as const },
             startDate: { type: 'string' as const },
             endDate: { type: 'string' as const, description: 'End date or "Present"' },
             bullets: { type: 'array' as const, items: { type: 'string' as const } },
@@ -145,7 +144,6 @@ interface ParsedResume {
   experience: Array<{
     company: string;
     title: string;
-    location?: string;
     startDate: string;
     endDate?: string;
     bullets: string[];
@@ -238,7 +236,6 @@ export async function parseResumeWithClaude(text: string, apiKey: string): Promi
             id: generateId(),
             company: exp.company,
             title: exp.title,
-            location: exp.location || '',
             dateRange: {
               start: exp.startDate || '',
               end: exp.endDate === 'Present' ? null : (exp.endDate || null),
@@ -372,7 +369,6 @@ export function extractPoolEntries(resume: Resume): ContentPoolEntry[] {
               context: {
                 company: exp.company,
                 title: exp.title,
-                location: exp.location,
                 startDate: exp.dateRange.start,
                 endDate: exp.dateRange.end,
               },

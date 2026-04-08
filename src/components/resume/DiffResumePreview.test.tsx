@@ -21,7 +21,7 @@ const makeSections = (overrides: Partial<ResumeSection>[] = []): ResumeSection[]
   const defaults: ResumeSection[] = [
     { id: 'contact', order: 0, visible: true, content: { type: 'contact', data: { fullName: 'John', email: 'j@e.com', phone: '555', location: 'NYC' } } },
     { id: 'summary', order: 1, visible: true, content: { type: 'summary', data: { text: 'Original summary text' } } },
-    { id: 'exp', order: 2, visible: true, content: { type: 'experience', data: { items: [{ id: 'e1', company: 'Acme', title: 'SWE', location: 'NYC', dateRange: { start: '2020', end: null }, bullets: ['Built REST API', 'Led team of 5'] }] } } },
+    { id: 'exp', order: 2, visible: true, content: { type: 'experience', data: { items: [{ id: 'e1', company: 'Acme', title: 'SWE', dateRange: { start: '2020', end: null }, bullets: ['Built REST API', 'Led team of 5'] }] } } },
   ];
   return defaults.map((d, i) => overrides[i] ? { ...d, ...overrides[i] } : d);
 };
@@ -32,7 +32,7 @@ beforeEach(() => {
     resumes: [{ id: 'r1', name: 'Test', sections: makeSections([
       undefined,
       { id: 'summary', order: 1, visible: true, content: { type: 'summary', data: { text: 'Improved summary text' } } },
-      { id: 'exp', order: 2, visible: true, content: { type: 'experience', data: { items: [{ id: 'e1', company: 'Acme', title: 'SWE', location: 'NYC', dateRange: { start: '2020', end: null }, bullets: ['Built GraphQL API', 'Led cross-functional team of 5'] }] } } },
+      { id: 'exp', order: 2, visible: true, content: { type: 'experience', data: { items: [{ id: 'e1', company: 'Acme', title: 'SWE', dateRange: { start: '2020', end: null }, bullets: ['Built GraphQL API', 'Led cross-functional team of 5'] }] } } },
     ]) }],
     activeResumeId: 'r1',
   };
