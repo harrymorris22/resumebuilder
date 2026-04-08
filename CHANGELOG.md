@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.6.0] - 2026-04-08
+
+### Fixed
+- **Generated CV content now syncs to content pool** — skills, experience, education, and other sections created during CV generation now appear in the content pool. Previously, generated content was written directly to the resume but not to the pool, so the content pool showed "No items yet" for sections that were visible in the CV. Content is deduplicated against existing pool entries to avoid doubles.
+
+### Changed
+- **Tighter classic template spacing** — reduced page margins (0.5in to 0.4in), section gaps, heading spacing, and experience item spacing. A typical 6-role CV now fits comfortably on one page instead of spilling onto page two.
+- Dev server reads API key from `VITE_ANTHROPIC_API_KEY` env var, so you no longer need to paste it into Settings every session
+
 ## [0.4.5.0] - 2026-04-04
 
 ### Added
