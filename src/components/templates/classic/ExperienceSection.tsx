@@ -81,15 +81,6 @@ export function ExperienceSection({ data, onUpdate }: ExperienceSectionProps) {
               />
             </div>
           </div>
-          {item.location && (
-            <InlineEditor
-              value={item.location}
-              onChange={(v) => updateItem(i, { location: v })}
-              placeholder="Location"
-              tag="div"
-              className="text-xs text-stone-500"
-            />
-          )}
           {item.bullets.length > 0 && (
             <ul className="list-disc ml-4 mt-1 space-y-0.5">
               {item.bullets.map((bullet, bi) => (

@@ -84,7 +84,7 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="font-medium text-sm">{item.title}</span>
               <span className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
             </div>
-            <div className="text-sm text-primary-600">{item.company}{item.location ? ` — ${item.location}` : ''}</div>
+            <div className="text-sm text-primary-600">{item.company}</div>
             {item.bullets.length > 0 && (
               <ul className="list-none mt-1 space-y-0.5">
                 {item.bullets.map((b, bi) => (

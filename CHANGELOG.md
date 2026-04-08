@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Tighter classic template spacing** — reduced page margins (0.5in to 0.4in), section gaps, heading spacing, and experience item spacing. A typical 6-role CV now fits comfortably on one page instead of spilling onto page two.
+- **Removed company location from experience sections** — classic and modern templates no longer display location (e.g., "London", "Canada") under each role. Keeps the CV cleaner without redundant geographic info.
 - Dev server reads API key from `VITE_ANTHROPIC_API_KEY` env var, so you no longer need to paste it into Settings every session
 
 ## [0.4.5.0] - 2026-04-04
