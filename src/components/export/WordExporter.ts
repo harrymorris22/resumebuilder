@@ -1,5 +1,6 @@
 import {
   Document,
+  ExternalHyperlink,
   Paragraph,
   TextRun,
   HeadingLevel,
@@ -9,6 +10,7 @@ import {
 } from 'docx';
 import { saveAs } from 'file-saver';
 import type { Resume } from '../../types/resume';
+import { getContactLinks } from '../../utils/contactLinks';
 
 export async function exportToWord(resume: Resume) {
   const sections = resume.sections.filter((s) => s.visible).sort((a, b) => a.order - b.order);
@@ -38,6 +40,13 @@ export async function exportToWord(resume: Resume) {
             size: 18,
             color: '666666',
           }),
+          ...getContactLinks(contactData).flatMap((link) => [
+            new TextRun({ text: ' | ', size: 18, color: '666666' }),
+            new ExternalHyperlink({
+              link: link.url,
+              children: [new TextRun({ text: link.label, size: 18, color: '666666', underline: {} })],
+            }),
+          ]),
         ],
         spacing: { after: 200 },
         border: {

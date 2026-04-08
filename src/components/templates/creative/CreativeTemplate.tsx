@@ -1,5 +1,6 @@
 import type { ResumeSection, SectionContent } from '../../../types/resume';
 import { isSectionEmpty } from '../../../utils/sectionEmpty';
+import { getContactLinks } from '../../../utils/contactLinks';
 import { InlineEditor } from '../../resume/InlineEditor';
 
 interface CreativeTemplateProps {
@@ -29,9 +30,9 @@ export function CreativeTemplate({ sections, onUpdate }: CreativeTemplateProps) 
             {contactData.email && <span>{contactData.email}</span>}
             {contactData.phone && <span>&#183; {contactData.phone}</span>}
             {contactData.location && <span>&#183; {contactData.location}</span>}
-            {contactData.linkedin && <span>&#183; {contactData.linkedin}</span>}
-            {contactData.github && <span>&#183; {contactData.github}</span>}
-            {contactData.website && <span>&#183; {contactData.website}</span>}
+            {getContactLinks(contactData).map((link) => (
+              <span key={link.label}>&#183; <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-stone-500 underline decoration-stone-300 hover:text-stone-700">{link.label}</a></span>
+            ))}
           </div>
         </div>
       )}
