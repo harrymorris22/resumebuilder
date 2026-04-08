@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.9.0] - 2026-04-08
+
+### Fixed
+- **Empty bullets no longer render in resume** — empty or whitespace-only bullets are filtered out of all 4 templates, PDF export, Word export, and diff preview. Existing persisted data with empty bullets is cleaned automatically on app load.
+
+### Added
+- 16 new tests for contact links utility and classic ContactSection component
+
 ## [0.4.8.0] - 2026-04-08
 
 ### Changed
