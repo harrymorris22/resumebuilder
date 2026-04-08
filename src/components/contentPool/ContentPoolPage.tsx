@@ -77,7 +77,7 @@ function getItemSummary(item: ContentPoolItemData): string {
 interface JobGroup {
   label: string;
   dateLabel: string;
-  context: { company: string; title: string; location: string; startDate: string; endDate: string | null };
+  context: { company: string; title: string; startDate: string; endDate: string | null };
   entries: ContentPoolEntry[];
 }
 
@@ -128,7 +128,7 @@ function groupBulletsByJob(bullets: ContentPoolEntry[]): Map<string, JobGroup> {
 
 // --- Inline "add bullet to existing job" form ---
 function AddBulletToJobForm({ context, onAdd }: {
-  context: { company: string; title: string; location: string; startDate: string; endDate: string | null };
+  context: { company: string; title: string; startDate: string; endDate: string | null };
   onAdd: (entry: ContentPoolEntry) => void;
 }) {
   const [bullet, setBullet] = useState('');
@@ -175,7 +175,7 @@ function AddNewJobForm({ onAdd }: { onAdd: (entry: ContentPoolEntry) => void }) 
   const handleSubmit = () => {
     if (!company.trim() || !title.trim()) return;
     const now = new Date().toISOString();
-    const context = { company: company.trim(), title: title.trim(), location: '', startDate: startDate.trim(), endDate: null };
+    const context = { company: company.trim(), title: title.trim(), startDate: startDate.trim(), endDate: null };
 
     // If they provided a bullet, add it. Otherwise create a placeholder bullet so the job shows up.
     const bulletText = bullet.trim() || `Worked as ${title.trim()} at ${company.trim()}`;
@@ -825,15 +825,15 @@ export function ContentPoolPage({ showCheckboxes = false }: { showCheckboxes?: b
               const testEntries: ContentPoolEntry[] = [
                 { id: generateId(), item: { type: 'summary', data: { text: 'Experienced product manager with 8+ years in healthcare tech, fintech, and consulting. Led cross-functional teams of up to 30 people.' } }, source: 'user', createdAt: now, updatedAt: now },
                 // Job 1: Current role (newest)
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Grew the Medical Platform from 1 team to 6 teams, managing four other PMs' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Led multi-million GBP enquiries from pharma-cos for data access' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Built Electronic Patient Record — migrated data into interoperable database' }, context: { company: 'Numan', title: 'Lead Product Manager', location: 'London', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Grew the Medical Platform from 1 team to 6 teams, managing four other PMs' }, context: { company: 'Numan', title: 'Lead Product Manager', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Led multi-million GBP enquiries from pharma-cos for data access' }, context: { company: 'Numan', title: 'Lead Product Manager', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Built Electronic Patient Record — migrated data into interoperable database' }, context: { company: 'Numan', title: 'Lead Product Manager', startDate: 'Mar 2024', endDate: null } }, source: 'user', createdAt: now, updatedAt: now },
                 // Job 2: Previous role
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Led the Medical Platform Team dedicated to improving clinical outcomes' }, context: { company: 'Numan', title: 'Senior Product Manager', location: 'London', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Launched prescription management system serving 50k+ patients monthly' }, context: { company: 'Numan', title: 'Senior Product Manager', location: 'London', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Led the Medical Platform Team dedicated to improving clinical outcomes' }, context: { company: 'Numan', title: 'Senior Product Manager', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Launched prescription management system serving 50k+ patients monthly' }, context: { company: 'Numan', title: 'Senior Product Manager', startDate: 'Jan 2022', endDate: 'Mar 2024' } }, source: 'user', createdAt: now, updatedAt: now },
                 // Job 3: Older role
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Consistently ranked top 5 analyst in Canada — 1 of 3 promoted to Accenture Digital' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', location: 'Toronto', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
-                { id: generateId(), item: { type: 'bullet', data: { text: 'Developed the business case for a suite of digital mortgage products' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', location: 'Toronto', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Consistently ranked top 5 analyst in Canada — 1 of 3 promoted to Accenture Digital' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
+                { id: generateId(), item: { type: 'bullet', data: { text: 'Developed the business case for a suite of digital mortgage products' }, context: { company: 'Accenture', title: 'Management Consulting Analyst', startDate: 'Oct 2016', endDate: 'Oct 2018' } }, source: 'user', createdAt: now, updatedAt: now },
                 // Education
                 { id: generateId(), item: { type: 'education', data: { id: generateId(), institution: 'University of Toronto', degree: 'BComm', field: 'Finance & Economics', dateRange: { start: '2012', end: '2016' } } }, source: 'user', createdAt: now, updatedAt: now },
                 // Skills

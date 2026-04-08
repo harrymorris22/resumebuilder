@@ -42,7 +42,6 @@ export const resumeTools: ToolDefinition[] = [
       properties: {
         company: { type: 'string', description: 'Company name' },
         title: { type: 'string', description: 'Job title' },
-        location: { type: 'string', description: 'Job location' },
         startDate: { type: 'string', description: 'Start date (e.g. Jan 2020)' },
         endDate: {
           type: 'string',

@@ -23,7 +23,6 @@ describe('createPoolEntriesFromTool', () => {
     const entries = createPoolEntriesFromTool('add_experience', {
       company: 'Acme',
       title: 'SWE',
-      location: 'NYC',
       startDate: 'Jan 2020',
       endDate: null,
       bullets: ['Built APIs', 'Led team'],
@@ -58,7 +57,6 @@ describe('createPoolEntriesFromTool', () => {
                   id: 'exp1',
                   company: 'BigCo',
                   title: 'Engineer',
-                  location: 'SF',
                   dateRange: { start: 'Jan 2021', end: 'Dec 2023' },
                   bullets: [],
                 },
@@ -174,13 +172,13 @@ describe('isDuplicatePoolEntry', () => {
       makePoolEntry({
         type: 'bullet',
         data: { text: 'Built APIs' },
-        context: { company: 'Acme', title: 'SWE', location: '', startDate: '', endDate: null },
+        context: { company: 'Acme', title: 'SWE', startDate: '', endDate: null },
       }),
     ];
     const entry = makeNewEntry({
       type: 'bullet',
       data: { text: 'Built APIs' },
-      context: { company: 'Acme', title: 'SWE', location: '', startDate: '', endDate: null },
+      context: { company: 'Acme', title: 'SWE', startDate: '', endDate: null },
     });
     expect(isDuplicatePoolEntry(entry, pool)).toBe(true);
   });
@@ -190,13 +188,13 @@ describe('isDuplicatePoolEntry', () => {
       makePoolEntry({
         type: 'bullet',
         data: { text: 'Built APIs' },
-        context: { company: 'Acme', title: 'SWE', location: '', startDate: '', endDate: null },
+        context: { company: 'Acme', title: 'SWE', startDate: '', endDate: null },
       }),
     ];
     const entry = makeNewEntry({
       type: 'bullet',
       data: { text: 'Led team' },
-      context: { company: 'Acme', title: 'SWE', location: '', startDate: '', endDate: null },
+      context: { company: 'Acme', title: 'SWE', startDate: '', endDate: null },
     });
     expect(isDuplicatePoolEntry(entry, pool)).toBe(false);
   });
