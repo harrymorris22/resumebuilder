@@ -55,3 +55,39 @@ describe('hasVisibleText', () => {
     expect(hasVisibleText('a')).toBe(true);
   });
 });
+
+describe('hasVisibleText with PDF-extracted strings', () => {
+  // Patterns that pdf.js actually produces during text extraction
+  const PDF_GARBAGE_STRINGS = [
+    '\u200B',
+    '\u200B \u200B',
+    '\uFEFF',
+    '\u200B\u200C\u200D\u2060',
+    ' \u200B \t \uFEFF ',
+    '\u00AD',
+    '\u200E\u200F',
+    '\u2028',
+    '\u2029',
+  ];
+
+  it.each(PDF_GARBAGE_STRINGS)(
+    'rejects PDF garbage string: %j',
+    (s) => {
+      expect(hasVisibleText(s)).toBe(false);
+    }
+  );
+
+  const PDF_DIRTY_BUT_VISIBLE = [
+    '\u200BManaged a team of 5 engineers\u200B',
+    '\uFEFFDesigned REST APIs',
+    'Led \u200Bmigration\u200B to AWS',
+    '\u00ADReduced latency by 40%\u00AD',
+  ];
+
+  it.each(PDF_DIRTY_BUT_VISIBLE)(
+    'accepts dirty-but-visible string: %j',
+    (s) => {
+      expect(hasVisibleText(s)).toBe(true);
+    }
+  );
+});
