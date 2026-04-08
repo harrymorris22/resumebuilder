@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.12.0] - 2026-04-08
+
+### Changed
+- **Education fits on one line** — "Degree in Field — Institution" with date right-aligned, across all 4 templates, PDF/Word export, and diff preview
+
 ## [0.4.11.0] - 2026-04-08
 
 ### Changed

@@ -128,10 +128,12 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
     return (
       <div className="space-y-2">
         {content.data.items.map((item) => (
-          <div key={item.id}>
-            <div className="font-medium text-sm">{item.degree} in {item.field}</div>
-            <div className="text-sm text-stone-500">{item.institution}</div>
-            <div className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</div>
+          <div key={item.id} className="flex justify-between items-baseline">
+            <span className="text-sm">
+              <span className="font-medium">{item.degree} in {item.field}</span>
+              <span className="text-stone-500"> — {item.institution}</span>
+            </span>
+            <span className="text-xs text-stone-400 whitespace-nowrap ml-2">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
           </div>
         ))}
       </div>

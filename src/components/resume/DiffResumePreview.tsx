@@ -140,13 +140,16 @@ function DiffEducation({ oldItems, newItems }: { oldItems: EducationItem[]; newI
         const oldIt = pair.old;
         return (
           <div key={newIt?.id ?? oldIt?.id ?? i} className="mb-2">
-            <div className="text-sm font-semibold">
-              <DiffText oldText={oldIt?.degree ?? ''} newText={newIt?.degree ?? ''} />
-              {' — '}
-              <DiffText oldText={oldIt?.field ?? ''} newText={newIt?.field ?? ''} />
-            </div>
-            <div className="text-sm text-stone-600">
-              {newIt?.institution ?? oldIt?.institution}
+            <div className="text-sm">
+              <span className="font-semibold">
+                <DiffText oldText={oldIt?.degree ?? ''} newText={newIt?.degree ?? ''} />
+                {' in '}
+                <DiffText oldText={oldIt?.field ?? ''} newText={newIt?.field ?? ''} />
+              </span>
+              <span className="text-stone-600">
+                {' — '}
+                {newIt?.institution ?? oldIt?.institution}
+              </span>
             </div>
           </div>
         );
