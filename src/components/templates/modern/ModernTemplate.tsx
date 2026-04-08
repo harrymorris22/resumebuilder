@@ -88,9 +88,9 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="text-xs text-stone-400">{item.dateRange.start} - {item.dateRange.end ?? 'Present'}</span>
             </div>
             <div className="text-sm text-primary-600">{item.company}</div>
-            {item.bullets.length > 0 && (
+            {item.bullets.filter((b) => b.trim()).length > 0 && (
               <ul className="list-none mt-1 space-y-0.5">
-                {item.bullets.map((b, bi) => (
+                {item.bullets.filter((b) => b.trim()).map((b, bi) => (
                   <li key={bi} className="text-sm text-stone-600 pl-3 relative before:content-['—'] before:absolute before:left-0 before:text-stone-300">{b}</li>
                 ))}
               </ul>

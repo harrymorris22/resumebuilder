@@ -526,7 +526,7 @@ export const useAppStore = create<AppState>()(
             if (!expData.items) continue;
             let dirty = false;
             for (const job of expData.items) {
-              const deduped = [...new Set(job.bullets)];
+              const deduped = [...new Set(job.bullets)].filter((b) => b.trim());
               if (deduped.length !== job.bullets.length) {
                 job.bullets = deduped;
                 dirty = true;

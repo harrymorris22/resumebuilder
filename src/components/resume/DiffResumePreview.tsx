@@ -26,8 +26,8 @@ function DiffSummary({ oldText, newText }: { oldText: string; newText: string })
 function DiffExperienceItem({ oldItem, newItem }: { oldItem?: ExperienceItem; newItem?: ExperienceItem }) {
   const title = newItem?.title ?? oldItem?.title ?? '';
   const company = newItem?.company ?? oldItem?.company ?? '';
-  const oldBullets = oldItem?.bullets ?? [];
-  const newBullets = newItem?.bullets ?? [];
+  const oldBullets = (oldItem?.bullets ?? []).filter((b) => b.trim());
+  const newBullets = (newItem?.bullets ?? []).filter((b) => b.trim());
   const maxLen = Math.max(oldBullets.length, newBullets.length);
 
   return (
@@ -176,8 +176,8 @@ function DiffProjects({ oldItems, newItems }: { oldItems: ProjectItem[]; newItem
       </h2>
       {pairs.map((pair, i) => {
         const name = pair.new?.name ?? pair.old?.name ?? '';
-        const oldBullets = pair.old?.bullets ?? [];
-        const newBullets = pair.new?.bullets ?? [];
+        const oldBullets = (pair.old?.bullets ?? []).filter((b) => b.trim());
+        const newBullets = (pair.new?.bullets ?? []).filter((b) => b.trim());
         const maxLen = Math.max(oldBullets.length, newBullets.length);
         return (
           <div key={pair.new?.id ?? pair.old?.id ?? i} className="mb-3">
