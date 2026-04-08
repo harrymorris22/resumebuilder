@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.7.0] - 2026-04-08
+
+### Changed
+- **Company location fully removed from experience data model** — `location` field stripped from ExperienceItem type, all 4 templates, PDF/Word export, diff preview, resume parser, CV generation tools, content pool, and seed data. Existing persisted data is migrated automatically on app load. Contact location (user's personal location in the CV header) is preserved.
+
 ## [0.4.6.0] - 2026-04-08
 
 ### Fixed
