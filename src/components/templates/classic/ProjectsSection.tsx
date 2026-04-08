@@ -24,8 +24,8 @@ export function ProjectsSection({ data, onUpdate }: ProjectsSectionProps) {
   if (data.items.length === 0) return null;
 
   return (
-    <div className="mb-5">
-      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-2">
+    <div className="mb-3">
+      <h2 className="text-sm font-bold uppercase tracking-wider text-stone-700 border-b border-stone-300 pb-1 mb-1">
         Projects
       </h2>
       {data.items.map((item, i) => (

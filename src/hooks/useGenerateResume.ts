@@ -6,6 +6,7 @@ import { resumeTools } from '../services/tools';
 import { buildGenerateResumePrompt } from '../services/systemPrompt';
 import { handleToolCall } from '../services/toolHandler';
 import { createDefaultResume } from '../utils/resumeDefaults';
+import { createPoolEntriesFromTool, isDuplicatePoolEntry } from '../utils/poolSync';
 
 const MAX_TOOL_ITERATIONS = 15;
 
@@ -30,6 +31,7 @@ export function useGenerateResume() {
   const setActiveResumeId = useAppStore((s) => s.setActiveResumeId);
   const setGeneratedResumeId = useAppStore((s) => s.setGeneratedResumeId);
   const addContentBankItem = useAppStore((s) => s.addContentBankItem);
+  const addPoolEntry = useAppStore((s) => s.addPoolEntry);
 
   const generate = useCallback(
     async (templateId?: string) => {
@@ -137,6 +139,20 @@ export function useGenerateResume() {
               { resume: freshResume, updateResume, addContentBankItem }
             );
 
+            // Sync generated content to content pool
+            const currentPool = useAppStore.getState().contentPool;
+            const currentResume = useAppStore.getState().resumes.find((r) => r.id === newResume.id);
+            const poolEntries = createPoolEntriesFromTool(
+              toolUse.name,
+              toolUse.input as Record<string, unknown>,
+              currentResume,
+            );
+            for (const entry of poolEntries) {
+              if (!isDuplicatePoolEntry(entry, currentPool)) {
+                addPoolEntry(entry);
+              }
+            }
+
             // Update progress: mark section as done
             if (sectionName) {
               setSections((prev) =>
@@ -209,7 +225,7 @@ export function useGenerateResume() {
         abortRef.current = null;
       }
     },
-    [apiKey, addResume, updateResume, setActiveResumeId, setGeneratedResumeId, addContentBankItem]
+    [apiKey, addResume, updateResume, setActiveResumeId, setGeneratedResumeId, addContentBankItem, addPoolEntry]
   );
 
   const abort = useCallback(() => {

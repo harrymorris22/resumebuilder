@@ -9,7 +9,7 @@ export function ContactSection({ data }: ContactSectionProps) {
   const urls = [data.linkedin, data.github, data.website].filter(Boolean);
 
   return (
-    <div className="text-center mb-6 border-b border-stone-300 pb-4">
+    <div className="text-center mb-3 border-b border-stone-300 pb-2">
       {data.fullName && (
         <h1 className="text-2xl font-bold text-stone-900">{data.fullName}</h1>
       )}
