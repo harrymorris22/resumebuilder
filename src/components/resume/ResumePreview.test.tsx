@@ -71,6 +71,7 @@ describe('ResumePreview — overflow detection', () => {
   it('shows overflow warning when content exceeds page height', () => {
     // Mock scrollHeight to exceed the 960px threshold (10in * 96dpi)
     const originalDefineProperty = Object.defineProperty
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const mockScrollHeight = (el: HTMLElement) => {
       if (el.getAttribute && el.getAttribute('data-testid') === 'resume-content') return
       originalDefineProperty(el, 'scrollHeight', { value: 1200, configurable: true })

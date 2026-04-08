@@ -11,6 +11,9 @@ export function SettingsModal() {
   const [status, setStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync local state when modal opens. setState here is intentional:
+  // we need to reset form state each time the modal becomes visible.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (settingsOpen) {
       setLocalKey(apiKey);
@@ -18,6 +21,7 @@ export function SettingsModal() {
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [settingsOpen, apiKey]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!settingsOpen) return null;
 

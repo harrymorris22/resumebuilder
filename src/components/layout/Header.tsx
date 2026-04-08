@@ -15,7 +15,10 @@ export function Header() {
     <>
       <header className="flex items-center justify-between px-4 h-14 border-b border-stone-200 bg-white flex-shrink-0">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-display font-semibold text-stone-900 tracking-tight">
+          <h1
+            className="text-lg font-display font-semibold text-stone-900 tracking-tight"
+            title={`v${__APP_VERSION__} (${__COMMIT_HASH__})`}
+          >
             Resume Builder
           </h1>
           <span className="text-xs text-stone-400 hidden sm:inline">

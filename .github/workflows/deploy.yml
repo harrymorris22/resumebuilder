@@ -32,3 +32,26 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for Pages propagation
+        run: sleep 30
+      - name: Smoke test deployed site
+        run: |
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          SITE_URL="https://$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]').github.io/resumebuilder/"
+          echo "Checking $SITE_URL for commit $COMMIT_HASH"
+          HTTP_STATUS=$(curl -s -o /tmp/page.html -w "%{http_code}" "$SITE_URL")
+          echo "HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "FAIL: Site returned $HTTP_STATUS"
+            exit 1
+          fi
+          if grep -q "$COMMIT_HASH" /tmp/page.html; then
+            echo "PASS: Commit hash $COMMIT_HASH found in deployed page"
+          else
+            echo "WARN: Commit hash $COMMIT_HASH not found in page (may still be propagating)"
+          fi
