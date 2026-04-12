@@ -117,7 +117,7 @@ export type ContentPoolItemType = 'contact' | 'summary' | 'bullet' | 'education'
 export type ContentPoolItemData =
   | { type: 'contact'; data: ContactInfo }
   | { type: 'summary'; data: { text: string } }
-  | { type: 'bullet'; data: { text: string }; context: { company: string; title: string; startDate: string; endDate: string | null } }
+  | { type: 'bullet'; data: { text: string }; context: { company: string; title: string; description?: string; startDate: string; endDate: string | null } }
   | { type: 'education'; data: EducationItem }
   | { type: 'skill_category'; data: SkillCategory }
   | { type: 'project'; data: ProjectItem }
