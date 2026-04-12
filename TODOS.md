@@ -22,15 +22,11 @@ User-supplied content (resume text, job descriptions, content pool items) is int
 - **Effort:** M (CC: ~30 min)
 - **Depends on:** Nothing
 
-## Data Migration
-
-**Priority:** P2
-### IndexedDB → Firestore Migration
-Existing users who sign in for the first time have data in IndexedDB but nothing in Firestore. Build a one-time migration flow that detects local IDB data when a user first authenticates and offers to upload it to their Firestore account.
-- **Effort:** M (CC: ~30 min)
-- **Depends on:** Firebase Auth (Phase 2)
 
 ## Completed
+
+### IndexedDB → Firestore Migration ✓
+Shipped in v0.5.1.0. When a user with local IDB data signs in for the first time, a modal offers to upload their data to Firestore. Covers all 7 data types including per-resume cover letters. 19 tests.
 
 ### Before/After Resume Diff ✓
 Shipped in v0.4.2.0. Toggle in RefineStep shows word-level inline diff after AI suggestions.
