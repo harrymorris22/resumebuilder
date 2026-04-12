@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2.0] - 2026-04-12
+
+### Added
+- **Prompt injection mitigation** — XML boundary tags (`<user-resume>`, `<user-job-description>`, `<user-content-pool>`, `<user-content>`) around all user-supplied content in LLM prompts. Defense preamble on every system prompt instructs the model to treat tagged content as data only. Input sanitization defangs role markers, XML tag escapes, and code fence breakout attempts. 50K character cap on user input.
+- 21 new tests for `promptSafety` utility (sanitization patterns, wrapping, preamble assertions)
+
+### Changed
+- All 5 prompt builders in `systemPrompt.ts` and 3 inline prompts (`resumeParser.ts`, `useAnalyzeJobDescription.ts`, `useRecommendations.ts`) now use the defense preamble and XML-wrapped user content
+
 ## [0.5.1.0] - 2026-04-12
 
 ### Added

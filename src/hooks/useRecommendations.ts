@@ -5,6 +5,7 @@ import { getClient } from '../services/anthropic';
 import { resumeTools } from '../services/tools';
 import { buildPoolRecommendationPrompt, buildJdPoolRecommendationPrompt, buildRefinePrompt } from '../services/systemPrompt';
 import { handleToolCall } from '../services/toolHandler';
+import { DEFENSE_PREAMBLE, wrapUserData } from '../utils/promptSafety';
 import { generateId } from '../utils/id';
 import type { Recommendation } from '../types/recommendation';
 
@@ -179,7 +180,7 @@ export function useRecommendations() {
         const stream = client.messages.stream({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
-          system: `You are an expert career coach. Execute this specific recommendation on the resume.\n\nResume:\n${JSON.stringify(resume, null, 2)}`,
+          system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
           messages: [{ role: 'user', content: rec.prompt }],
           tools: resumeTools,
         });

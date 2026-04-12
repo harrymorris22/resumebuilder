@@ -14,16 +14,10 @@ Collapsible "Completed (N)" section at bottom of action panel showing what the A
 - **Effort:** S (CC: ~10 min)
 - **Depends on:** Action-list UI (shipped)
 
-## Security
-
-**Priority:** P2
-### Prompt Injection Mitigation
-User-supplied content (resume text, job descriptions, content pool items) is interpolated into system prompts sent to the Anthropic API. A malicious user could craft content that manipulates AI behavior. Add input sanitization and/or structured prompt boundaries.
-- **Effort:** M (CC: ~30 min)
-- **Depends on:** Nothing
-
-
 ## Completed
+
+### Prompt Injection Mitigation ✓
+Shipped in v0.5.2.0. XML boundary tags around all user content in prompts, defense preamble on every system prompt, sanitization of common injection patterns (role markers, tag escapes, code fence breakouts). 21 tests. Covers all 5 prompt builders + 3 inline prompts.
 
 ### IndexedDB → Firestore Migration ✓
 Shipped in v0.5.1.0. When a user with local IDB data signs in for the first time, a modal offers to upload their data to Firestore. Covers all 7 data types including per-resume cover letters. 19 tests.

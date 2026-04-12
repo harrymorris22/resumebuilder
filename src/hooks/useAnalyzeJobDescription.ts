@@ -6,6 +6,7 @@ import { resumeTools } from '../services/tools';
 import { handleToolCall } from '../services/toolHandler';
 import { generateId } from '../utils/id';
 import type { JobDescription } from '../types/resume';
+import { DEFENSE_PREAMBLE, wrapUserData } from '../utils/promptSafety';
 
 export function useAnalyzeJobDescription() {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,9 +35,9 @@ export function useAnalyzeJobDescription() {
         const stream = client.messages.stream({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
-          system: `You are a job description analyzer. Extract the job title, company name, and important keywords from the job description. Call the analyze_job_description tool with the extracted information. Keywords should include: required skills, technologies, frameworks, soft skills, certifications, and any other important terms a resume should match.`,
+          system: `${DEFENSE_PREAMBLE}You are a job description analyzer. Extract the job title, company name, and important keywords from the job description. Call the analyze_job_description tool with the extracted information. Keywords should include: required skills, technologies, frameworks, soft skills, certifications, and any other important terms a resume should match.`,
           messages: [
-            { role: 'user', content: `Analyze this job description:\n\n${rawText}` },
+            { role: 'user', content: `Analyze this job description:\n\n${wrapUserData('user-job-description', rawText)}` },
           ],
           tools: resumeTools,
         });
