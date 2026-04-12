@@ -77,7 +77,7 @@ function getItemSummary(item: ContentPoolItemData): string {
 interface JobGroup {
   label: string;
   dateLabel: string;
-  context: { company: string; title: string; startDate: string; endDate: string | null };
+  context: { company: string; title: string; description?: string; startDate: string; endDate: string | null };
   entries: ContentPoolEntry[];
 }
 
@@ -302,8 +302,56 @@ function isEntryInResume(entry: ContentPoolEntry, sections: Array<{ content: { t
   return false;
 }
 
+// --- Description editor (auto-resizing textarea for role descriptions) ---
+function DescriptionEditor({ value, onSave }: { value: string; onSave: (v: string | null) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (editing && textareaRef.current) {
+      const ta = textareaRef.current;
+      ta.style.height = '0px';
+      ta.style.height = `${ta.scrollHeight}px`;
+    }
+  }, [editing]);
+
+  if (!editing) {
+    return (
+      <p
+        onClick={() => { setEditing(true); setDraft(value); }}
+        className="text-xs text-stone-400 dark:text-stone-500 italic cursor-text hover:bg-stone-100 dark:hover:bg-stone-700 rounded px-1 -mx-1 min-h-[18px]"
+        title="Click to edit"
+      >
+        {value || <span className="text-stone-300 dark:text-stone-600">Add role description...</span>}
+      </p>
+    );
+  }
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={draft}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        e.target.style.height = '0px';
+        e.target.style.height = `${e.target.scrollHeight}px`;
+      }}
+      onBlur={() => { if (draft !== value) onSave(draft.trim() || null); setEditing(false); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (draft !== value) onSave(draft.trim() || null); setEditing(false); }
+        if (e.key === 'Escape') { setDraft(value); setEditing(false); }
+      }}
+      autoFocus
+      rows={1}
+      placeholder="1-2 sentence company or role description"
+      className="w-full text-xs italic border border-primary-300 dark:border-primary-600 rounded px-1 py-0.5 bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-primary-500 -mx-1 resize-none overflow-hidden"
+    />
+  );
+}
+
 // --- Editable text (click to edit, blur/Enter to save) ---
-function EditableText({ text, onSave, className, allowEmpty }: { text: string; onSave: (newText: string) => void; className?: string; allowEmpty?: boolean }) {
+function EditableText({ text, onSave, className, allowEmpty, placeholder }: { text: string; onSave: (newText: string) => void; className?: string; allowEmpty?: boolean; placeholder?: string }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(text);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -326,7 +374,7 @@ function EditableText({ text, onSave, className, allowEmpty }: { text: string; o
         className={`cursor-text hover:bg-stone-100 dark:hover:bg-stone-700 rounded px-1 -mx-1 ${className ?? ''}`}
         title="Click to edit"
       >
-        {text}
+        {text || <span className="text-stone-400 dark:text-stone-500">{placeholder}</span>}
       </p>
     );
   }
@@ -335,6 +383,7 @@ function EditableText({ text, onSave, className, allowEmpty }: { text: string; o
     <textarea
       ref={textareaRef}
       value={value}
+      placeholder={placeholder}
       onChange={(e) => {
         setValue(e.target.value);
         // Auto-resize to fit content
@@ -415,7 +464,7 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, o
   onToggle: (entry: ContentPoolEntry, isChecked: boolean) => void;
   onUpdate: (entry: ContentPoolEntry) => void;
   onReorder: (orderedIds: string[]) => void;
-  onUpdateContext: (entries: ContentPoolEntry[], field: 'title' | 'company' | 'startDate' | 'endDate', value: string | null) => void;
+  onUpdateContext: (entries: ContentPoolEntry[], field: 'title' | 'company' | 'description' | 'startDate' | 'endDate', value: string | null) => void;
   resumeSections: Array<{ content: { type: string; data: unknown } }> | null;
   showCheckboxes?: boolean;
 }) {
@@ -473,6 +522,10 @@ function JobGroupCard({ group, onAdd, onRemove, onToggle, onUpdate, onReorder, o
                 className="text-xs text-stone-500 dark:text-stone-400"
               />
             </div>
+            <DescriptionEditor
+              value={group.context.description || ''}
+              onSave={(v) => onUpdateContext(group.entries, 'description', v || null)}
+            />
           </div>
           <button
             onClick={() => setAddingBullet(!addingBullet)}
@@ -764,8 +817,12 @@ export function ContentPoolPage({ showCheckboxes = false }: { showCheckboxes?: b
     reorderPoolEntries(result);
   }, [contentPool, reorderPoolEntries]);
 
-  const handleUpdateContext = useCallback((entries: ContentPoolEntry[], field: 'title' | 'company' | 'startDate' | 'endDate', value: string | null) => {
+  const handleUpdateContext = useCallback((entries: ContentPoolEntry[], field: 'title' | 'company' | 'description' | 'startDate' | 'endDate', value: string | null) => {
     const now = new Date().toISOString();
+    // Get the old context before updating (for matching resume items)
+    const firstBullet = entries.find((e) => e.item.type === 'bullet');
+    const oldContext = firstBullet?.item.type === 'bullet' ? firstBullet.item.context : null;
+
     for (const entry of entries) {
       if (entry.item.type !== 'bullet') continue;
       const updatedContext = { ...entry.item.context, [field]: value };
@@ -775,7 +832,25 @@ export function ContentPoolPage({ showCheckboxes = false }: { showCheckboxes?: b
         updatedAt: now,
       });
     }
-  }, [updatePoolEntry]);
+
+    // Sync description changes to the active resume's matching experience item
+    if (field === 'description' && activeResume && oldContext) {
+      const expSection = activeResume.sections.find((s) => s.content.type === 'experience');
+      if (expSection && expSection.content.type === 'experience') {
+        const matchIdx = expSection.content.data.items.findIndex(
+          (item) => item.company === oldContext.company && item.title === oldContext.title
+        );
+        if (matchIdx >= 0) {
+          const updatedItems = [...expSection.content.data.items];
+          updatedItems[matchIdx] = { ...updatedItems[matchIdx], description: (value as string) || undefined };
+          const updatedSections = activeResume.sections.map((s) =>
+            s.id === expSection.id ? { ...s, content: { type: 'experience' as const, data: { items: updatedItems } } } : s
+          );
+          updateResume({ ...activeResume, sections: updatedSections, updatedAt: now });
+        }
+      }
+    }
+  }, [updatePoolEntry, activeResume, updateResume]);
 
   const handleAdd = useCallback((entry: ContentPoolEntry) => {
     addPoolEntry(entry);

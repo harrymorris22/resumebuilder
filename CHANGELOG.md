@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.6] - 2026-04-12
+
+### Added
+- **Role descriptions editable in content pool** — click "Add role description..." below the dates on any job group in the content pool. Auto-resizing textarea fits the text as you type. Descriptions sync to the matching experience entry on the active resume automatically.
+
+### Fixed
+- Content pool description changes now propagate to the resume in real time (previously required regenerating the resume)
+
 ## [0.5.3.5] - 2026-04-12
 
 ### Added

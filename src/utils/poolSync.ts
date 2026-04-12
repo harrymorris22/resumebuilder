@@ -35,6 +35,7 @@ export function createPoolEntriesFromTool(
           context: {
             company: (input.company as string) || '',
             title: (input.title as string) || '',
+            description: (input.description as string) || undefined,
             startDate: (input.startDate as string) || '',
             endDate: input.endDate === null || input.endDate === undefined ? null : (input.endDate as string),
           },
