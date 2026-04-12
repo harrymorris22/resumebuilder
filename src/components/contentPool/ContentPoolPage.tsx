@@ -77,7 +77,7 @@ function getItemSummary(item: ContentPoolItemData): string {
 interface JobGroup {
   label: string;
   dateLabel: string;
-  context: { company: string; title: string; startDate: string; endDate: string | null };
+  context: { company: string; title: string; description?: string; startDate: string; endDate: string | null };
   entries: ContentPoolEntry[];
 }
 
