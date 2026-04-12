@@ -20,13 +20,12 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children, onBeforeSignOut }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(hasFirebaseConfig);
+  // If auth isn't available, we're never loading. Otherwise start loading
+  // and let onAuthStateChanged resolve it.
+  const [loading, setLoading] = useState(() => !!auth);
 
   useEffect(() => {
-    if (!auth) {
-      setLoading(false);
-      return;
-    }
+    if (!auth) return;
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -83,6 +82,7 @@ export function AuthProvider({ children, onBeforeSignOut }: AuthProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within an AuthProvider');

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Resume } from '../types/resume';
-import type { Recommendation } from '../types/recommendation';
+
 
 // --- Firestore SDK mocks ---
 const mockSetDoc = vi.fn();

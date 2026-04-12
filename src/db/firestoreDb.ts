@@ -39,7 +39,7 @@ function userDoc(uid: string, colName: string, docId: string) {
 export async function saveResume(uid: string, resume: Resume): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'resumes', resume.id), JSON.parse(JSON.stringify(resume)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save resume to cloud. Check your connection.");
   }
 }
@@ -48,7 +48,7 @@ export async function getResume(uid: string, id: string): Promise<Resume | undef
   try {
     const snap = await getDoc(userDoc(uid, 'resumes', id));
     return snap.exists() ? (snap.data() as Resume) : undefined;
-  } catch (err) {
+  } catch {
     showToast("Couldn't load resume from cloud.");
     return undefined;
   }
@@ -58,7 +58,7 @@ export async function getAllResumes(uid: string): Promise<Resume[]> {
   try {
     const snap = await getDocs(userCol(uid, 'resumes'));
     return snap.docs.map((d) => d.data() as Resume);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load resumes from cloud.");
     return [];
   }
@@ -67,7 +67,7 @@ export async function getAllResumes(uid: string): Promise<Resume[]> {
 export async function deleteResume(uid: string, id: string): Promise<void> {
   try {
     await deleteDoc(userDoc(uid, 'resumes', id));
-  } catch (err) {
+  } catch {
     showToast("Couldn't delete resume from cloud.");
   }
 }
@@ -77,7 +77,7 @@ export async function deleteResume(uid: string, id: string): Promise<void> {
 export async function saveChatSession(uid: string, session: ChatSession): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'chatSessions', session.id), JSON.parse(JSON.stringify(session)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save chat session to cloud.");
   }
 }
@@ -86,7 +86,7 @@ export async function getChatSession(uid: string, id: string): Promise<ChatSessi
   try {
     const snap = await getDoc(userDoc(uid, 'chatSessions', id));
     return snap.exists() ? (snap.data() as ChatSession) : undefined;
-  } catch (err) {
+  } catch {
     showToast("Couldn't load chat session from cloud.");
     return undefined;
   }
@@ -96,7 +96,7 @@ export async function getAllChatSessions(uid: string): Promise<ChatSession[]> {
   try {
     const snap = await getDocs(userCol(uid, 'chatSessions'));
     return snap.docs.map((d) => d.data() as ChatSession);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load chat sessions from cloud.");
     return [];
   }
@@ -107,7 +107,7 @@ export async function getAllChatSessions(uid: string): Promise<ChatSession[]> {
 export async function saveContentBankItem(uid: string, item: ContentBankItem): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'contentBank', item.id), JSON.parse(JSON.stringify(item)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save content bank item to cloud.");
   }
 }
@@ -116,7 +116,7 @@ export async function getAllContentBankItems(uid: string): Promise<ContentBankIt
   try {
     const snap = await getDocs(userCol(uid, 'contentBank'));
     return snap.docs.map((d) => d.data() as ContentBankItem);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load content bank from cloud.");
     return [];
   }
@@ -125,7 +125,7 @@ export async function getAllContentBankItems(uid: string): Promise<ContentBankIt
 export async function deleteContentBankItem(uid: string, id: string): Promise<void> {
   try {
     await deleteDoc(userDoc(uid, 'contentBank', id));
-  } catch (err) {
+  } catch {
     showToast("Couldn't delete content bank item from cloud.");
   }
 }
@@ -135,7 +135,7 @@ export async function deleteContentBankItem(uid: string, id: string): Promise<vo
 export async function saveContentPoolEntry(uid: string, entry: ContentPoolEntry): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'contentPool', entry.id), JSON.parse(JSON.stringify(entry)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save content pool entry to cloud.");
   }
 }
@@ -144,7 +144,7 @@ export async function getAllContentPoolEntries(uid: string): Promise<ContentPool
   try {
     const snap = await getDocs(userCol(uid, 'contentPool'));
     return snap.docs.map((d) => d.data() as ContentPoolEntry);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load content pool from cloud.");
     return [];
   }
@@ -153,7 +153,7 @@ export async function getAllContentPoolEntries(uid: string): Promise<ContentPool
 export async function deleteContentPoolEntry(uid: string, id: string): Promise<void> {
   try {
     await deleteDoc(userDoc(uid, 'contentPool', id));
-  } catch (err) {
+  } catch {
     showToast("Couldn't delete content pool entry from cloud.");
   }
 }
@@ -163,7 +163,7 @@ export async function deleteContentPoolEntry(uid: string, id: string): Promise<v
 export async function saveCoverLetter(uid: string, letter: CoverLetter): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'coverLetters', letter.id), JSON.parse(JSON.stringify(letter)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save cover letter to cloud.");
   }
 }
@@ -172,7 +172,7 @@ export async function getCoverLetter(uid: string, resumeId: string): Promise<Cov
   try {
     const snap = await getDocs(userCol(uid, 'coverLetters'));
     return snap.docs.map((d) => d.data() as CoverLetter).find((l) => l.resumeId === resumeId);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load cover letter from cloud.");
     return undefined;
   }
@@ -183,7 +183,7 @@ export async function getCoverLetter(uid: string, resumeId: string): Promise<Cov
 export async function saveJobDescription(uid: string, jd: JobDescription): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'jobDescriptions', jd.id), JSON.parse(JSON.stringify(jd)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save job description to cloud.");
   }
 }
@@ -192,7 +192,7 @@ export async function getAllJobDescriptions(uid: string): Promise<JobDescription
   try {
     const snap = await getDocs(userCol(uid, 'jobDescriptions'));
     return snap.docs.map((d) => d.data() as JobDescription);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load job descriptions from cloud.");
     return [];
   }
@@ -201,7 +201,7 @@ export async function getAllJobDescriptions(uid: string): Promise<JobDescription
 export async function deleteJobDescription(uid: string, id: string): Promise<void> {
   try {
     await deleteDoc(userDoc(uid, 'jobDescriptions', id));
-  } catch (err) {
+  } catch {
     showToast("Couldn't delete job description from cloud.");
   }
 }
@@ -211,7 +211,7 @@ export async function deleteJobDescription(uid: string, id: string): Promise<voi
 export async function saveRecommendation(uid: string, rec: Recommendation): Promise<void> {
   try {
     await setDoc(userDoc(uid, 'recommendations', rec.id), JSON.parse(JSON.stringify(rec)));
-  } catch (err) {
+  } catch {
     showToast("Couldn't save recommendation to cloud.");
   }
 }
@@ -220,7 +220,7 @@ export async function getAllRecommendations(uid: string): Promise<Recommendation
   try {
     const snap = await getDocs(userCol(uid, 'recommendations'));
     return snap.docs.map((d) => d.data() as Recommendation);
-  } catch (err) {
+  } catch {
     showToast("Couldn't load recommendations from cloud.");
     return [];
   }
@@ -229,7 +229,7 @@ export async function getAllRecommendations(uid: string): Promise<Recommendation
 export async function deleteRecommendation(uid: string, id: string): Promise<void> {
   try {
     await deleteDoc(userDoc(uid, 'recommendations', id));
-  } catch (err) {
+  } catch {
     showToast("Couldn't delete recommendation from cloud.");
   }
 }
@@ -241,7 +241,7 @@ export async function clearRecommendations(uid: string): Promise<void> {
     const batch = writeBatch(db!);
     snap.docs.forEach((d) => batch.delete(d.ref));
     await batch.commit();
-  } catch (err) {
+  } catch {
     showToast("Couldn't clear recommendations from cloud.");
   }
 }
