@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.0] - 2026-04-12
+
+### Added
+- **Cover letter generation** — new Cover Letter tab in the Refine step. Select a tone (Professional, Conversational, or Technical), click Generate, and get a tailored cover letter based on your resume, content pool, and job description. Includes inline editing, copy to clipboard, Word export, and regenerate.
+- `useGenerateCoverLetter` hook with streaming AI generation, abort support, and error handling for empty responses and missing prerequisites
+- `buildCoverLetterPrompt` system prompt with tone-aware instructions and prompt injection defenses
+- `updateCoverLetter` store action for inline editing with persistence
+- `exportCoverLetterToWord` function for Word document export
+- 20 new tests (hook, component, and tool handler coverage)
+
+### Changed
+- Refine step tabs renamed: "Suggestions" → "CV Suggestions", new "Cover Letter" tab added
+- Right panel swaps between resume preview and cover letter panel based on active tab
+
+### Fixed
+- `jobDescriptionId` in `generate_cover_letter` tool handler was hardcoded to empty string, now correctly reads from context
+
 ## [0.5.2.0] - 2026-04-12
 
 ### Added
