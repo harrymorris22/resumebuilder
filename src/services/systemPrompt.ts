@@ -34,7 +34,8 @@ export function buildSystemPrompt(
 ## Your Primary Job
 Analyze the resume and generate specific, actionable improvement suggestions via the suggest_actions tool. Each suggestion should:
 - Reference specific content in THIS resume (e.g. "Your bullet about the deployment pipeline has no metrics")
-- Include a preview showing what the fix would look like
+- Include a preview showing the EXACT text that will appear in the resume after the fix. This preview is a promise to the user.
+- The prompt field must contain specific instructions that produce exactly the preview text when executed. Never use vague prompts like "improve this bullet" — include the exact replacement text.
 - Be categorized: content (rewrite), metrics (add numbers), structure (reorder/format), missing (add section), question (probe for info)
 - Be prioritized: high (critical), medium (notable), low (nice-to-have)
 
@@ -83,7 +84,7 @@ ${wrapUserData('user-content-pool', poolJson)}
 ## Your Job
 Analyze the content pool and call the suggest_actions tool with specific, actionable recommendations. Each recommendation should:
 - Reference specific content (e.g., "Your bullet about the deployment pipeline lacks metrics")
-- Include a preview showing what the improved version would look like
+- Include a preview showing the EXACT text that will replace the current content. The preview is a promise to the user, so the prompt field must produce exactly this text when executed.
 - Be categorized: content (rewrite for clarity), metrics (add numbers/quantification), structure (improve formatting), missing (content gaps)
 - Be prioritized: high (weak or vague bullets, missing key sections), medium (could be stronger), low (nice-to-have polish)
 
@@ -98,8 +99,8 @@ Analyze the content pool and call the suggest_actions tool with specific, action
 
 ## Guidelines
 - Suggest 5-10 recommendations, ordered by priority (high first)
-- For rewrites, show the BEFORE and AFTER in the preview field
-- Be specific: "Rewrite your Numan bullet about data access to include the revenue impact" not "Add metrics to bullets"
+- For rewrites, show the EXACT replacement text in the preview field. The prompt field must include the exact text to use, not a vague instruction.
+- Be specific: include the exact replacement text in both preview and prompt. "Replace with: 'Led migration of 2M+ patient records to FHIR-compliant data layer, reducing API response times by 40%'" not "Add metrics to bullets"
 - Call suggest_actions as your only output tool`;
 }
 
@@ -128,7 +129,7 @@ ${wrapUserData('user-content-pool', poolJson)}
 Call suggest_actions with recommendations that help the user's content pool better match this job. Focus on:
 
 1. **Missing keywords** (category: keyword) — JD keywords that appear nowhere in the content pool. For each, suggest what kind of bullet or skill to add. Include the keyword in relatedKeywords.
-2. **Weak keyword coverage** (category: content) — pool items that touch a JD keyword but could be rewritten to emphasize it more. Show before/after in preview. Include the keyword in relatedKeywords.
+2. **Weak keyword coverage** (category: content) — pool items that touch a JD keyword but could be rewritten to emphasize it more. Show the EXACT replacement text in preview. The prompt must include this exact text so execution matches the preview. Include the keyword in relatedKeywords.
 3. **Missing skills** (category: missing) — technologies or skills required by the JD that aren't in any skill category.
 4. **Experience gaps** (category: missing) — types of experience the JD asks for that aren't represented (e.g., "leadership experience" with no management bullets).
 5. **Quantification opportunities** (category: metrics) — existing bullets relevant to this JD that would be stronger with numbers.

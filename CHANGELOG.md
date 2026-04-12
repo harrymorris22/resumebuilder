@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.1] - 2026-04-12
+
+### Fixed
+- **Suggestion previews now match applied changes** — recommendation execution now includes the preview text as a constraint, so the AI produces exactly what was shown to the user. Tool descriptions and system prompts updated to treat previews as commitments, not suggestions.
+
 ## [0.5.3.0] - 2026-04-12
 
 ### Added
