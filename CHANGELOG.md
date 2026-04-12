@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.4] - 2026-04-12
+
+### Fixed
+- **PDF export no longer produces extra blank pages** — print CSS collapsed the app shell to zero height (`#root { height: 0; overflow: hidden }`) so hidden UI elements don't paginate. Print areas use `position: fixed` to render independently. Cover letter print area hidden by default to prevent double-printing.
+
 ## [0.5.3.3] - 2026-04-12
 
 ### Changed
