@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.7] - 2026-04-12
+
+### Fixed
+- **AI now sees role descriptions in content pool** — all 4 prompt builders (generation, pool recommendations, JD recommendations, cover letter) now include the description field when serializing pool data. Previously stripped to company+title only.
+- **AI can update role descriptions on existing experience** — `update_experience_bullets` tool now accepts an optional `description` field alongside bullets.
+- **CV upload captures role descriptions** — resume parser schema now extracts descriptions from uploaded CVs into content pool context.
+
 ## [0.5.3.6] - 2026-04-12
 
 ### Added
