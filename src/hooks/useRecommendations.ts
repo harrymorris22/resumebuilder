@@ -187,9 +187,10 @@ export function useRecommendations() {
         const stream = client.messages.stream({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
-          system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume. The user has already seen a preview of what the change will look like. Your job is to apply EXACTLY that change, nothing more and nothing less.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
+          system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume. The user has already seen a preview of what the change will look like. Your job is to apply EXACTLY that change, nothing more and nothing less. You MUST call a tool to make the change. Do not respond with text only.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
           messages: [{ role: 'user', content: executionMessage }],
           tools: resumeTools,
+          tool_choice: { type: 'any' as const },
         });
 
         const finalMessage = await stream.finalMessage();
@@ -197,6 +198,13 @@ export function useRecommendations() {
         const toolUses = finalMessage.content.filter(
           (block): block is Anthropic.Messages.ToolUseBlock => block.type === 'tool_use'
         );
+
+        if (toolUses.length === 0) {
+          // AI responded without calling any tool, resume unchanged
+          updateRecommendation(id, { status: 'pending' });
+          setError('Could not apply this suggestion. Try again.');
+          return;
+        }
 
         for (const toolUse of toolUses) {
           const freshResume = useAppStore.getState().resumes.find((r) => r.id === state.activeResumeId);

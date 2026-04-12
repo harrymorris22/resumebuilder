@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.2] - 2026-04-12
+
+### Fixed
+- **Accepting a suggestion now always modifies the resume** — forced tool use (`tool_choice: any`) so the AI must call a resume-modifying tool instead of responding with text only. If no tool is called, the suggestion reverts to pending with an error message instead of silently marking as accepted.
+
 ## [0.5.3.1] - 2026-04-12
 
 ### Fixed
