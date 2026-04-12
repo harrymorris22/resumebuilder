@@ -45,9 +45,20 @@ body {
     visibility: hidden;
   }
 
-  /* Show the resume and all its children */
+  /* Show the resume and all its children (default print target) */
   #resume-print-area,
   #resume-print-area * {
+    visibility: visible;
+  }
+
+  /* When printing a cover letter, hide the resume and show the cover letter instead */
+  body.printing-cover-letter #resume-print-area,
+  body.printing-cover-letter #resume-print-area * {
+    visibility: hidden;
+  }
+
+  #cover-letter-print-area,
+  #cover-letter-print-area * {
     visibility: visible;
   }
 
@@ -56,8 +67,9 @@ body {
     display: none !important;
   }
 
-  /* Position it at the top of the page */
-  #resume-print-area {
+  /* Position print areas at the top of the page */
+  #resume-print-area,
+  #cover-letter-print-area {
     position: absolute;
     left: 0;
     top: 0;
