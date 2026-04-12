@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1.0] - 2026-04-12
+
+### Added
+- **IDB → Firestore migration** — when a user with local data signs in for the first time, a modal offers to upload their IndexedDB data to Firestore. Covers all 7 data types (resumes, content pool, chat sessions, content bank, cover letters, job descriptions, recommendations). Smart detection skips empty default resumes. Per-user localStorage flag prevents re-prompting.
+- 19 new tests for migration utility (detection, routing, full data copy, edge cases)
+
 ## [0.5.0.0] - 2026-04-12
 
 ### Added
