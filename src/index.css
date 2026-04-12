@@ -40,37 +40,26 @@ body {
     margin: 0;
   }
 
-  /* Hide everything, preserve layout tree */
+  /* Collapse the app so hidden content doesn't create extra blank pages.
+     We can't use display:none on #root because print areas are inside it.
+     Instead: hide everything visually AND collapse their height. */
   body * {
     visibility: hidden;
   }
 
-  /* Show the resume and all its children (default print target) */
+  #root {
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Show the resume print area and pull it out of the collapsed flow */
   #resume-print-area,
   #resume-print-area * {
     visibility: visible;
   }
 
-  /* When printing a cover letter, hide the resume and show the cover letter instead */
-  body.printing-cover-letter #resume-print-area,
-  body.printing-cover-letter #resume-print-area * {
-    visibility: hidden;
-  }
-
-  #cover-letter-print-area,
-  #cover-letter-print-area * {
-    visibility: visible;
-  }
-
-  /* Hide page boundary line in print */
-  .page-boundary-line {
-    display: none !important;
-  }
-
-  /* Position print areas at the top of the page */
-  #resume-print-area,
-  #cover-letter-print-area {
-    position: absolute;
+  #resume-print-area {
+    position: fixed;
     left: 0;
     top: 0;
     width: 8.5in;
@@ -79,5 +68,40 @@ body {
     box-shadow: none;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* Cover letter print area */
+  #cover-letter-print-area,
+  #cover-letter-print-area * {
+    visibility: visible;
+  }
+
+  #cover-letter-print-area {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 8.5in;
+    max-width: 8.5in;
+    padding: 0.4in;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* When printing cover letter, hide the resume */
+  body.printing-cover-letter #resume-print-area,
+  body.printing-cover-letter #resume-print-area * {
+    visibility: hidden;
+  }
+
+  /* When NOT printing cover letter, hide it */
+  body:not(.printing-cover-letter) #cover-letter-print-area,
+  body:not(.printing-cover-letter) #cover-letter-print-area * {
+    visibility: hidden;
+  }
+
+  /* Hide page boundary line in print */
+  .page-boundary-line {
+    display: none !important;
   }
 }
