@@ -24,7 +24,7 @@ import {
   saveRecommendation,
   getAllRecommendations,
   clearRecommendations as clearRecsFromDb,
-} from '../db/indexedDb';
+} from '../db/persistence';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
 import { hasVisibleText } from '../utils/textClean';
@@ -39,6 +39,9 @@ interface AppState {
   wizardStep: WizardStep;
   activeJobDescriptionId: string | null;
   generatedResumeId: string | null;
+
+  // Auth (set from AuthContext, not persisted)
+  userId: string | null;
 
   // In-memory state (hydrated from IDB)
   resumes: Resume[];
@@ -56,6 +59,9 @@ interface AppState {
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
   diffSnapshot: ResumeSection[] | null;
+
+  // Actions — auth
+  setUserId: (uid: string | null) => void;
 
   // Actions — settings
   setApiKey: (key: string) => void;
@@ -121,7 +127,7 @@ interface AppState {
   setLatestCoachSuggestion: (s: { text: string; prompt: string } | null) => void;
 
   // Hydration
-  hydrateFromIdb: () => Promise<void>;
+  hydrateFromIdb: (uid?: string | null) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -136,6 +142,9 @@ export const useAppStore = create<AppState>()(
       wizardStep: 'content-pool' as WizardStep,
       activeJobDescriptionId: null,
       generatedResumeId: null,
+
+      // Auth
+      userId: null,
 
       // In-memory
       resumes: [],
@@ -154,6 +163,9 @@ export const useAppStore = create<AppState>()(
       diffSnapshot: null,
       settingsOpen: false,
 
+      // Auth
+      setUserId: (uid) => set({ userId: uid }),
+
       // Settings
       setApiKey: (key) => set({ apiKey: key }),
       toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
@@ -165,14 +177,14 @@ export const useAppStore = create<AppState>()(
 
       addResume: (resume) => {
         set((s) => ({ resumes: [...s.resumes, resume] }));
-        saveResume(resume);
+        saveResume(get().userId, resume);
       },
 
       updateResume: (resume) => {
         set((s) => ({
           resumes: s.resumes.map((r) => (r.id === resume.id ? resume : r)),
         }));
-        saveResume(resume);
+        saveResume(get().userId, resume);
       },
 
       removeResume: (id) => {
@@ -183,7 +195,7 @@ export const useAppStore = create<AppState>()(
           resumes: remaining,
           activeResumeId: s.activeResumeId === id ? remaining[0]?.id ?? null : s.activeResumeId,
         }));
-        deleteResumeFromDb(id);
+        deleteResumeFromDb(get().userId, id);
       },
 
       duplicateResume: (id) => {
@@ -191,7 +203,7 @@ export const useAppStore = create<AppState>()(
         if (!source) return;
         const clone = cloneResume(source);
         set((s) => ({ resumes: [...s.resumes, clone], activeResumeId: clone.id }));
-        saveResume(clone);
+        saveResume(get().userId, clone);
       },
 
       renameResume: (id, name) => {
@@ -203,7 +215,7 @@ export const useAppStore = create<AppState>()(
           ),
         }));
         const updated = get().resumes.find((r) => r.id === id);
-        if (updated) saveResume(updated);
+        if (updated) saveResume(get().userId, updated);
       },
 
       resetResume: (id) => {
@@ -215,7 +227,7 @@ export const useAppStore = create<AppState>()(
           ),
         }));
         const updated = get().resumes.find((r) => r.id === id);
-        if (updated) saveResume(updated);
+        if (updated) saveResume(get().userId, updated);
       },
 
       // Chat
@@ -223,7 +235,7 @@ export const useAppStore = create<AppState>()(
 
       addChatSession: (session) => {
         set((s) => ({ chatSessions: [...s.chatSessions, session] }));
-        saveChatSession(session);
+        saveChatSession(get().userId, session);
       },
 
       updateChatSession: (session) => {
@@ -232,20 +244,20 @@ export const useAppStore = create<AppState>()(
             c.id === session.id ? session : c
           ),
         }));
-        saveChatSession(session);
+        saveChatSession(get().userId, session);
       },
 
       // Content bank
       addContentBankItem: (item) => {
         set((s) => ({ contentBankItems: [...s.contentBankItems, item] }));
-        saveContentBankItem(item);
+        saveContentBankItem(get().userId, item);
       },
 
       removeContentBankItem: (id) => {
         set((s) => ({
           contentBankItems: s.contentBankItems.filter((i) => i.id !== id),
         }));
-        deleteContentBankItemFromDb(id);
+        deleteContentBankItemFromDb(get().userId, id);
       },
 
       updateContentBankItem: (item) => {
@@ -254,25 +266,25 @@ export const useAppStore = create<AppState>()(
             i.id === item.id ? item : i
           ),
         }));
-        saveContentBankItem(item);
+        saveContentBankItem(get().userId, item);
       },
 
       // Content pool
       addPoolEntry: (entry) => {
         set((s) => ({ contentPool: [...s.contentPool, entry] }));
-        saveContentPoolEntry(entry);
+        saveContentPoolEntry(get().userId, entry);
       },
 
       removePoolEntry: (id) => {
         set((s) => ({ contentPool: s.contentPool.filter((e) => e.id !== id) }));
-        deletePoolEntryFromDb(id);
+        deletePoolEntryFromDb(get().userId, id);
       },
 
       updatePoolEntry: (entry) => {
         set((s) => ({
           contentPool: s.contentPool.map((e) => (e.id === entry.id ? entry : e)),
         }));
-        saveContentPoolEntry(entry);
+        saveContentPoolEntry(get().userId, entry);
       },
 
       reorderPoolEntries: (orderedIds) => {
@@ -452,7 +464,7 @@ export const useAppStore = create<AppState>()(
       // Cover letters
       addCoverLetter: (letter) => {
         set((s) => ({ coverLetters: [...s.coverLetters, letter] }));
-        saveCoverLetter(letter);
+        saveCoverLetter(get().userId, letter);
       },
       setActiveCoverLetter: (letter) => set({ activeCoverLetter: letter }),
 
@@ -467,22 +479,22 @@ export const useAppStore = create<AppState>()(
       // Job descriptions
       addJobDescription: (jd) => {
         set((s) => ({ jobDescriptions: [...s.jobDescriptions, jd] }));
-        saveJobDescription(jd);
+        saveJobDescription(get().userId, jd);
       },
       removeJobDescription: (id) => {
         set((s) => ({
           jobDescriptions: s.jobDescriptions.filter((j) => j.id !== id),
           activeJobDescriptionId: s.activeJobDescriptionId === id ? null : s.activeJobDescriptionId,
         }));
-        deleteJdFromDb(id);
+        deleteJdFromDb(get().userId, id);
       },
 
       // Recommendations
       setRecommendations: (recs) => {
         set({ recommendations: recs });
-        // Persist each to IDB
-        clearRecsFromDb().then(() => {
-          for (const rec of recs) saveRecommendation(rec);
+        const uid = get().userId;
+        clearRecsFromDb(uid).then(() => {
+          for (const rec of recs) saveRecommendation(uid, rec);
         });
       },
       updateRecommendation: (id, updates) => {
@@ -492,11 +504,11 @@ export const useAppStore = create<AppState>()(
           ),
         }));
         const updated = get().recommendations.find((r) => r.id === id);
-        if (updated) saveRecommendation(updated);
+        if (updated) saveRecommendation(get().userId, updated);
       },
       clearRecommendations: () => {
         set({ recommendations: [] });
-        clearRecsFromDb();
+        clearRecsFromDb(get().userId);
       },
       setRecommendationsLoading: (loading) => set({ recommendationsLoading: loading }),
 
@@ -509,14 +521,17 @@ export const useAppStore = create<AppState>()(
       setLatestCoachSuggestion: (s) => set({ latestCoachSuggestion: s }),
 
       // Hydration
-      hydrateFromIdb: async () => {
+      hydrateFromIdb: async (uid?: string | null) => {
+        const effectiveUid = uid ?? get().userId;
+        if (uid !== undefined) set({ userId: uid ?? null });
+
         const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations] = await Promise.all([
-          getAllResumes(),
-          getAllChatSessions(),
-          getAllContentBankItems(),
-          getAllContentPoolEntries(),
-          getAllJobDescriptions(),
-          getAllRecommendations(),
+          getAllResumes(effectiveUid),
+          getAllChatSessions(effectiveUid),
+          getAllContentBankItems(effectiveUid),
+          getAllContentPoolEntries(effectiveUid),
+          getAllJobDescriptions(effectiveUid),
+          getAllRecommendations(effectiveUid),
         ]);
 
         // Migrate persisted data: deduplicate bullets + strip location from experience items
@@ -537,14 +552,14 @@ export const useAppStore = create<AppState>()(
                 dirty = true;
               }
             }
-            if (dirty) saveResume(resume);
+            if (dirty) saveResume(effectiveUid, resume);
           }
         }
 
         // Create default master resume if none exist
         if (resumes.length === 0) {
           const defaultResume = createDefaultResume();
-          await saveResume(defaultResume);
+          await saveResume(effectiveUid, defaultResume);
           resumes.push(defaultResume);
         }
 

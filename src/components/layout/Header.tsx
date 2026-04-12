@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
+import { useAuth } from '../../contexts/AuthContext';
 import { WIZARD_STEP_LABELS } from '../../types/wizard';
 import { ResumeLibrary } from '../wizard/ResumeLibrary';
 import { ContentPoolDrawer } from '../contentPool/ContentPoolDrawer';
+import { SignInButton } from '../auth/SignInButton';
+import { UserMenu } from '../auth/UserMenu';
 
 export function Header() {
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
   const wizardStep = useAppStore((s) => s.wizardStep);
   const resumes = useAppStore((s) => s.resumes);
+  const { user, firebaseAvailable } = useAuth();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [poolOpen, setPoolOpen] = useState(false);
 
@@ -55,6 +59,8 @@ export function Header() {
               </span>
             )}
           </button>
+
+          {firebaseAvailable && (user ? <UserMenu /> : <SignInButton />)}
 
           <button
             onClick={() => setSettingsOpen(true)}
