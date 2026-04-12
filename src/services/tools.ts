@@ -271,3 +271,7 @@ export const resumeTools: ToolDefinition[] = [
     },
   },
 ];
+
+export const coverLetterTools: ToolDefinition[] = resumeTools.filter(
+  (t) => t.name === 'generate_cover_letter'
+);

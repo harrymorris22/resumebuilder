@@ -99,6 +99,7 @@ interface AppState {
   // Actions — cover letters
   addCoverLetter: (letter: CoverLetter) => void;
   setActiveCoverLetter: (letter: CoverLetter | null) => void;
+  updateCoverLetter: (id: string, text: string) => void;
 
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
@@ -467,6 +468,17 @@ export const useAppStore = create<AppState>()(
         saveCoverLetter(get().userId, letter);
       },
       setActiveCoverLetter: (letter) => set({ activeCoverLetter: letter }),
+      updateCoverLetter: (id, text) => {
+        const updated = get().coverLetters.map((l) =>
+          l.id === id ? { ...l, text, updatedAt: new Date().toISOString() } : l
+        );
+        const updatedLetter = updated.find((l) => l.id === id);
+        set((s) => ({
+          coverLetters: updated,
+          activeCoverLetter: s.activeCoverLetter?.id === id && updatedLetter ? updatedLetter : s.activeCoverLetter,
+        }));
+        if (updatedLetter) saveCoverLetter(get().userId, updatedLetter);
+      },
 
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),

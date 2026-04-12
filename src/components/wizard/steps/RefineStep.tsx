@@ -9,13 +9,15 @@ import { ContentPoolPage } from '../../contentPool/ContentPoolPage';
 import { TemplateSelector } from '../../resume/TemplateSelector';
 import { JobDescriptionForm } from '../../jobDescription/JobDescriptionForm';
 import { SavedJobList } from '../../jobDescription/SavedJobList';
+import { CoverLetterPanel } from '../../coverLetter/CoverLetterPanel';
 
-type LeftTab = 'suggestions' | 'content-pool' | 'job-description';
+type LeftTab = 'suggestions' | 'content-pool' | 'job-description' | 'cover-letter';
 
 const TABS: { key: LeftTab; label: string }[] = [
-  { key: 'suggestions', label: 'Suggestions' },
+  { key: 'suggestions', label: 'CV Suggestions' },
   { key: 'content-pool', label: 'Content Pool' },
   { key: 'job-description', label: 'Job Description' },
+  { key: 'cover-letter', label: 'Cover Letter' },
 ];
 
 export function RefineStep() {
@@ -38,7 +40,7 @@ export function RefineStep() {
   } = useRecommendations();
 
   const { analyze, isLoading: isAnalyzing, error: jdError } = useAnalyzeJobDescription();
-
+  const activeCoverLetter = useAppStore((s) => s.activeCoverLetter);
   const diffSnapshot = useAppStore((s) => s.diffSnapshot);
   const [showDiff, setShowDiff] = useState(false);
   const [leftTab, setLeftTab] = useState<LeftTab>('suggestions');
@@ -234,33 +236,51 @@ export function RefineStep() {
               </div>
             </>
           )}
+
+          {/* Cover letter tab: left panel is intentionally empty.
+              The CoverLetterPanel in the right panel handles all controls. */}
+          {leftTab === 'cover-letter' && (
+            <div className="flex items-center justify-center h-full text-center px-4">
+              <p className="text-sm text-stone-400">
+                {activeCoverLetter
+                  ? 'Your cover letter is shown on the right. Use the toolbar to copy, edit, export, or regenerate.'
+                  : 'Use the panel on the right to generate your cover letter.'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Right panel: toolbar + resume preview or diff view */}
+      {/* Right panel: resume preview, diff view, or cover letter preview */}
       <div className="flex-1 min-h-0 flex flex-col">
-        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
-          <TemplateSelector />
-          {diffSnapshot && (
-            <button
-              onClick={() => setShowDiff(!showDiff)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                showDiff
-                  ? 'bg-primary-100 text-primary-700 border border-primary-300'
-                  : 'text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300'
-              }`}
-            >
-              {showDiff ? 'Hide Changes' : 'Show Changes'}
-            </button>
-          )}
-        </div>
-        <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100">
-          {showDiff && diffSnapshot ? (
-            <DiffResumePreview snapshot={diffSnapshot} />
-          ) : (
-            <ResumePreview />
-          )}
-        </div>
+        {leftTab === 'cover-letter' ? (
+          <CoverLetterPanel />
+        ) : (
+          <>
+            <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">
+              <TemplateSelector />
+              {diffSnapshot && (
+                <button
+                  onClick={() => setShowDiff(!showDiff)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    showDiff
+                      ? 'bg-primary-100 text-primary-700 border border-primary-300'
+                      : 'text-stone-500 hover:text-stone-700 border border-stone-200 hover:border-stone-300'
+                  }`}
+                >
+                  {showDiff ? 'Hide Changes' : 'Show Changes'}
+                </button>
+              )}
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100">
+              {showDiff && diffSnapshot ? (
+                <DiffResumePreview snapshot={diffSnapshot} />
+              ) : (
+                <ResumePreview />
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

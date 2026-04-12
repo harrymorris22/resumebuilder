@@ -104,14 +104,14 @@ describe('RefineStep', () => {
     expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
     // Tab bar present
     expect(screen.getByRole('tablist', { name: 'Left panel tabs' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Suggestions' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'CV Suggestions' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Content Pool' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Job Description' })).toBeInTheDocument()
   })
 
   it('defaults to Suggestions tab', () => {
     render(<RefineStep />)
-    expect(screen.getByRole('tab', { name: 'Suggestions' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'CV Suggestions' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByText('Get AI Suggestions')).toBeInTheDocument()
   })
 

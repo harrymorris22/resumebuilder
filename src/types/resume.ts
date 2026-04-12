@@ -155,10 +155,13 @@ export interface JobDescription {
   createdAt: string;
 }
 
+export type CoverLetterTone = 'professional' | 'conversational' | 'technical';
+
 export interface CoverLetter {
   id: string;
   resumeId: string;
   jobDescriptionId: string;
   text: string;
+  tone?: CoverLetterTone;
   createdAt: string;
 }

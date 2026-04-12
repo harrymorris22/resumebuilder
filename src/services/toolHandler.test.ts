@@ -59,3 +59,51 @@ describe('handleToolCall — analyze_job_description', () => {
     expect(job.keywords).toEqual([])
   })
 })
+
+describe('handleToolCall — generate_cover_letter', () => {
+  it('uses jobDescriptionId from context when provided', () => {
+    const onCoverLetterGenerated = vi.fn()
+    handleToolCall(
+      'generate_cover_letter',
+      { text: 'Dear Hiring Manager...' },
+      makeCtx({ onCoverLetterGenerated, jobDescriptionId: 'jd-42' }),
+    )
+
+    expect(onCoverLetterGenerated).toHaveBeenCalledOnce()
+    const letter = onCoverLetterGenerated.mock.calls[0][0]
+    expect(letter.jobDescriptionId).toBe('jd-42')
+    expect(letter.text).toBe('Dear Hiring Manager...')
+    expect(letter.resumeId).toBe('r1')
+  })
+
+  it('falls back to empty string when no jobDescriptionId in context', () => {
+    const onCoverLetterGenerated = vi.fn()
+    handleToolCall(
+      'generate_cover_letter',
+      { text: 'Cover letter body' },
+      makeCtx({ onCoverLetterGenerated }),
+    )
+
+    const letter = onCoverLetterGenerated.mock.calls[0][0]
+    expect(letter.jobDescriptionId).toBe('')
+  })
+
+  it('calls onCoverLetterGenerated callback with correct CoverLetter shape', () => {
+    const onCoverLetterGenerated = vi.fn()
+    const result = handleToolCall(
+      'generate_cover_letter',
+      { text: 'Full cover letter text here' },
+      makeCtx({ onCoverLetterGenerated, jobDescriptionId: 'jd-99' }),
+    )
+
+    expect(result).toBe('Cover letter generated and saved.')
+    const letter = onCoverLetterGenerated.mock.calls[0][0]
+    expect(letter).toEqual(expect.objectContaining({
+      resumeId: 'r1',
+      jobDescriptionId: 'jd-99',
+      text: 'Full cover letter text here',
+    }))
+    expect(letter.id).toBeDefined()
+    expect(letter.createdAt).toBeDefined()
+  })
+})
