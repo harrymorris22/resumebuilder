@@ -45,6 +45,7 @@ export interface ActionSuggestion {
   text: string;
   prompt: string;
   preview?: string;
+  mutation?: { tool: string; input: Record<string, unknown> };
   sectionId?: string;
   category: ActionCategory;
   priority: ActionPriority;

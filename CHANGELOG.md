@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.3] - 2026-04-12
+
+### Changed
+- **Suggestions apply instantly without a second AI call** — the AI now includes structured mutation data in each suggestion. When you accept, the change is applied deterministically in code. No waiting, no API cost, and guaranteed to match the preview. Falls back to LLM execution for older suggestions without mutation data.
+
 ## [0.5.3.2] - 2026-04-12
 
 ### Fixed

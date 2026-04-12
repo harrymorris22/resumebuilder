@@ -107,3 +107,50 @@ describe('handleToolCall — generate_cover_letter', () => {
     expect(letter.createdAt).toBeDefined()
   })
 })
+
+describe('handleToolCall — suggest_actions mutation passthrough', () => {
+  it('passes mutation data through to onActionSuggestion callback', () => {
+    const onActionSuggestion = vi.fn()
+    const mutation = { tool: 'update_experience_bullets', input: { experienceId: 'exp-1', bullets: ['New bullet'] } }
+
+    handleToolCall(
+      'suggest_actions',
+      {
+        suggestions: [{
+          text: 'Add metrics',
+          prompt: 'Update bullet',
+          preview: 'New bullet',
+          mutation,
+          category: 'metrics',
+          priority: 'high',
+        }],
+      },
+      makeCtx({ onActionSuggestion }),
+    )
+
+    expect(onActionSuggestion).toHaveBeenCalledOnce()
+    const suggestions = onActionSuggestion.mock.calls[0][0]
+    expect(suggestions).toHaveLength(1)
+    expect(suggestions[0].mutation).toEqual(mutation)
+  })
+
+  it('handles suggestions without mutation (backward compat)', () => {
+    const onActionSuggestion = vi.fn()
+
+    handleToolCall(
+      'suggest_actions',
+      {
+        suggestions: [{
+          text: 'Add metrics',
+          prompt: 'Update bullet',
+          category: 'metrics',
+          priority: 'high',
+        }],
+      },
+      makeCtx({ onActionSuggestion }),
+    )
+
+    const suggestions = onActionSuggestion.mock.calls[0][0]
+    expect(suggestions[0].mutation).toBeUndefined()
+  })
+})
