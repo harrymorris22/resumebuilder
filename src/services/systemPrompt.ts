@@ -178,7 +178,7 @@ ${wrapUserData('user-content-pool', poolJson)}
 Build a resume by calling these tools IN ORDER, using ONLY items from the content pool above:
 1. update_contact — set contact info from pool (only if contact info exists in pool)
 2. set_summary — use the summary from the pool verbatim (skip if no summary exists in pool)
-3. add_experience — select the most relevant jobs/bullets from the pool. Choose bullets that best match the JD keywords. Limit to 3-4 roles, 3-4 bullets each. Prioritize recent, relevant experience. Use exact bullet text from the pool.
+3. add_experience — select the most relevant jobs/bullets from the pool. Choose bullets that best match the JD keywords. Limit to 3-4 roles, 3-4 bullets each. Prioritize recent, relevant experience. Use exact bullet text from the pool. Optionally include a 1-2 sentence description for each role if the company context would strengthen the application.
 4. add_education — add education entries from the pool (skip if none exist)
 5. add_skills — group skills from the pool into categories. Only include skills that exist in the pool.
 6. add_certification — add certifications from the pool (skip if none exist)

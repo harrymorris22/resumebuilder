@@ -42,6 +42,7 @@ export const resumeTools: ToolDefinition[] = [
       properties: {
         company: { type: 'string', description: 'Company name' },
         title: { type: 'string', description: 'Job title' },
+        description: { type: 'string', description: 'Optional 1-2 sentence company or role description, shown below the role header and above bullets' },
         startDate: { type: 'string', description: 'Start date (e.g. Jan 2020)' },
         endDate: {
           type: 'string',

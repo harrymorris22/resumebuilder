@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.3.5] - 2026-04-12
+
+### Added
+- **Optional role description for experience entries** — add a 1-2 sentence company or role description below each job header and above the bullet points. Renders in italic across all 4 templates (Classic, Modern, Minimal, Creative) and in Word export. The AI can include descriptions when generating resumes if company context is available.
+
 ## [0.5.3.4] - 2026-04-12
 
 ### Fixed

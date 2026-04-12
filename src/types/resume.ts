@@ -29,6 +29,7 @@ export interface ExperienceItem {
   id: string;
   company: string;
   title: string;
+  description?: string;
   dateRange: DateRange;
   bullets: string[];
 }

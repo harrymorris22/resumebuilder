@@ -81,6 +81,9 @@ export function ExperienceSection({ data, onUpdate }: ExperienceSectionProps) {
               />
             </div>
           </div>
+          {item.description && (
+            <p className="text-xs text-stone-500 italic mt-0.5">{item.description}</p>
+          )}
           {item.bullets.filter(hasVisibleText).length > 0 && (
             <ul className="list-disc ml-4 mt-1 space-y-0.5">
               {item.bullets.filter(hasVisibleText).map((bullet, bi) => (
