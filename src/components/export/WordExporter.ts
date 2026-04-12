@@ -102,6 +102,13 @@ export async function exportToWord(resume: Resume) {
             ],
           })
         );
+        if (item.description) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: item.description, size: 18, italics: true, color: '666666' })],
+            })
+          );
+        }
         for (const bullet of item.bullets.filter(hasVisibleText)) {
           children.push(
             new Paragraph({

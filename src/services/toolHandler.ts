@@ -67,6 +67,7 @@ export function handleToolCall(
         id: generateId(),
         company: (input.company as string) || '',
         title: (input.title as string) || '',
+        description: (input.description as string) || undefined,
         dateRange: {
           start: (input.startDate as string) || '',
           end: input.endDate === null || input.endDate === undefined ? null : (input.endDate as string),

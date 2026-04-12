@@ -93,6 +93,9 @@ function RenderSection({ section, onUpdate }: { section: ResumeSection; onUpdate
               <span className="text-stone-400"> — {item.company}</span>
             </div>
             <div className="text-xs text-stone-400">{item.dateRange.start} - {formatEndDate(item.dateRange.end)}</div>
+            {item.description && (
+              <p className="text-xs text-stone-500 italic mt-0.5">{item.description}</p>
+            )}
             {item.bullets.filter(hasVisibleText).length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.bullets.filter(hasVisibleText).map((b, bi) => (
