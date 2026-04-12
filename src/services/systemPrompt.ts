@@ -1,4 +1,5 @@
 import type { Resume, ContentBankItem, ContentPoolEntry, JobDescription } from '../types/resume';
+import { DEFENSE_PREAMBLE, wrapUserData } from '../utils/promptSafety';
 
 export function buildSystemPrompt(
   resume: Resume,
@@ -20,15 +21,15 @@ export function buildSystemPrompt(
       tags: i.tags,
     }));
 
-  const bankJson = bankItems.length > 0
-    ? `\n\n## Content Bank (${bankItems.length} items)\n\`\`\`json\n${JSON.stringify(bankItems, null, 2)}\n\`\`\``
+  const bankSection = bankItems.length > 0
+    ? `\n\n## Content Bank (${bankItems.length} items)\n${wrapUserData('user-content', JSON.stringify(bankItems, null, 2))}`
     : '';
 
   const jobSection = mode === 'job-customisation' && jobDescriptionText
-    ? `\n\n## Target Job Description\n\`\`\`\n${jobDescriptionText}\n\`\`\`\n\nYou are in job customisation mode. Help tailor this resume to the job description. Suggest relevant content bank items, highlight keyword matches, and recommend improvements.`
+    ? `\n\n## Target Job Description\n${wrapUserData('user-job-description', jobDescriptionText)}\n\nYou are in job customisation mode. Help tailor this resume to the job description. Suggest relevant content bank items, highlight keyword matches, and recommend improvements.`
     : '';
 
-  return `You are an expert career coach powering an action-list interface. The user sees a list of action cards — each card is a specific improvement you suggest. They click "Fix" to execute it or dismiss it. Keep text responses very brief — the UI is card-based, not conversational.
+  return `${DEFENSE_PREAMBLE}You are an expert career coach powering an action-list interface. The user sees a list of action cards — each card is a specific improvement you suggest. They click "Fix" to execute it or dismiss it. Keep text responses very brief — the UI is card-based, not conversational.
 
 ## Your Primary Job
 Analyze the resume and generate specific, actionable improvement suggestions via the suggest_actions tool. Each suggestion should:
@@ -44,9 +45,7 @@ Analyze the resume and generate specific, actionable improvement suggestions via
 - Bullets: 1-2 lines max
 
 ## Current Resume State
-\`\`\`json
-${resumeJson}
-\`\`\`${bankJson}${jobSection}
+${wrapUserData('user-resume', resumeJson)}${bankSection}${jobSection}
 
 ## When to Call suggest_actions
 - After EVERY resume modification — always suggest 2-5 next improvements
@@ -76,12 +75,10 @@ export function buildPoolRecommendationPrompt(contentPool: ContentPoolEntry[]): 
     2
   );
 
-  return `You are an expert career coach. The user has a content pool (a master library of their professional experience, skills, and education). Your job is to analyze this pool and suggest improvements.
+  return `${DEFENSE_PREAMBLE}You are an expert career coach. The user has a content pool (a master library of their professional experience, skills, and education). Your job is to analyze this pool and suggest improvements.
 
 ## Content Pool (${contentPool.length} items)
-\`\`\`json
-${poolJson}
-\`\`\`
+${wrapUserData('user-content-pool', poolJson)}
 
 ## Your Job
 Analyze the content pool and call the suggest_actions tool with specific, actionable recommendations. Each recommendation should:
@@ -119,20 +116,13 @@ export function buildJdPoolRecommendationPrompt(contentPool: ContentPoolEntry[],
     2
   );
 
-  return `You are an expert career coach. The user has a content pool and a target job description. Compare the two and suggest specific improvements to strengthen their application.
+  return `${DEFENSE_PREAMBLE}You are an expert career coach. The user has a content pool and a target job description. Compare the two and suggest specific improvements to strengthen their application.
 
 ## Target Job
-**Title:** ${jobDescription.title} at ${jobDescription.company}
-**Keywords:** ${jobDescription.keywords.join(', ')}
-**Full Text:**
-\`\`\`
-${jobDescription.rawText}
-\`\`\`
+${wrapUserData('user-job-description', `Title: ${jobDescription.title} at ${jobDescription.company}\nKeywords: ${jobDescription.keywords.join(', ')}\n\nFull Text:\n${jobDescription.rawText}`)}
 
 ## Content Pool (${contentPool.length} items)
-\`\`\`json
-${poolJson}
-\`\`\`
+${wrapUserData('user-content-pool', poolJson)}
 
 ## Your Job
 Call suggest_actions with recommendations that help the user's content pool better match this job. Focus on:
@@ -160,7 +150,7 @@ export function buildGenerateResumePrompt(contentPool: ContentPoolEntry[], jobDe
     2
   );
 
-  return `You are an expert resume curator. Generate a targeted 1-page resume by SELECTING the best items from the user's content pool. You must ONLY use content that already exists in the pool — never fabricate, rewrite, or auto-generate any content.
+  return `${DEFENSE_PREAMBLE}You are an expert resume curator. Generate a targeted 1-page resume by SELECTING the best items from the user's content pool. You must ONLY use content that already exists in the pool — never fabricate, rewrite, or auto-generate any content.
 
 ## CRITICAL RULE: POOL CONTENT ONLY
 - Every bullet, skill, summary, education entry, certification, and project on the resume MUST come directly from the content pool below.
@@ -170,18 +160,10 @@ export function buildGenerateResumePrompt(contentPool: ContentPoolEntry[], jobDe
 - If a section has no matching pool items, SKIP that section entirely. Do not fabricate content to fill gaps.
 
 ## Job Description
-**Title:** ${jobDescription.title}
-**Company:** ${jobDescription.company}
-**Keywords:** ${jobDescription.keywords.join(', ')}
-**Full Text:**
-\`\`\`
-${jobDescription.rawText}
-\`\`\`
+${wrapUserData('user-job-description', `Title: ${jobDescription.title}\nCompany: ${jobDescription.company}\nKeywords: ${jobDescription.keywords.join(', ')}\n\nFull Text:\n${jobDescription.rawText}`)}
 
 ## Content Pool (${contentPool.length} items)
-\`\`\`json
-${poolJson}
-\`\`\`
+${wrapUserData('user-content-pool', poolJson)}
 
 ## Your Job
 Build a resume by calling these tools IN ORDER, using ONLY items from the content pool above:
@@ -204,20 +186,13 @@ Build a resume by calling these tools IN ORDER, using ONLY items from the conten
 export function buildRefinePrompt(resume: Resume, jobDescription: JobDescription, contentPool: ContentPoolEntry[]): string {
   const resumeJson = JSON.stringify(resume, null, 2);
 
-  return `You are an expert career coach reviewing a tailored resume against a specific job description. Find gaps and suggest improvements.
+  return `${DEFENSE_PREAMBLE}You are an expert career coach reviewing a tailored resume against a specific job description. Find gaps and suggest improvements.
 
 ## Target Job
-**Title:** ${jobDescription.title} at ${jobDescription.company}
-**Keywords:** ${jobDescription.keywords.join(', ')}
-**Full Text:**
-\`\`\`
-${jobDescription.rawText}
-\`\`\`
+${wrapUserData('user-job-description', `Title: ${jobDescription.title} at ${jobDescription.company}\nKeywords: ${jobDescription.keywords.join(', ')}\n\nFull Text:\n${jobDescription.rawText}`)}
 
 ## Current Resume
-\`\`\`json
-${resumeJson}
-\`\`\`
+${wrapUserData('user-resume', resumeJson)}
 
 ## Content Pool (${contentPool.length} items available but not on this resume)
 ${contentPool.length > 0 ? 'The user has additional content that could strengthen this resume.' : 'No additional content available.'}

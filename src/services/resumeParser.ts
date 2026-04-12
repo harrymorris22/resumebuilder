@@ -1,6 +1,7 @@
 import { getClient } from './anthropic';
 import { generateId } from '../utils/id';
 import type { Resume, ResumeSection, ContentPoolEntry } from '../types/resume';
+import { DEFENSE_PREAMBLE, wrapUserData } from '../utils/promptSafety';
 
 export async function extractText(file: File): Promise<string> {
   const type = file.type;
@@ -179,11 +180,11 @@ export async function parseResumeWithClaude(text: string, apiKey: string): Promi
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
-    system: 'You are a resume parser. Extract all information from the provided resume text into a structured format. Be thorough — capture every detail. Use the create_resume tool to return the structured data. If a field is not present in the resume, use an empty string or empty array.',
+    system: `${DEFENSE_PREAMBLE}You are a resume parser. Extract all information from the provided resume text into a structured format. Be thorough — capture every detail. Use the create_resume tool to return the structured data. If a field is not present in the resume, use an empty string or empty array.`,
     messages: [
       {
         role: 'user',
-        content: `Parse the following resume text and extract all structured information:\n\n${text}`,
+        content: `Parse the following resume text and extract all structured information:\n\n${wrapUserData('user-content', text)}`,
       },
     ],
     tools: [PARSE_TOOL],
