@@ -60,6 +60,12 @@ export function CoverLetterPanel() {
     }
   }, [activeCoverLetter, activeJd, activeResume]);
 
+  const handlePdfExport = useCallback(() => {
+    document.body.classList.add('printing-cover-letter');
+    window.print();
+    document.body.classList.remove('printing-cover-letter');
+  }, []);
+
   const handleStartEdit = useCallback(() => {
     if (!activeCoverLetter) return;
     setEditText(activeCoverLetter.text);
@@ -168,6 +174,13 @@ export function CoverLetterPanel() {
           Export Word
         </button>
         <span className="text-stone-300 dark:text-stone-600">|</span>
+        <button
+          onClick={handlePdfExport}
+          className="text-xs text-stone-500 hover:text-primary-600 dark:text-stone-400 dark:hover:text-primary-400 transition-colors"
+        >
+          Export PDF
+        </button>
+        <span className="text-stone-300 dark:text-stone-600">|</span>
         {isEditing ? (
           <>
             <button
@@ -223,7 +236,7 @@ export function CoverLetterPanel() {
 
       {/* Document body */}
       <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-        <div className="bg-white dark:bg-stone-800 shadow-lg w-full max-w-[8.5in] min-h-[11in] p-12">
+        <div id="cover-letter-print-area" className="bg-white dark:bg-stone-800 shadow-lg w-full max-w-[8.5in] min-h-[11in] p-12">
           {isEditing ? (
             <textarea
               value={editText}
