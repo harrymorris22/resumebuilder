@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from './stores/useAppStore';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
@@ -6,6 +6,8 @@ import { SettingsModal } from './components/settings/SettingsModal';
 import { WizardShell } from './components/wizard/WizardShell';
 import { FirestoreToast } from './components/layout/FirestoreToast';
 import { LandingPage } from './components/landing/LandingPage';
+import { MigrationModal } from './components/auth/MigrationModal';
+import { isMigrationDone, hasLocalData, isFirestoreEmpty, markMigrationDone } from './utils/migration';
 
 function AppContent() {
   const { uid, loading: authLoading, firebaseAvailable } = useAuth();
@@ -14,6 +16,10 @@ function AppContent() {
 
   // Track whether the user chose to continue without an account
   const [continueLocal, setContinueLocal] = useState(false);
+
+  // Migration state: null = not checked, 'needed' = show modal, 'done' = dismissed
+  const [migrationState, setMigrationState] = useState<null | 'needed' | 'done'>(null);
+  const migrationCheckStarted = useRef(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -29,6 +35,24 @@ function AppContent() {
       hydrateFromIdb(null);
     }
   }, [authLoading, uid, hydrateFromIdb, continueLocal, firebaseAvailable]);
+
+  // Check if IDB → Firestore migration is needed after hydration
+  useEffect(() => {
+    if (!uid || !hydrated || migrationState !== null || migrationCheckStarted.current) return;
+    if (isMigrationDone(uid)) return;
+
+    migrationCheckStarted.current = true;
+    let cancelled = false;
+    (async () => {
+      const [firestoreEmpty, localExists] = await Promise.all([
+        isFirestoreEmpty(uid),
+        hasLocalData(),
+      ]);
+      if (cancelled) return;
+      setMigrationState(firestoreEmpty && localExists ? 'needed' : 'done');
+    })();
+    return () => { cancelled = true; };
+  }, [uid, hydrated, migrationState]);
 
   // Always light mode — remove any stale dark class
   useEffect(() => {
@@ -59,6 +83,20 @@ function AppContent() {
       <WizardShell />
       <SettingsModal />
       <FirestoreToast />
+      {migrationState === 'needed' && uid && (
+        <MigrationModal
+          uid={uid}
+          onComplete={() => {
+            setMigrationState('done');
+            // Re-hydrate from Firestore to pick up migrated data
+            hydrateFromIdb(uid);
+          }}
+          onSkip={() => {
+            markMigrationDone(uid);
+            setMigrationState('done');
+          }}
+        />
+      )}
     </div>
   );
 }
