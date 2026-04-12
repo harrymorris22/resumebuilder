@@ -61,7 +61,7 @@ export const resumeTools: ToolDefinition[] = [
   {
     name: 'update_experience_bullets',
     description:
-      'Update the bullet points for an existing experience entry. Use this to refine or improve bullets.',
+      'Update the bullet points and/or description for an existing experience entry. Use this to refine or improve bullets, or to add/update a role description.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -71,6 +71,7 @@ export const resumeTools: ToolDefinition[] = [
           items: { type: 'string' },
           description: 'Updated bullet points',
         },
+        description: { type: 'string', description: 'Optional 1-2 sentence company or role description. Pass null to remove.' },
       },
       required: ['experienceId', 'bullets'],
     },
