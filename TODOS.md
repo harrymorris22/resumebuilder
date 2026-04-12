@@ -14,6 +14,22 @@ Collapsible "Completed (N)" section at bottom of action panel showing what the A
 - **Effort:** S (CC: ~10 min)
 - **Depends on:** Action-list UI (shipped)
 
+## Security
+
+**Priority:** P2
+### Prompt Injection Mitigation
+User-supplied content (resume text, job descriptions, content pool items) is interpolated into system prompts sent to the Anthropic API. A malicious user could craft content that manipulates AI behavior. Add input sanitization and/or structured prompt boundaries.
+- **Effort:** M (CC: ~30 min)
+- **Depends on:** Nothing
+
+## Data Migration
+
+**Priority:** P2
+### IndexedDB → Firestore Migration
+Existing users who sign in for the first time have data in IndexedDB but nothing in Firestore. Build a one-time migration flow that detects local IDB data when a user first authenticates and offers to upload it to their Firestore account.
+- **Effort:** M (CC: ~30 min)
+- **Depends on:** Firebase Auth (Phase 2)
+
 ## Completed
 
 ### Before/After Resume Diff ✓

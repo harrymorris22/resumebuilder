@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0.0] - 2026-04-12
+
+### Added
+- **Google Sign-In + Cloud Sync** — sign in with Google to sync resumes, content pool, chat sessions, cover letters, job descriptions, and recommendations across devices via Firestore
+- **Landing page** — new homepage for logged-out users with feature overview and sign-in/continue-local CTAs
+- **Persistence routing** — automatic routing: signed-in users → Firestore, anonymous users → IndexedDB (backward compatible)
+- **Firestore error toasts** — non-blocking toast notifications when cloud operations fail
+- **Account section in Settings** — shows signed-in user info, sign-out button, or sign-in prompt
+- **Header auth UI** — sign-in button or user avatar/menu in the app header
+- **Offline support** — Firestore persistent local cache for instant loads even without network
+- **77 new tests** — persistence routing (44), Firestore CRUD (12), AuthContext (12), SignInButton (3), UserMenu (6)
+
+### Changed
+- **Firebase graceful degradation** — app works without Firebase env vars (local-only mode)
+
 ## [0.4.13.0] - 2026-04-08
 
 ### Fixed

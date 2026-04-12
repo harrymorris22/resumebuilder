@@ -1,23 +1,42 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from './stores/useAppStore';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { WizardShell } from './components/wizard/WizardShell';
+import { FirestoreToast } from './components/layout/FirestoreToast';
+import { LandingPage } from './components/landing/LandingPage';
 
 function AppContent() {
+  const { uid, loading: authLoading, firebaseAvailable } = useAuth();
   const hydrated = useAppStore((s) => s.hydrated);
   const hydrateFromIdb = useAppStore((s) => s.hydrateFromIdb);
 
+  // Track whether the user chose to continue without an account
+  const [continueLocal, setContinueLocal] = useState(false);
+
   useEffect(() => {
-    hydrateFromIdb();
-  }, [hydrateFromIdb]);
+    if (authLoading) return;
+
+    // If user is signed in, hydrate from their Firestore account
+    if (uid) {
+      hydrateFromIdb(uid);
+      return;
+    }
+
+    // Not signed in but continuing locally: hydrate from IDB
+    if (continueLocal || !firebaseAvailable) {
+      hydrateFromIdb(null);
+    }
+  }, [authLoading, uid, hydrateFromIdb, continueLocal, firebaseAvailable]);
 
   // Always light mode — remove any stale dark class
   useEffect(() => {
     document.documentElement.classList.remove('dark');
   }, []);
 
-  if (!hydrated) {
+  // Loading state (only when auth is resolving or actively hydrating)
+  if (authLoading || (uid && !hydrated) || (continueLocal && !hydrated)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-stone-50">
         <div className="flex flex-col items-center gap-3">
@@ -28,15 +47,33 @@ function AppContent() {
     );
   }
 
+  // Show landing page when not signed in and hasn't opted into local mode
+  // If Firebase isn't configured, skip landing and go straight to app
+  if (!uid && !continueLocal && firebaseAvailable) {
+    return <LandingPage onContinueLocal={() => setContinueLocal(true)} />;
+  }
+
   return (
     <div className="flex flex-col h-screen bg-stone-50 text-stone-900">
       <Header />
       <WizardShell />
       <SettingsModal />
+      <FirestoreToast />
     </div>
   );
 }
 
+// Placeholder: flush pending Firestore writes before sign-out.
+// Currently persistence calls are fire-and-forget.
+// If we add a write queue later, flush it here.
+async function flushPendingWrites() {
+  // no-op for now
+}
+
 export default function App() {
-  return <AppContent />;
+  return (
+    <AuthProvider onBeforeSignOut={flushPendingWrites}>
+      <AppContent />
+    </AuthProvider>
+  );
 }

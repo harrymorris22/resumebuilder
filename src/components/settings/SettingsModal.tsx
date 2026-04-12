@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function SettingsModal() {
   const settingsOpen = useAppStore((s) => s.settingsOpen);
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
   const apiKey = useAppStore((s) => s.apiKey);
   const setApiKey = useAppStore((s) => s.setApiKey);
+
+  const { user, signIn, signOut, firebaseAvailable } = useAuth();
 
   const [localKey, setLocalKey] = useState(apiKey);
   const [status, setStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
@@ -115,6 +118,54 @@ export function SettingsModal() {
             </p>
           )}
         </div>
+
+        {firebaseAvailable && (
+          <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-600">
+            <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+              Account
+            </h3>
+            {user ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {user.photoURL && (
+                    <img
+                      src={user.photoURL}
+                      alt=""
+                      className="w-8 h-8 rounded-full"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  <div>
+                    <p className="text-sm text-stone-900 dark:text-white">
+                      {user.displayName || user.email}
+                    </p>
+                    {user.email && user.displayName && (
+                      <p className="text-xs text-stone-500">{user.email}</p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-300"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Sign in to sync your data across devices.
+                </p>
+                <button
+                  onClick={signIn}
+                  className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                >
+                  Sign in with Google
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-6 flex justify-end gap-2">
           <button
