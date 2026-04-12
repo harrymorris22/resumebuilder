@@ -59,7 +59,13 @@ ${wrapUserData('user-resume', resumeJson)}${bankSection}${jobSection}
 - Use resume-modifying tools (update_contact, set_summary, add_experience, etc.) to make changes
 - Use suggest_star_rewrite for bullet-level improvements
 - Always update the resume immediately, then call suggest_actions with next steps
-- Keep text responses under 2 sentences — the action cards do the talking`;
+- Keep text responses under 2 sentences — the action cards do the talking
+
+## Mutation Data (REQUIRED for every suggestion)
+For EVERY suggestion in suggest_actions, include a \`mutation\` object with the exact tool name and input to apply the change. This allows instant execution without a second AI call.
+Example: { "tool": "update_experience_bullets", "input": { "experienceId": "<id>", "bullets": ["New bullet text..."] } }
+The mutation.tool must be one of: set_summary, update_experience_bullets, add_experience, add_education, add_skills, add_certification, add_project, update_contact.
+The mutation.input must match the schema of that tool exactly.`;
 }
 
 export function buildPoolRecommendationPrompt(contentPool: ContentPoolEntry[]): string {
@@ -101,7 +107,8 @@ Analyze the content pool and call the suggest_actions tool with specific, action
 - Suggest 5-10 recommendations, ordered by priority (high first)
 - For rewrites, show the EXACT replacement text in the preview field. The prompt field must include the exact text to use, not a vague instruction.
 - Be specific: include the exact replacement text in both preview and prompt. "Replace with: 'Led migration of 2M+ patient records to FHIR-compliant data layer, reducing API response times by 40%'" not "Add metrics to bullets"
-- Call suggest_actions as your only output tool`;
+- Call suggest_actions as your only output tool
+- For EVERY suggestion, include a \`mutation\` object with the exact tool name and input. Example: { "tool": "update_experience_bullets", "input": { "experienceId": "<id>", "bullets": ["..."] } }`;
 }
 
 export function buildJdPoolRecommendationPrompt(contentPool: ContentPoolEntry[], jobDescription: JobDescription): string {
@@ -136,7 +143,8 @@ Call suggest_actions with recommendations that help the user's content pool bett
 
 For EVERY suggestion, populate the relatedKeywords field with the JD keywords it addresses.
 Order by priority: missing keywords (high) > weak coverage (high) > missing skills (medium) > experience gaps (medium) > quantification (low).
-Suggest 5-10 recommendations.`;
+Suggest 5-10 recommendations.
+For EVERY suggestion, include a \`mutation\` object with the exact tool name and input for instant execution.`;
 }
 
 export function buildGenerateResumePrompt(contentPool: ContentPoolEntry[], jobDescription: JobDescription): string {
@@ -259,5 +267,6 @@ Call suggest_actions with specific refinements:
 
 For each suggestion that references a JD keyword, include it in the relatedKeywords field.
 Order by priority: missing keywords (high) > weak matches (medium) > quantification (medium) > nice-to-have (low).
-Suggest 3-7 refinements.`;
+Suggest 3-7 refinements.
+For EVERY suggestion, include a \`mutation\` object with the exact tool name and input for instant execution.`;
 }

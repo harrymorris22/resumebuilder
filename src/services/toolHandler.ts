@@ -246,6 +246,7 @@ export function handleToolCall(
           text: string;
           prompt: string;
           preview?: string;
+          mutation?: { tool: string; input: Record<string, unknown> };
           sectionId?: string;
           category?: string;
           priority?: string;
@@ -254,6 +255,7 @@ export function handleToolCall(
           text: s.text,
           prompt: s.prompt,
           preview: s.preview,
+          mutation: s.mutation,
           sectionId: s.sectionId,
           category: (s.category || 'content') as ActionSuggestion['category'],
           priority: (s.priority || 'medium') as ActionSuggestion['priority'],

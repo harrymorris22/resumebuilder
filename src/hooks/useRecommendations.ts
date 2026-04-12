@@ -11,6 +11,11 @@ import type { Recommendation } from '../types/recommendation';
 
 const MAX_TOOL_ITERATIONS = 10;
 
+const VALID_MUTATION_TOOLS = [
+  'set_summary', 'update_experience_bullets', 'add_experience',
+  'add_education', 'add_skills', 'add_certification', 'add_project', 'update_contact',
+];
+
 export function useRecommendations() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +95,7 @@ export function useRecommendations() {
                     text: s.text,
                     prompt: s.prompt,
                     preview: s.preview,
+                    mutation: s.mutation,
                     category: s.category === 'question' ? 'content' : s.category as Recommendation['category'],
                     priority: s.priority,
                     status: 'pending' as const,
@@ -164,63 +170,88 @@ export function useRecommendations() {
   const executeRecommendation = useCallback(
     async (id: string) => {
       const rec = useAppStore.getState().recommendations.find((r) => r.id === id);
-      if (!rec || !apiKey) return;
+      if (!rec) return;
 
       updateRecommendation(id, { status: 'executing' });
 
-      try {
-        const client = getClient(apiKey);
-        const state = useAppStore.getState();
-        const resume = state.resumes.find((r) => r.id === state.activeResumeId);
-        if (!resume) return;
+      const state = useAppStore.getState();
+      const resume = state.resumes.find((r) => r.id === state.activeResumeId);
+      if (!resume) {
+        updateRecommendation(id, { status: 'pending' });
+        return;
+      }
 
-        // Snapshot current sections for before/after diff
-        useAppStore.getState().setDiffSnapshot(structuredClone(resume.sections));
+      // Snapshot current sections for before/after diff
+      useAppStore.getState().setDiffSnapshot(structuredClone(resume.sections));
 
-        // Build execution message that includes both the prompt AND the preview
-        // so the AI produces exactly what was previewed to the user
-        let executionMessage = rec.prompt;
-        if (rec.preview) {
-          executionMessage += `\n\nIMPORTANT: The user was shown this exact preview of what the change would look like:\n"${rec.preview}"\n\nYou MUST produce output that matches this preview exactly. Do not deviate from what was promised.`;
-        }
-
-        const stream = client.messages.stream({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
-          system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume. The user has already seen a preview of what the change will look like. Your job is to apply EXACTLY that change, nothing more and nothing less. You MUST call a tool to make the change. Do not respond with text only.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
-          messages: [{ role: 'user', content: executionMessage }],
-          tools: resumeTools,
-          tool_choice: { type: 'any' as const },
-        });
-
-        const finalMessage = await stream.finalMessage();
-
-        const toolUses = finalMessage.content.filter(
-          (block): block is Anthropic.Messages.ToolUseBlock => block.type === 'tool_use'
-        );
-
-        if (toolUses.length === 0) {
-          // AI responded without calling any tool, resume unchanged
+      if (rec.mutation) {
+        // DETERMINISTIC PATH: validate then apply mutation directly
+        if (!VALID_MUTATION_TOOLS.includes(rec.mutation.tool)) {
           updateRecommendation(id, { status: 'pending' });
-          setError('Could not apply this suggestion. Try again.');
+          setError('Invalid suggestion data. Try regenerating suggestions.');
           return;
         }
 
-        for (const toolUse of toolUses) {
-          const freshResume = useAppStore.getState().resumes.find((r) => r.id === state.activeResumeId);
-          if (!freshResume) break;
+        const freshResume = useAppStore.getState().resumes.find((r) => r.id === state.activeResumeId);
+        if (!freshResume) return;
 
-          handleToolCall(
-            toolUse.name,
-            toolUse.input as Record<string, unknown>,
-            { resume: freshResume, updateResume, addContentBankItem }
-          );
-        }
+        handleToolCall(rec.mutation.tool, rec.mutation.input, {
+          resume: freshResume,
+          updateResume,
+          addContentBankItem,
+        });
 
         updateRecommendation(id, { status: 'accepted' });
-      } catch {
+      } else if (rec.prompt && apiKey) {
+        // FALLBACK: LLM call for recommendations without mutation data
+        try {
+          const client = getClient(apiKey);
+
+          let executionMessage = rec.prompt;
+          if (rec.preview) {
+            executionMessage += `\n\nIMPORTANT: The user was shown this exact preview of what the change would look like:\n"${rec.preview}"\n\nYou MUST produce output that matches this preview exactly.`;
+          }
+
+          const stream = client.messages.stream({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
+            messages: [{ role: 'user', content: executionMessage }],
+            tools: resumeTools,
+            tool_choice: { type: 'any' as const },
+          });
+
+          const finalMessage = await stream.finalMessage();
+
+          const toolUses = finalMessage.content.filter(
+            (block): block is Anthropic.Messages.ToolUseBlock => block.type === 'tool_use'
+          );
+
+          if (toolUses.length === 0) {
+            updateRecommendation(id, { status: 'pending' });
+            setError('Could not apply this suggestion. Try again.');
+            return;
+          }
+
+          for (const toolUse of toolUses) {
+            const freshResume = useAppStore.getState().resumes.find((r) => r.id === state.activeResumeId);
+            if (!freshResume) break;
+
+            handleToolCall(
+              toolUse.name,
+              toolUse.input as Record<string, unknown>,
+              { resume: freshResume, updateResume, addContentBankItem }
+            );
+          }
+
+          updateRecommendation(id, { status: 'accepted' });
+        } catch {
+          updateRecommendation(id, { status: 'pending' });
+          setError('Failed to apply recommendation. Try again.');
+        }
+      } else {
         updateRecommendation(id, { status: 'pending' });
-        setError('Failed to apply recommendation. Try again.');
+        setError('Cannot apply this suggestion. No mutation data or API key.');
       }
     },
     [apiKey, updateResume, addContentBankItem, updateRecommendation]

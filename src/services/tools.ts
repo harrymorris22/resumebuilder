@@ -249,8 +249,24 @@ export const resumeTools: ToolDefinition[] = [
                 enum: ['high', 'medium', 'low'],
                 description: 'Priority: high (critical improvement), medium (notable improvement), low (nice to have)',
               },
+              mutation: {
+                type: 'object',
+                properties: {
+                  tool: {
+                    type: 'string',
+                    enum: ['set_summary', 'update_experience_bullets', 'add_experience', 'add_education', 'add_skills', 'add_certification', 'add_project', 'update_contact'],
+                    description: 'The tool to call to apply this change.',
+                  },
+                  input: {
+                    type: 'object',
+                    description: 'The exact input to pass to the tool. Same schema as calling the tool directly.',
+                  },
+                },
+                required: ['tool', 'input'],
+                description: 'Structured mutation data for instant, deterministic execution. Include for every suggestion so changes apply without a second AI call.',
+              },
             },
-            required: ['text', 'prompt', 'category', 'priority'],
+            required: ['text', 'prompt', 'category', 'priority', 'mutation'],
           },
           description: 'Array of 1-5 suggested next actions, ordered by priority',
         },
