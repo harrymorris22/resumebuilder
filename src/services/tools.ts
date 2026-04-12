@@ -236,8 +236,8 @@ export const resumeTools: ToolDefinition[] = [
             type: 'object',
             properties: {
               text: { type: 'string', description: 'Short display text for the action card (1-2 sentences)' },
-              prompt: { type: 'string', description: 'Full prompt to execute when the user clicks "Fix this"' },
-              preview: { type: 'string', description: 'Short preview of what the fix would look like (e.g. the rewritten bullet text, the new section content). Shows before the user commits.' },
+              prompt: { type: 'string', description: 'Full prompt to execute when the user clicks "Fix this". Must produce EXACTLY the result shown in the preview field. Be specific: include the exact text to use, not vague instructions.' },
+              preview: { type: 'string', description: 'The EXACT text that will appear in the resume after this fix is applied. This is a commitment to the user. The prompt field must produce this exact output when executed.' },
               sectionId: { type: 'string', description: 'Resume section ID this relates to' },
               category: {
                 type: 'string',
