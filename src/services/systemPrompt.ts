@@ -74,7 +74,7 @@ export function buildPoolRecommendationPrompt(contentPool: ContentPoolEntry[]): 
       id: e.id,
       type: e.item.type,
       data: e.item.type === 'bullet'
-        ? { text: (e.item as { type: 'bullet'; data: { text: string } }).data.text, context: (e.item as { type: 'bullet'; context: { company: string; title: string } }).context }
+        ? { text: (e.item as { type: 'bullet'; data: { text: string } }).data.text, context: (e.item as { type: 'bullet'; context: unknown }).context }
         : e.item.data,
       source: e.source,
     })),
@@ -117,7 +117,7 @@ export function buildJdPoolRecommendationPrompt(contentPool: ContentPoolEntry[],
       id: e.id,
       type: e.item.type,
       data: e.item.type === 'bullet'
-        ? { text: (e.item as { type: 'bullet'; data: { text: string } }).data.text, context: (e.item as { type: 'bullet'; context: { company: string; title: string } }).context }
+        ? { text: (e.item as { type: 'bullet'; data: { text: string } }).data.text, context: (e.item as { type: 'bullet'; context: unknown }).context }
         : e.item.data,
     })),
     null,

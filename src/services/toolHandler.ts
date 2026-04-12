@@ -84,11 +84,15 @@ export function handleToolCall(
       if (!section || section.content.type !== 'experience') return 'Error: experience section not found';
       const items = section.content.data.items.map((item) =>
         item.id === input.experienceId
-          ? { ...item, bullets: input.bullets as string[] }
+          ? {
+              ...item,
+              bullets: input.bullets as string[],
+              ...(input.description !== undefined ? { description: input.description as string || undefined } : {}),
+            }
           : item
       );
       updateResume(updateSection(resume, section.id, { type: 'experience', data: { items } }));
-      return 'Experience bullets updated.';
+      return 'Experience updated.';
     }
 
     case 'add_education': {
