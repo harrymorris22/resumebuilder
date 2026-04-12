@@ -13,6 +13,7 @@ interface ToolHandlerContext {
   onJobAnalyzed?: (job: JobDescription) => void;
   onCoverLetterGenerated?: (letter: CoverLetter) => void;
   onActionSuggestion?: (suggestions: ActionSuggestion[]) => void;
+  jobDescriptionId?: string;
 }
 
 function findSection(resume: Resume, type: string): ResumeSection | undefined {
@@ -267,7 +268,7 @@ export function handleToolCall(
       const letter: CoverLetter = {
         id: generateId(),
         resumeId: resume.id,
-        jobDescriptionId: '',
+        jobDescriptionId: ctx.jobDescriptionId || '',
         text: input.text as string,
         createdAt: new Date().toISOString(),
       };

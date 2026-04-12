@@ -202,3 +202,35 @@ export async function exportToWord(resume: Resume) {
   const fileName = `${resume.name.replace(/\s+/g, '_')}.docx`;
   saveAs(blob, fileName);
 }
+
+export async function exportCoverLetterToWord(text: string, _applicantName: string, jobTitle: string, company: string) {
+  const paragraphs = text.split(/\n\n+/).filter(Boolean);
+
+  const children: Paragraph[] = [
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: `Cover Letter — ${jobTitle} at ${company}`,
+          bold: true,
+          size: 24,
+        }),
+      ],
+      spacing: { after: 200 },
+    }),
+    ...paragraphs.map(
+      (p) =>
+        new Paragraph({
+          children: [new TextRun({ text: p, size: 22 })],
+          spacing: { after: 160 },
+        })
+    ),
+  ];
+
+  const doc = new Document({
+    sections: [{ children }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const fileName = `Cover_Letter_${company.replace(/\s+/g, '_')}.docx`;
+  saveAs(blob, fileName);
+}

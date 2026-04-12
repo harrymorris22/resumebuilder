@@ -1,4 +1,4 @@
-import type { Resume, ContentBankItem, ContentPoolEntry, JobDescription } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, JobDescription, CoverLetterTone } from '../types/resume';
 import { DEFENSE_PREAMBLE, wrapUserData } from '../utils/promptSafety';
 
 export function buildSystemPrompt(
@@ -181,6 +181,58 @@ Build a resume by calling these tools IN ORDER, using ONLY items from the conten
 - Use the EXACT wording from pool items — do not modify or "improve" them.
 - If the pool lacks content for a section, skip it. Never invent content.
 - After building the resume, call suggest_actions with 2-3 suggestions for content the user could ADD to their pool to strengthen this resume.`;
+}
+
+export function buildCoverLetterPrompt(
+  resume: Resume,
+  contentPool: ContentPoolEntry[],
+  jobDescription: JobDescription,
+  tone: CoverLetterTone = 'professional'
+): string {
+  const resumeJson = JSON.stringify(resume, null, 2);
+  const poolJson = JSON.stringify(
+    contentPool.slice(0, 200).map((e) => ({
+      id: e.id,
+      type: e.item.type,
+      data: e.item.data,
+      ...(e.item.type === 'bullet' ? { context: (e.item as { type: 'bullet'; context: unknown }).context } : {}),
+    })),
+    null,
+    2
+  );
+
+  const toneInstructions: Record<CoverLetterTone, string> = {
+    professional: 'Use a formal, professional tone. Confident but not arrogant. Standard business language.',
+    conversational: 'Use a warm, approachable tone. Still professional but more personal and engaging. Write like a confident person talking to a hiring manager they respect.',
+    technical: 'Use a precise, technical tone. Lead with technical expertise and specific technologies. Appropriate for engineering and technical roles.',
+  };
+
+  return `${DEFENSE_PREAMBLE}You are an expert career coach writing a cover letter. Write a compelling, one-page cover letter (~300-400 words) for this job application.
+
+## Tone
+${toneInstructions[tone]}
+
+## Target Job
+${wrapUserData('user-job-description', `Title: ${jobDescription.title}\nCompany: ${jobDescription.company}\nKeywords: ${jobDescription.keywords.join(', ')}\n\nFull Text:\n${jobDescription.rawText}`)}
+
+## Applicant's Resume
+${wrapUserData('user-resume', resumeJson)}
+
+## Applicant's Full Background
+${wrapUserData('user-content-pool', poolJson)}
+
+## Instructions
+1. Address the letter to the hiring manager (use "Dear Hiring Manager" if no name is available).
+2. Opening paragraph: State the position and express genuine interest. Include a compelling hook.
+3. Body paragraphs (1-2): Connect the applicant's specific achievements from the resume to what the job requires. Reference real numbers, projects, and outcomes from the resume. Match JD keywords naturally.
+4. Closing paragraph: Reaffirm interest, mention what the applicant would bring, include a call to action.
+5. Sign off professionally.
+
+## Rules
+- Use ONLY facts from the resume and content pool. NEVER fabricate experience, skills, or achievements.
+- Output plain text with paragraph breaks (\\n\\n between paragraphs). No markdown formatting.
+- Keep it to one page (~300-400 words).
+- Call the generate_cover_letter tool with the complete cover letter text.`;
 }
 
 export function buildRefinePrompt(resume: Resume, jobDescription: JobDescription, contentPool: ContentPoolEntry[]): string {
