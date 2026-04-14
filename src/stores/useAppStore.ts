@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Resume, ResumeSection, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
-import type { ContentBankItem, CoverLetter } from '../types/resume';
+import type { ContentBankItem, CoverLetter, InterviewQuestions } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 import type { WizardStep } from '../types/wizard';
@@ -18,12 +18,14 @@ import {
   getAllContentPoolEntries,
   deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
+  saveInterviewQuestions,
   saveJobDescription,
   getAllJobDescriptions,
   deleteJobDescription as deleteJdFromDb,
   saveRecommendation,
   getAllRecommendations,
   clearRecommendations as clearRecsFromDb,
+  getAllInterviewQuestions,
 } from '../db/persistence';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
@@ -56,6 +58,8 @@ interface AppState {
   settingsOpen: boolean;
   atsKeywords: string[];
   activeCoverLetter: CoverLetter | null;
+  interviewQuestions: InterviewQuestions[];
+  activeInterviewQuestions: InterviewQuestions | null;
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
   diffSnapshot: ResumeSection[] | null;
@@ -100,6 +104,10 @@ interface AppState {
   addCoverLetter: (letter: CoverLetter) => void;
   setActiveCoverLetter: (letter: CoverLetter | null) => void;
   updateCoverLetter: (id: string, text: string) => void;
+
+  // Actions — interview questions
+  addInterviewQuestions: (iq: InterviewQuestions) => void;
+  setActiveInterviewQuestions: (iq: InterviewQuestions | null) => void;
 
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
@@ -159,6 +167,8 @@ export const useAppStore = create<AppState>()(
       hydrated: false,
       atsKeywords: [],
       activeCoverLetter: null,
+      interviewQuestions: [],
+      activeInterviewQuestions: null,
       pendingAutoMessage: null,
       latestCoachSuggestion: null,
       diffSnapshot: null,
@@ -480,6 +490,13 @@ export const useAppStore = create<AppState>()(
         if (updatedLetter) saveCoverLetter(get().userId, updatedLetter);
       },
 
+      // Interview questions
+      addInterviewQuestions: (iq) => {
+        set((s) => ({ interviewQuestions: [...s.interviewQuestions, iq] }));
+        saveInterviewQuestions(get().userId, iq);
+      },
+      setActiveInterviewQuestions: (iq) => set({ activeInterviewQuestions: iq }),
+
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
 
@@ -537,13 +554,14 @@ export const useAppStore = create<AppState>()(
         const effectiveUid = uid ?? get().userId;
         if (uid !== undefined) set({ userId: uid ?? null });
 
-        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations] = await Promise.all([
+        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations, interviewQuestions] = await Promise.all([
           getAllResumes(effectiveUid),
           getAllChatSessions(effectiveUid),
           getAllContentBankItems(effectiveUid),
           getAllContentPoolEntries(effectiveUid),
           getAllJobDescriptions(effectiveUid),
           getAllRecommendations(effectiveUid),
+          getAllInterviewQuestions(effectiveUid),
         ]);
 
         // Migrate persisted data: deduplicate bullets + strip location from experience items
@@ -601,6 +619,7 @@ export const useAppStore = create<AppState>()(
           contentPool,
           jobDescriptions,
           recommendations,
+          interviewQuestions,
           hydrated: true,
           activeResumeId,
           wizardStep,

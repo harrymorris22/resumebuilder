@@ -288,8 +288,28 @@ export const resumeTools: ToolDefinition[] = [
       required: ['text'],
     },
   },
+  {
+    name: 'generate_interview_questions',
+    description:
+      'Generate interview questions for the candidate to ask at the end of a job interview.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        questions: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of exactly 5 interview questions',
+        },
+      },
+      required: ['questions'],
+    },
+  },
 ];
 
 export const coverLetterTools: ToolDefinition[] = resumeTools.filter(
   (t) => t.name === 'generate_cover_letter'
+);
+
+export const interviewQuestionsTools: ToolDefinition[] = resumeTools.filter(
+  (t) => t.name === 'generate_interview_questions'
 );
