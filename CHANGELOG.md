@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0.0] - 2026-04-14
+
+### Added
+- **Interview questions generator** — new "Questions" tab in the Refine step. Enter a company website URL and generate 5 tailored interview questions based on your resume, job description, and company context. Questions are specific, research-backed, and role-relevant. Includes Copy All and Regenerate.
+- Full persistence: questions saved to IndexedDB and Firestore, synced across devices
+- `InterviewQuestionsPanel` component with company URL input, loading states, error handling, and numbered question cards
+- `useGenerateInterviewQuestions` hook with streaming AI generation and abort support
+- `buildInterviewQuestionsPrompt` system prompt for generating company-specific questions
+- Questions tab added to both RefineStep wizard and RightPanel non-wizard view
+
 ## [0.5.3.7] - 2026-04-12
 
 ### Fixed

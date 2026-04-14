@@ -1,10 +1,10 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, JobDescription } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
 const DB_NAME = 'resume-builder';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 interface ResumeBuilderDB {
   resumes: Resume;
@@ -14,6 +14,7 @@ interface ResumeBuilderDB {
   coverLetters: CoverLetter;
   jobDescriptions: JobDescription;
   recommendations: Recommendation;
+  interviewQuestions: InterviewQuestions;
 }
 
 let dbInstance: IDBPDatabase<ResumeBuilderDB> | null = null;
@@ -48,6 +49,9 @@ async function getDb(): Promise<IDBPDatabase<ResumeBuilderDB> | null> {
         }
         if (!db.objectStoreNames.contains('recommendations')) {
           db.createObjectStore('recommendations', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('interviewQuestions')) {
+          db.createObjectStore('interviewQuestions', { keyPath: 'id' });
         }
       },
     });
@@ -195,4 +199,24 @@ export async function deleteRecommendation(id: string): Promise<void> {
 export async function clearRecommendations(): Promise<void> {
   const db = await getDb();
   if (db) await db.clear('recommendations');
+}
+
+// --- Interview Questions ---
+
+export async function saveInterviewQuestions(iq: InterviewQuestions): Promise<void> {
+  const db = await getDb();
+  if (db) await db.put('interviewQuestions', iq);
+}
+
+export async function getInterviewQuestions(jobDescriptionId: string): Promise<InterviewQuestions | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const all = await db.getAll('interviewQuestions');
+  return all.find(iq => iq.jobDescriptionId === jobDescriptionId);
+}
+
+export async function getAllInterviewQuestions(): Promise<InterviewQuestions[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.getAll('interviewQuestions');
 }

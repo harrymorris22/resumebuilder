@@ -10,14 +10,16 @@ import { TemplateSelector } from '../../resume/TemplateSelector';
 import { JobDescriptionForm } from '../../jobDescription/JobDescriptionForm';
 import { SavedJobList } from '../../jobDescription/SavedJobList';
 import { CoverLetterPanel } from '../../coverLetter/CoverLetterPanel';
+import { InterviewQuestionsPanel } from '../../interviewQuestions/InterviewQuestionsPanel';
 
-type LeftTab = 'suggestions' | 'content-pool' | 'job-description' | 'cover-letter';
+type LeftTab = 'suggestions' | 'content-pool' | 'job-description' | 'cover-letter' | 'interview-questions';
 
 const TABS: { key: LeftTab; label: string }[] = [
   { key: 'suggestions', label: 'CV Suggestions' },
   { key: 'content-pool', label: 'Content Pool' },
   { key: 'job-description', label: 'Job Description' },
   { key: 'cover-letter', label: 'Cover Letter' },
+  { key: 'interview-questions', label: 'Questions' },
 ];
 
 export function RefineStep() {
@@ -248,13 +250,24 @@ export function RefineStep() {
               </p>
             </div>
           )}
+
+          {/* Interview questions tab: left panel helper text */}
+          {leftTab === 'interview-questions' && (
+            <div className="flex items-center justify-center h-full text-center px-4">
+              <p className="text-sm text-stone-400">
+                Use the panel on the right to generate smart questions to ask at your interview.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Right panel: resume preview, diff view, or cover letter preview */}
+      {/* Right panel: resume preview, diff view, cover letter, or interview questions */}
       <div className="flex-1 min-h-0 flex flex-col">
         {leftTab === 'cover-letter' ? (
           <CoverLetterPanel />
+        ) : leftTab === 'interview-questions' ? (
+          <InterviewQuestionsPanel />
         ) : (
           <>
             <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-stone-200 flex-shrink-0">

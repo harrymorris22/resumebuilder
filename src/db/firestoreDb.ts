@@ -8,7 +8,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, JobDescription } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
@@ -243,5 +243,35 @@ export async function clearRecommendations(uid: string): Promise<void> {
     await batch.commit();
   } catch {
     showToast("Couldn't clear recommendations from cloud.");
+  }
+}
+
+// --- Interview Questions ---
+
+export async function saveInterviewQuestions(uid: string, iq: InterviewQuestions): Promise<void> {
+  try {
+    await setDoc(userDoc(uid, 'interviewQuestions', iq.id), JSON.parse(JSON.stringify(iq)));
+  } catch {
+    showToast("Couldn't save interview questions to cloud.");
+  }
+}
+
+export async function getInterviewQuestions(uid: string, jobDescriptionId: string): Promise<InterviewQuestions | undefined> {
+  try {
+    const snap = await getDocs(userCol(uid, 'interviewQuestions'));
+    return snap.docs.map((d) => d.data() as InterviewQuestions).find((iq) => iq.jobDescriptionId === jobDescriptionId);
+  } catch {
+    showToast("Couldn't load interview questions from cloud.");
+    return undefined;
+  }
+}
+
+export async function getAllInterviewQuestions(uid: string): Promise<InterviewQuestions[]> {
+  try {
+    const snap = await getDocs(userCol(uid, 'interviewQuestions'));
+    return snap.docs.map((d) => d.data() as InterviewQuestions);
+  } catch {
+    showToast("Couldn't load interview questions from cloud.");
+    return [];
   }
 }

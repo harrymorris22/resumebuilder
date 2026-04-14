@@ -1,4 +1,4 @@
-import type { Resume, ResumeSection, ExperienceItem, EducationItem, CertificationItem, ProjectItem, SkillCategory, ContentBankItem, CoverLetter, JobDescription } from '../types/resume';
+import type { Resume, ResumeSection, ExperienceItem, EducationItem, CertificationItem, ProjectItem, SkillCategory, ContentBankItem, CoverLetter, InterviewQuestions, JobDescription } from '../types/resume';
 import type { StarSuggestion, BankItemSuggestion, ActionSuggestion } from '../types/chat';
 import { generateId } from '../utils/id';
 
@@ -12,6 +12,7 @@ interface ToolHandlerContext {
   onBankItemSuggestion?: (suggestion: BankItemSuggestion) => void;
   onJobAnalyzed?: (job: JobDescription) => void;
   onCoverLetterGenerated?: (letter: CoverLetter) => void;
+  onInterviewQuestionsGenerated?: (iq: InterviewQuestions) => void;
   onActionSuggestion?: (suggestions: ActionSuggestion[]) => void;
   jobDescriptionId?: string;
 }
@@ -35,7 +36,7 @@ export function handleToolCall(
   input: ToolInput,
   ctx: ToolHandlerContext
 ): string {
-  const { resume, updateResume, addContentBankItem, onStarSuggestion, onBankItemSuggestion, onJobAnalyzed, onCoverLetterGenerated, onActionSuggestion } = ctx;
+  const { resume, updateResume, addContentBankItem, onStarSuggestion, onBankItemSuggestion, onJobAnalyzed, onCoverLetterGenerated, onInterviewQuestionsGenerated, onActionSuggestion } = ctx;
 
   switch (toolName) {
     case 'update_contact': {
@@ -281,6 +282,17 @@ export function handleToolCall(
       };
       if (onCoverLetterGenerated) onCoverLetterGenerated(letter);
       return 'Cover letter generated and saved.';
+    }
+
+    case 'generate_interview_questions': {
+      const iq: InterviewQuestions = {
+        id: generateId(),
+        jobDescriptionId: ctx.jobDescriptionId || '',
+        questions: (input.questions as string[]) || [],
+        createdAt: new Date().toISOString(),
+      };
+      if (onInterviewQuestionsGenerated) onInterviewQuestionsGenerated(iq);
+      return 'Interview questions generated and saved.';
     }
 
     default:

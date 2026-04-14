@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { ResumePreview } from './ResumePreview';
 import { CoverLetterPanel } from '../coverLetter/CoverLetterPanel';
+import { InterviewQuestionsPanel } from '../interviewQuestions/InterviewQuestionsPanel';
 import { ContentPoolPage } from '../contentPool/ContentPoolPage';
 import { useAppStore } from '../../stores/useAppStore';
 
-type Tab = 'resume' | 'cover-letter' | 'cv-content';
+type Tab = 'resume' | 'cover-letter' | 'cv-content' | 'interview-questions';
 
 export function RightPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('resume');
   const activeCoverLetter = useAppStore((s) => s.activeCoverLetter);
+  const activeInterviewQuestions = useAppStore((s) => s.activeInterviewQuestions);
   const contentPool = useAppStore((s) => s.contentPool);
 
   const tabClass = (tab: Tab) =>
@@ -37,6 +39,12 @@ export function RightPanel() {
             <span className="ml-1 w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block" />
           )}
         </button>
+        <button onClick={() => setActiveTab('interview-questions')} className={tabClass('interview-questions')}>
+          Questions
+          {activeInterviewQuestions && (
+            <span className="ml-1 w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block" />
+          )}
+        </button>
       </div>
 
       {/* Content */}
@@ -44,6 +52,7 @@ export function RightPanel() {
         {activeTab === 'resume' && <ResumePreview />}
         {activeTab === 'cv-content' && <ContentPoolPage />}
         {activeTab === 'cover-letter' && <CoverLetterPanel />}
+        {activeTab === 'interview-questions' && <InterviewQuestionsPanel />}
       </div>
     </div>
   );

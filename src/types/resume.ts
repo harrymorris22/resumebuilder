@@ -166,3 +166,11 @@ export interface CoverLetter {
   tone?: CoverLetterTone;
   createdAt: string;
 }
+
+export interface InterviewQuestions {
+  id: string;
+  jobDescriptionId: string;
+  companyUrl?: string;
+  questions: string[];
+  createdAt: string;
+}

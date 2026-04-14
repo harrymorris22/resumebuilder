@@ -270,3 +270,40 @@ Order by priority: missing keywords (high) > weak matches (medium) > quantificat
 Suggest 3-7 refinements.
 For EVERY suggestion, include a \`mutation\` object with the exact tool name and input for instant execution.`;
 }
+
+export function buildInterviewQuestionsPrompt(
+  jobDescription: JobDescription,
+  resume: Resume,
+  companyUrl?: string,
+): string {
+  const resumeJson = JSON.stringify(resume, null, 2);
+
+  const companyUrlSection = companyUrl
+    ? `\n\n## Company Website\nThe candidate provided this company website URL for context: ${companyUrl}`
+    : '';
+
+  return `${DEFENSE_PREAMBLE}You are an expert career coach helping a candidate prepare smart, research-backed questions to ask at the end of a job interview.
+
+## Target Job
+${wrapUserData('user-job-description', `Title: ${jobDescription.title}\nCompany: ${jobDescription.company}\nKeywords: ${jobDescription.keywords.join(', ')}\n\nFull Text:\n${jobDescription.rawText}`)}
+
+## Candidate's Resume
+${wrapUserData('user-resume', resumeJson)}${companyUrlSection}
+
+## Your Job
+Generate exactly 5 interview questions the candidate should ask the interviewer. These questions should:
+
+1. **Demonstrate research about the company** — reference specific things about the company, its products, industry position, or recent developments. Use your knowledge of the company (from the company name, website URL, and job description) to make questions specific.
+2. **Show strategic thinking** — ask about challenges, priorities, and the direction of the team or company. Go beyond surface-level questions.
+3. **Be role-relevant** — connect to the specific responsibilities and skills mentioned in the job description. Show the candidate understands the role.
+4. **Invite real conversation** — ask open-ended questions that encourage the interviewer to share their perspective, not just yes/no answers.
+5. **Vary in scope** — mix questions about the immediate role, the team, company culture, and strategic direction.
+
+## Rules
+- Generate exactly 5 questions.
+- Each question should be 1-3 sentences.
+- Do NOT generate generic questions like "What does a typical day look like?" or "What are the next steps?"
+- Make every question specific to THIS company and THIS role.
+- Use ONLY facts from the job description and resume. Do not fabricate company information.
+- Call the generate_interview_questions tool with the array of 5 questions.`;
+}
