@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0.0] - 2026-04-23
+
+### Added
+- **Interview Prep** — new "Interview Prep" tab in the header (CV/job agnostic, always accessible). Opens a drawer with 12 common interview questions grouped into opener, behavioural, strengths/weaknesses, and motivation categories. Click "Generate Answer" per question, or "Generate All" to fan out 12 parallel requests (concurrency capped at 3). Answers are 3-5 first-person bullets grounded only in the content pool. No fabrication: if the pool lacks material for a question, the AI returns a single meta-bullet prompting the user to add pool entries.
+- **Generate All + Copy All + Clear All** — batch actions on the drawer header. Live progress counter ("3 / 12 answered") with failed-count indicator. Per-card Copy / Regenerate / Clear actions.
+- **Anthropic prompt caching** — content pool serialized once per batch with `cache_control: { type: 'ephemeral' }`, so the 11 follow-up calls read the pool from cache at ~10% input cost.
+- Full persistence: answers saved to IndexedDB (DB version bumped 4 → 5, new `interviewPrep` store) and Firestore (`users/{uid}/interviewPrep/default`), synced across devices.
+- `InterviewPrepDrawer`, `InterviewPrepPage`, `InterviewPrepCard` components matching the Content Pool drawer pattern.
+- `useGenerateInterviewAnswer` hook (per-card) and `useGenerateAllInterviewAnswers` orchestrator (inline `pLimit(3)`, per-question failure isolation, abort support).
+- `generate_interview_answer` tool added to Anthropic tool handler with `onInterviewAnswerGenerated` callback.
+- `buildInterviewAnswerPrompt` system prompt with DEFENSE_PREAMBLE, grounding rules, and thin-pool fallback.
+- Chat-bubble header button next to Content Pool / My Resumes.
+
 ## [0.6.0.0] - 2026-04-14
 
 ### Added

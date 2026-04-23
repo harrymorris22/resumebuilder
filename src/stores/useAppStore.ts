@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Resume, ResumeSection, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
-import type { ContentBankItem, CoverLetter, InterviewQuestions } from '../types/resume';
+import type { ContentBankItem, CoverLetter, InterviewQuestions, InterviewPrep } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 import type { WizardStep } from '../types/wizard';
@@ -19,6 +19,8 @@ import {
   deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
   saveInterviewQuestions,
+  saveInterviewPrep,
+  getInterviewPrep,
   saveJobDescription,
   getAllJobDescriptions,
   deleteJobDescription as deleteJdFromDb,
@@ -60,6 +62,7 @@ interface AppState {
   activeCoverLetter: CoverLetter | null;
   interviewQuestions: InterviewQuestions[];
   activeInterviewQuestions: InterviewQuestions | null;
+  interviewPrep: InterviewPrep | null;
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
   diffSnapshot: ResumeSection[] | null;
@@ -108,6 +111,11 @@ interface AppState {
   // Actions — interview questions
   addInterviewQuestions: (iq: InterviewQuestions) => void;
   setActiveInterviewQuestions: (iq: InterviewQuestions | null) => void;
+
+  // Actions — interview prep
+  updateInterviewPrepAnswer: (questionId: string, bullets: string[]) => void;
+  clearInterviewPrepAnswer: (questionId: string) => void;
+  clearAllInterviewPrepAnswers: () => void;
 
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
@@ -169,6 +177,7 @@ export const useAppStore = create<AppState>()(
       activeCoverLetter: null,
       interviewQuestions: [],
       activeInterviewQuestions: null,
+      interviewPrep: null,
       pendingAutoMessage: null,
       latestCoachSuggestion: null,
       diffSnapshot: null,
@@ -497,6 +506,32 @@ export const useAppStore = create<AppState>()(
       },
       setActiveInterviewQuestions: (iq) => set({ activeInterviewQuestions: iq }),
 
+      // Interview prep
+      updateInterviewPrepAnswer: (questionId, bullets) => {
+        const existing = get().interviewPrep ?? { id: 'default', answers: {}, updatedAt: new Date().toISOString() };
+        const next: InterviewPrep = {
+          ...existing,
+          answers: { ...existing.answers, [questionId]: bullets },
+          updatedAt: new Date().toISOString(),
+        };
+        set({ interviewPrep: next });
+        saveInterviewPrep(get().userId, next);
+      },
+      clearInterviewPrepAnswer: (questionId) => {
+        const existing = get().interviewPrep;
+        if (!existing) return;
+        const nextAnswers = { ...existing.answers };
+        delete nextAnswers[questionId];
+        const next: InterviewPrep = { ...existing, answers: nextAnswers, updatedAt: new Date().toISOString() };
+        set({ interviewPrep: next });
+        saveInterviewPrep(get().userId, next);
+      },
+      clearAllInterviewPrepAnswers: () => {
+        const next: InterviewPrep = { id: 'default', answers: {}, updatedAt: new Date().toISOString() };
+        set({ interviewPrep: next });
+        saveInterviewPrep(get().userId, next);
+      },
+
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
 
@@ -554,7 +589,7 @@ export const useAppStore = create<AppState>()(
         const effectiveUid = uid ?? get().userId;
         if (uid !== undefined) set({ userId: uid ?? null });
 
-        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations, interviewQuestions] = await Promise.all([
+        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations, interviewQuestions, interviewPrep] = await Promise.all([
           getAllResumes(effectiveUid),
           getAllChatSessions(effectiveUid),
           getAllContentBankItems(effectiveUid),
@@ -562,6 +597,7 @@ export const useAppStore = create<AppState>()(
           getAllJobDescriptions(effectiveUid),
           getAllRecommendations(effectiveUid),
           getAllInterviewQuestions(effectiveUid),
+          getInterviewPrep(effectiveUid),
         ]);
 
         // Migrate persisted data: deduplicate bullets + strip location from experience items
@@ -620,6 +656,7 @@ export const useAppStore = create<AppState>()(
           jobDescriptions,
           recommendations,
           interviewQuestions,
+          interviewPrep: interviewPrep ?? null,
           hydrated: true,
           activeResumeId,
           wizardStep,

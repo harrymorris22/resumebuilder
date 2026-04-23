@@ -154,3 +154,57 @@ describe('handleToolCall — suggest_actions mutation passthrough', () => {
     expect(suggestions[0].mutation).toBeUndefined()
   })
 })
+
+describe('handleToolCall — generate_interview_answer', () => {
+  it('routes to onInterviewAnswerGenerated callback with questionId + bullets', () => {
+    const onInterviewAnswerGenerated = vi.fn()
+    const result = handleToolCall(
+      'generate_interview_answer',
+      {
+        questionId: 'tell-me-about-yourself',
+        bullets: ['I am a software engineer.', 'I worked at Acme.', 'I love shipping product.'],
+      },
+      makeCtx({ onInterviewAnswerGenerated }),
+    )
+
+    expect(onInterviewAnswerGenerated).toHaveBeenCalledOnce()
+    expect(onInterviewAnswerGenerated).toHaveBeenCalledWith(
+      'tell-me-about-yourself',
+      ['I am a software engineer.', 'I worked at Acme.', 'I love shipping product.'],
+    )
+    expect(result).toContain('tell-me-about-yourself')
+    expect(result).toContain('3 bullets')
+  })
+
+  it('does not crash when callback is missing from context', () => {
+    expect(() =>
+      handleToolCall(
+        'generate_interview_answer',
+        { questionId: 'greatest-weakness', bullets: ['x'] },
+        makeCtx(),
+      ),
+    ).not.toThrow()
+  })
+
+  it('defaults bullets to [] when missing', () => {
+    const onInterviewAnswerGenerated = vi.fn()
+    handleToolCall(
+      'generate_interview_answer',
+      { questionId: 'greatest-strength' },
+      makeCtx({ onInterviewAnswerGenerated }),
+    )
+
+    expect(onInterviewAnswerGenerated).toHaveBeenCalledWith('greatest-strength', [])
+  })
+
+  it('defaults questionId to empty string when missing', () => {
+    const onInterviewAnswerGenerated = vi.fn()
+    handleToolCall(
+      'generate_interview_answer',
+      { bullets: ['one', 'two'] },
+      makeCtx({ onInterviewAnswerGenerated }),
+    )
+
+    expect(onInterviewAnswerGenerated).toHaveBeenCalledWith('', ['one', 'two'])
+  })
+})

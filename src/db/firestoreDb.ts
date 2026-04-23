@@ -8,7 +8,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, JobDescription } from '../types/resume';
+import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
@@ -273,5 +273,25 @@ export async function getAllInterviewQuestions(uid: string): Promise<InterviewQu
   } catch {
     showToast("Couldn't load interview questions from cloud.");
     return [];
+  }
+}
+
+// --- Interview Prep ---
+
+export async function saveInterviewPrep(uid: string, prep: InterviewPrep): Promise<void> {
+  try {
+    await setDoc(userDoc(uid, 'interviewPrep', prep.id), JSON.parse(JSON.stringify(prep)));
+  } catch {
+    showToast("Couldn't save interview prep to cloud.");
+  }
+}
+
+export async function getInterviewPrep(uid: string): Promise<InterviewPrep | undefined> {
+  try {
+    const snap = await getDoc(userDoc(uid, 'interviewPrep', 'default'));
+    return snap.exists() ? (snap.data() as InterviewPrep) : undefined;
+  } catch {
+    showToast("Couldn't load interview prep from cloud.");
+    return undefined;
   }
 }

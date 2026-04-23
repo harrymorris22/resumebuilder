@@ -304,6 +304,23 @@ export const resumeTools: ToolDefinition[] = [
       required: ['questions'],
     },
   },
+  {
+    name: 'generate_interview_answer',
+    description:
+      "Generate a bulleted answer to a single interview question, grounded in the candidate's content pool.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        questionId: { type: 'string', description: 'The id of the question being answered' },
+        bullets: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of 3-5 first-person bullets answering the question',
+        },
+      },
+      required: ['questionId', 'bullets'],
+    },
+  },
 ];
 
 export const coverLetterTools: ToolDefinition[] = resumeTools.filter(
@@ -312,4 +329,8 @@ export const coverLetterTools: ToolDefinition[] = resumeTools.filter(
 
 export const interviewQuestionsTools: ToolDefinition[] = resumeTools.filter(
   (t) => t.name === 'generate_interview_questions'
+);
+
+export const interviewPrepTools: ToolDefinition[] = resumeTools.filter(
+  (t) => t.name === 'generate_interview_answer'
 );

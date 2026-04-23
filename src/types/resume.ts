@@ -174,3 +174,9 @@ export interface InterviewQuestions {
   questions: string[];
   createdAt: string;
 }
+
+export interface InterviewPrep {
+  id: string;                              // always 'default' — single global record
+  answers: Record<string, string[]>;       // questionId → array of bullets
+  updatedAt: string;
+}
