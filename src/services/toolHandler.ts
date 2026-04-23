@@ -13,6 +13,7 @@ interface ToolHandlerContext {
   onJobAnalyzed?: (job: JobDescription) => void;
   onCoverLetterGenerated?: (letter: CoverLetter) => void;
   onInterviewQuestionsGenerated?: (iq: InterviewQuestions) => void;
+  onInterviewAnswerGenerated?: (questionId: string, bullets: string[]) => void;
   onActionSuggestion?: (suggestions: ActionSuggestion[]) => void;
   jobDescriptionId?: string;
 }
@@ -293,6 +294,13 @@ export function handleToolCall(
       };
       if (onInterviewQuestionsGenerated) onInterviewQuestionsGenerated(iq);
       return 'Interview questions generated and saved.';
+    }
+
+    case 'generate_interview_answer': {
+      const questionId = (input.questionId as string) || '';
+      const bullets = (input.bullets as string[]) || [];
+      if (ctx.onInterviewAnswerGenerated) ctx.onInterviewAnswerGenerated(questionId, bullets);
+      return `Answer generated for ${questionId} (${bullets.length} bullets).`;
     }
 
     default:

@@ -307,3 +307,40 @@ Generate exactly 5 interview questions the candidate should ask the interviewer.
 - Use ONLY facts from the job description and resume. Do not fabricate company information.
 - Call the generate_interview_questions tool with the array of 5 questions.`;
 }
+
+export function buildInterviewAnswerPrompt(
+  question: { id: string; question: string },
+): string {
+  // Pool JSON is NOT interpolated here — it's passed as a separate cached content block by the hook.
+  // Keeping it out of the system string is what makes the cache breakpoint stable across questions.
+
+  return `${DEFENSE_PREAMBLE}You are an expert interview coach helping a candidate prepare bullet-point answers to a common interview question.
+
+**The candidate's Content Pool is the ONLY source of truth.** Every claim in every bullet must trace directly to an entry in the pool provided separately in the message body. Your job is to articulate a coherent, compelling *story* from the candidate's real material — not to invent, embellish, or approximate anything.
+
+## Question
+${wrapUserData('interview-question', `id: ${question.id}\nquestion: ${question.question}`)}
+
+## Candidate's Content Pool (source of truth)
+The content pool is provided separately in the message body (cached block). Use that as the sole source of facts.
+
+## Your Job
+Produce 3-5 first-person bullet points the candidate can deliver as a spoken answer. Each bullet should:
+
+1. Be written in first person ("I led...", "I learned...", "I shipped...").
+2. Cite only facts present in the content pool — real companies, titles, projects, technologies, numbers, outcomes. If the pool says "led a team of 4", do not round to "5". If the pool doesn't mention a metric, do not invent one.
+3. Build a coherent narrative across the bullets (e.g. situation → action → result for behavioural questions), linking pool entries together into a story rather than listing them.
+4. Be short enough to say out loud in one breath (under ~25 words each).
+
+## Absolute Rules — no fabrication
+- **Never invent facts.** Do not make up company names, job titles, dates, technologies, team sizes, revenue numbers, project names, outcomes, awards, or anything else not explicitly in the pool.
+- **Never paraphrase into false specificity.** If a bullet says "improved performance," do not turn it into "improved performance by 40%."
+- **Never infer beyond what's written.** If the pool lists "React" as a skill, don't claim "5 years of React experience" unless that's also in the pool.
+- **Thin-pool fallback (pure meta-only).** If the pool lacks sufficient material to give a grounded answer to THIS question, do NOT try to produce "some real bullets plus a meta-bullet." Instead, output exactly one bullet: "To answer this question well, add content pool entries about [specific topic — e.g. 'a time you resolved a team conflict' or 'a leadership moment']." Do NOT produce any other bullets. A single honest placeholder beats a mix that invites fabrication.
+- **Empty pool.** If the pool is entirely empty, output one bullet: "Add entries to your Content Pool (work experience, projects, skills) so I can draft an answer grounded in your real career."
+
+## Output
+- Either exactly 3-5 real bullets grounded in the pool, OR exactly 1 meta-bullet (thin/empty pool). Never mix.
+- Do not include the question itself in the output.
+- Call the generate_interview_answer tool with { questionId: "${question.id}", bullets: [...] }.`;
+}
