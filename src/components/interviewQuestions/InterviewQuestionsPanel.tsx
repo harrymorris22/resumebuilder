@@ -3,10 +3,20 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useGenerateInterviewQuestions } from '../../hooks/useGenerateInterviewQuestions';
 
 export function InterviewQuestionsPanel() {
-  const activeInterviewQuestions = useAppStore((s) => s.activeInterviewQuestions);
   const generatedResumeId = useAppStore((s) => s.generatedResumeId);
   const activeJobDescriptionId = useAppStore((s) => s.activeJobDescriptionId);
   const jobDescriptions = useAppStore((s) => s.jobDescriptions);
+  // Derive from list + active JD + generated resume. Scoping by resume too
+  // prevents cross-resume leakage when two resumes target the same JD.
+  const activeInterviewQuestions = useAppStore((s) =>
+    s.activeJobDescriptionId && s.generatedResumeId
+      ? s.interviewQuestions.find(
+          (iq) =>
+            iq.jobDescriptionId === s.activeJobDescriptionId &&
+            iq.resumeId === s.generatedResumeId,
+        ) ?? null
+      : null,
+  );
 
   const { generate, isGenerating, error, abort } = useGenerateInterviewQuestions();
 

@@ -288,6 +288,9 @@ export function handleToolCall(
     case 'generate_interview_questions': {
       const iq: InterviewQuestions = {
         id: generateId(),
+        // resumeId is overlaid by the hook (it has the resume in scope).
+        // Default to '' here so the type is satisfied without widening ctx.
+        resumeId: '',
         jobDescriptionId: ctx.jobDescriptionId || '',
         questions: (input.questions as string[]) || [],
         createdAt: new Date().toISOString(),

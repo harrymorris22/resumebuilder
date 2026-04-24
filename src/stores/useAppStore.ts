@@ -19,6 +19,7 @@ import {
   deleteContentPoolEntry as deletePoolEntryFromDb,
   saveCoverLetter,
   saveInterviewQuestions,
+  deleteInterviewQuestions,
   saveInterviewPrep,
   getInterviewPrep,
   saveJobDescription,
@@ -61,7 +62,6 @@ interface AppState {
   atsKeywords: string[];
   activeCoverLetter: CoverLetter | null;
   interviewQuestions: InterviewQuestions[];
-  activeInterviewQuestions: InterviewQuestions | null;
   interviewPrep: InterviewPrep | null;
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
@@ -110,7 +110,6 @@ interface AppState {
 
   // Actions — interview questions
   addInterviewQuestions: (iq: InterviewQuestions) => void;
-  setActiveInterviewQuestions: (iq: InterviewQuestions | null) => void;
 
   // Actions — interview prep
   updateInterviewPrepAnswer: (questionId: string, bullets: string[]) => void;
@@ -176,7 +175,6 @@ export const useAppStore = create<AppState>()(
       atsKeywords: [],
       activeCoverLetter: null,
       interviewQuestions: [],
-      activeInterviewQuestions: null,
       interviewPrep: null,
       pendingAutoMessage: null,
       latestCoachSuggestion: null,
@@ -499,12 +497,26 @@ export const useAppStore = create<AppState>()(
         if (updatedLetter) saveCoverLetter(get().userId, updatedLetter);
       },
 
-      // Interview questions
+      // Interview questions — upsert by (resumeId, jobDescriptionId). Each
+      // resume keeps its own questions per JD so two resumes targeting the
+      // same JD don't share (or leak) questions. Reuse the existing record's
+      // id so the persistence layer overwrites cleanly rather than piling up
+      // orphan rows.
       addInterviewQuestions: (iq) => {
-        set((s) => ({ interviewQuestions: [...s.interviewQuestions, iq] }));
-        saveInterviewQuestions(get().userId, iq);
+        const existing = get().interviewQuestions.find(
+          (x) => x.jobDescriptionId === iq.jobDescriptionId && x.resumeId === iq.resumeId,
+        );
+        const finalIq = existing ? { ...iq, id: existing.id } : iq;
+        set((s) => ({
+          interviewQuestions: [
+            ...s.interviewQuestions.filter(
+              (x) => !(x.jobDescriptionId === iq.jobDescriptionId && x.resumeId === iq.resumeId),
+            ),
+            finalIq,
+          ],
+        }));
+        saveInterviewQuestions(get().userId, finalIq);
       },
-      setActiveInterviewQuestions: (iq) => set({ activeInterviewQuestions: iq }),
 
       // Interview prep
       updateInterviewPrepAnswer: (questionId, bullets) => {
@@ -622,6 +634,43 @@ export const useAppStore = create<AppState>()(
           }
         }
 
+        // Migrate interview questions to the (resumeId, jobDescriptionId)
+        // key. Pre-v0.7.0.1 records had only jobDescriptionId, and IDB keyed
+        // by `id` (not JD), so regenerating could leave orphan rows — hence
+        // both the dedup pass and the "drop legacy rows" pass.
+        //
+        // 1. Drop rows without resumeId (legacy, ambiguous under the new key
+        //    — we can't know which resume they belonged to, so the honest
+        //    move is to force regeneration rather than guess and leak).
+        // 2. Dedup by (resumeId, jobDescriptionId), keeping newest by createdAt.
+        // 3. Delete losers from persistence so IDB/Firestore don't keep
+        //    dragging them back on next load.
+        const iqCleaned: InterviewQuestions[] = [];
+        const iqToDelete: string[] = [];
+        const iqByKey = new Map<string, InterviewQuestions>();
+        for (const iq of interviewQuestions) {
+          if (!iq.resumeId) {
+            iqToDelete.push(iq.id);
+            continue;
+          }
+          const key = `${iq.resumeId}::${iq.jobDescriptionId}`;
+          const prev = iqByKey.get(key);
+          if (!prev) {
+            iqByKey.set(key, iq);
+          } else {
+            const prevTs = Date.parse(prev.createdAt) || 0;
+            const curTs = Date.parse(iq.createdAt) || 0;
+            if (curTs > prevTs) {
+              iqToDelete.push(prev.id);
+              iqByKey.set(key, iq);
+            } else {
+              iqToDelete.push(iq.id);
+            }
+          }
+        }
+        for (const iq of iqByKey.values()) iqCleaned.push(iq);
+        for (const id of iqToDelete) deleteInterviewQuestions(effectiveUid, id);
+
         // Create default master resume if none exist
         if (resumes.length === 0) {
           const defaultResume = createDefaultResume();
@@ -655,7 +704,7 @@ export const useAppStore = create<AppState>()(
           contentPool,
           jobDescriptions,
           recommendations,
-          interviewQuestions,
+          interviewQuestions: iqCleaned,
           interviewPrep: interviewPrep ?? null,
           hydrated: true,
           activeResumeId,

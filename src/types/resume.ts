@@ -169,6 +169,10 @@ export interface CoverLetter {
 
 export interface InterviewQuestions {
   id: string;
+  // Scopes questions to the resume that generated them. Two resumes targeting
+  // the same JD should each have their own questions — keying by JD alone
+  // caused cross-resume leakage (see v0.7.0.1).
+  resumeId: string;
   jobDescriptionId: string;
   companyUrl?: string;
   questions: string[];

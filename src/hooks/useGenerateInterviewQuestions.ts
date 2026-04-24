@@ -16,7 +16,6 @@ export function useGenerateInterviewQuestions() {
 
   const apiKey = useAppStore((s) => s.apiKey);
   const addInterviewQuestions = useAppStore((s) => s.addInterviewQuestions);
-  const setActiveInterviewQuestions = useAppStore((s) => s.setActiveInterviewQuestions);
   const updateResume = useAppStore((s) => s.updateResume);
   const addContentBankItem = useAppStore((s) => s.addContentBankItem);
 
@@ -99,9 +98,13 @@ export function useGenerateInterviewQuestions() {
                     setError('Generated questions were empty. Try again.');
                     return;
                   }
-                  const iqWithUrl = { ...iq, companyUrl: companyUrl || undefined, jobDescriptionId: jd.id };
+                  const iqWithUrl = {
+                    ...iq,
+                    companyUrl: companyUrl || undefined,
+                    jobDescriptionId: jd.id,
+                    resumeId: resume.id,
+                  };
                   addInterviewQuestions(iqWithUrl);
-                  setActiveInterviewQuestions(iqWithUrl);
                   generated = true;
                 },
               }
@@ -143,7 +146,7 @@ export function useGenerateInterviewQuestions() {
         abortRef.current = null;
       }
     },
-    [apiKey, updateResume, addContentBankItem, addInterviewQuestions, setActiveInterviewQuestions]
+    [apiKey, updateResume, addContentBankItem, addInterviewQuestions]
   );
 
   const abort = useCallback(() => {

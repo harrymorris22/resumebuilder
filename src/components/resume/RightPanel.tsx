@@ -10,7 +10,17 @@ type Tab = 'resume' | 'cover-letter' | 'cv-content' | 'interview-questions';
 export function RightPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('resume');
   const activeCoverLetter = useAppStore((s) => s.activeCoverLetter);
-  const activeInterviewQuestions = useAppStore((s) => s.activeInterviewQuestions);
+  // Derive from list + active JD + generated resume. Mirrored state goes
+  // stale; scoping by resume too prevents cross-resume leakage.
+  const activeInterviewQuestions = useAppStore((s) =>
+    s.activeJobDescriptionId && s.generatedResumeId
+      ? s.interviewQuestions.find(
+          (iq) =>
+            iq.jobDescriptionId === s.activeJobDescriptionId &&
+            iq.resumeId === s.generatedResumeId,
+        ) ?? null
+      : null,
+  );
   const contentPool = useAppStore((s) => s.contentPool);
 
   const tabClass = (tab: Tab) =>
