@@ -1,5 +1,5 @@
 import type { Application, ApplicationStatus } from '../types/resume';
-import { TERMINAL_STATUSES, PIPELINE_STAGES } from '../types/resume';
+import { TERMINAL_STATUSES, ACTIVE_STATUSES, PIPELINE_STAGES } from '../types/resume';
 
 /**
  * Pure functions over Application[]. Used by ApplicationsPage tiles,
@@ -77,12 +77,9 @@ export function interviewsThisWeek(apps: Application[], now: Date): number {
  * Returns 0..1; empty denominator → 0 (not NaN).
  */
 export function responseRate(apps: Application[]): number {
-  const BEYOND_APPLIED: ApplicationStatus[] = [
-    'phone_screen',
-    'interview',
-    'final_round',
-    'offer',
-  ];
+  // Derived from ACTIVE_STATUSES minus 'applied' so it stays in sync
+  // if new active statuses are added to the canonical list.
+  const BEYOND_APPLIED = ACTIVE_STATUSES.filter((s) => s !== 'applied');
   let denom = 0;
   let numer = 0;
   for (const a of apps) {

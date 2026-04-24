@@ -72,6 +72,12 @@ export function ApplicationsPage({ onClose, onOpenResume }: ApplicationsPageProp
       offer: offerRate(applications),
       pipeline: pipelineCounts(applications),
       totalClosed: applications.filter((a) => TERMINAL_STATUSES.includes(a.status)).length,
+      // Safest seed is '' — ISO strings sort lexicographically so every real
+      // updatedAt value beats it, and it avoids a direct index access.
+      lastUpdated: applications.reduce(
+        (acc, a) => (a.updatedAt > acc ? a.updatedAt : acc),
+        '',
+      ),
     }),
     [applications, now],
   );
@@ -176,13 +182,7 @@ export function ApplicationsPage({ onClose, onOpenResume }: ApplicationsPageProp
       {/* Hint row */}
       <div className="text-[11px] font-mono text-stone-400 tabular-nums">
         Showing {visible.length} of {applications.length} · Updated{' '}
-        {daysSince(
-          applications.reduce(
-            (acc, a) => (a.updatedAt > acc ? a.updatedAt : acc),
-            applications[0].updatedAt,
-          ),
-        )}
-        d ago
+        {daysSince(stats.lastUpdated)}d ago
       </div>
 
       <ApplicationDetailDrawer

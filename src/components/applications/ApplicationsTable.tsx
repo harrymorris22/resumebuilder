@@ -41,6 +41,30 @@ function compare(a: Application, b: Application, key: SortKey): number {
   }
 }
 
+interface SortButtonProps {
+  k: SortKey;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
+  children: React.ReactNode;
+}
+
+function SortButton({ k, sortKey, sortDir, onSort, children }: SortButtonProps) {
+  const active = sortKey === k;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(k)}
+      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider ${
+        active ? 'text-stone-900' : 'text-stone-500'
+      } hover:text-stone-800`}
+    >
+      {children}
+      {active && <span>{sortDir === 'asc' ? '↑' : '↓'}</span>}
+    </button>
+  );
+}
+
 export function ApplicationsTable({
   apps,
   onRowClick,
@@ -68,22 +92,6 @@ export function ApplicationsTable({
     }
   }
 
-  function SortButton({ k, children }: { k: SortKey; children: React.ReactNode }) {
-    const active = sortKey === k;
-    return (
-      <button
-        type="button"
-        onClick={() => handleSort(k)}
-        className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider ${
-          active ? 'text-stone-900' : 'text-stone-500'
-        } hover:text-stone-800`}
-      >
-        {children}
-        {active && <span>{sortDir === 'asc' ? '↑' : '↓'}</span>}
-      </button>
-    );
-  }
-
   if (apps.length === 0) {
     return (
       <div className="text-sm text-stone-500 py-8 text-center border border-dashed border-stone-200 rounded-md">
@@ -97,11 +105,11 @@ export function ApplicationsTable({
       <table className="w-full text-sm">
         <thead className="bg-stone-50 border-b border-stone-200">
           <tr>
-            <th className="px-3 py-2 text-left"><SortButton k="company">Company</SortButton></th>
-            <th className="px-3 py-2 text-left"><SortButton k="role">Role</SortButton></th>
-            <th className="px-3 py-2 text-left"><SortButton k="status">Status</SortButton></th>
-            <th className="px-3 py-2 text-left"><SortButton k="appliedAt">Applied</SortButton></th>
-            <th className="px-3 py-2 text-left"><SortButton k="nextStepDate">Next step</SortButton></th>
+            <th className="px-3 py-2 text-left"><SortButton k="company" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>Company</SortButton></th>
+            <th className="px-3 py-2 text-left"><SortButton k="role" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>Role</SortButton></th>
+            <th className="px-3 py-2 text-left"><SortButton k="status" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>Status</SortButton></th>
+            <th className="px-3 py-2 text-left"><SortButton k="appliedAt" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>Applied</SortButton></th>
+            <th className="px-3 py-2 text-left"><SortButton k="nextStepDate" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>Next step</SortButton></th>
             <th className="px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500">Age</th>
             <th className="px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-stone-500">Actions</th>
           </tr>

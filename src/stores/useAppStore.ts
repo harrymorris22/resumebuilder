@@ -568,11 +568,11 @@ export const useAppStore = create<AppState>()(
         saveInterviewPrep(get().userId, next);
       },
 
-      // Applications
-      // Idempotent: if an application already exists for this resumeId, the
       // Navigation
       setCurrentView: (view) => set({ currentView: view }),
 
+      // Applications
+      // Idempotent: if an application already exists for this resumeId, the
       // call is a no-op. This handles resume-regeneration races without
       // creating duplicates — the guard lives in the action so call-sites
       // stay simple.

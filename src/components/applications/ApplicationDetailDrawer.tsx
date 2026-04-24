@@ -31,6 +31,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
   const updateApplication = useAppStore((s) => s.updateApplication);
   const addApplicationEvent = useAppStore((s) => s.addApplicationEvent);
   const removeApplication = useAppStore((s) => s.removeApplication);
+  const setActiveJobDescriptionId = useAppStore((s) => s.setActiveJobDescriptionId);
 
   const [companyLocal, setCompanyLocal] = useState('');
   const [roleLocal, setRoleLocal] = useState('');
@@ -151,7 +152,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
               <button
                 type="button"
                 onClick={() => {
-                  useAppStore.getState().setActiveJobDescriptionId(application.jobDescriptionId);
+                  setActiveJobDescriptionId(application.jobDescriptionId);
                 }}
                 className="px-3 py-1.5 text-xs font-medium text-stone-700 border border-stone-200 rounded-md hover:bg-stone-50"
               >

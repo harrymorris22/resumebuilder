@@ -192,9 +192,8 @@ describe('useAppStore — addApplicationEvent', () => {
     mockSave.mockClear();
     useAppStore.getState().addApplicationEvent('nonexistent', mkEvent('applied'));
     expect(useAppStore.getState().applications[0].events).toHaveLength(1);
-    // save is still called with the unchanged app because get().applications.find
-    // finds the existing one; but the state didn't change semantically. We don't
-    // assert saves here — behavior just can't corrupt state.
+    // find() returns undefined for an unknown appId, so saveApplication is NOT
+    // called — the no-op is clean. State remains unchanged.
   });
 });
 

@@ -36,6 +36,8 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
+    // Intentionally omit filters/onChange from deps — closing over stale values
+    // IS the debounce mechanism. Updating on every keystroke would reset the timer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryLocal]);
 

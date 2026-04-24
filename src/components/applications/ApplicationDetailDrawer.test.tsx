@@ -60,6 +60,7 @@ describe('ApplicationDetailDrawer', () => {
 
   afterEach(() => {
     useAppStore.setState({ applications: [], jobDescriptions: [] } as never);
+    vi.restoreAllMocks();
   });
 
   it('renders nothing when applicationId is null', () => {
@@ -142,32 +143,22 @@ describe('ApplicationDetailDrawer', () => {
   it('Delete button calls removeApplication after confirm', () => {
     seedStore(mkApp());
     const onClose = vi.fn();
-    const originalConfirm = window.confirm;
-    window.confirm = vi.fn().mockReturnValue(true);
-    try {
-      render(
-        <ApplicationDetailDrawer applicationId="app-1" onClose={onClose} onOpenResume={vi.fn()} />,
-      );
-      fireEvent.click(screen.getByRole('button', { name: /delete application/i }));
-      expect(useAppStore.getState().applications).toHaveLength(0);
-      expect(onClose).toHaveBeenCalled();
-    } finally {
-      window.confirm = originalConfirm;
-    }
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(
+      <ApplicationDetailDrawer applicationId="app-1" onClose={onClose} onOpenResume={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /delete application/i }));
+    expect(useAppStore.getState().applications).toHaveLength(0);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('Delete does nothing when user cancels confirm', () => {
     seedStore(mkApp());
-    const originalConfirm = window.confirm;
-    window.confirm = vi.fn().mockReturnValue(false);
-    try {
-      render(
-        <ApplicationDetailDrawer applicationId="app-1" onClose={vi.fn()} onOpenResume={vi.fn()} />,
-      );
-      fireEvent.click(screen.getByRole('button', { name: /delete application/i }));
-      expect(useAppStore.getState().applications).toHaveLength(1);
-    } finally {
-      window.confirm = originalConfirm;
-    }
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(
+      <ApplicationDetailDrawer applicationId="app-1" onClose={vi.fn()} onOpenResume={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /delete application/i }));
+    expect(useAppStore.getState().applications).toHaveLength(1);
   });
 });

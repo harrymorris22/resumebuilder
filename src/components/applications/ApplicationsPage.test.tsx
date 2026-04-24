@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useAppStore } from '../../stores/useAppStore';
 import type { Application } from '../../types/resume';
 
@@ -95,26 +95,24 @@ describe('ApplicationsPage', () => {
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
-  it('company search filter narrows the visible table rows', () => {
+  it('company search filter narrows the visible table rows', async () => {
     useAppStore.setState({
       applications: [
         mkApp({ id: 'a1', company: 'Alpha' }),
         mkApp({ id: 'a2', resumeId: 'res-2', company: 'Beta' }),
       ],
     } as never);
+    vi.useFakeTimers();
     render(<ApplicationsPage onClose={vi.fn()} />);
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
 
     const search = screen.getByPlaceholderText(/search company/i) as HTMLInputElement;
     fireEvent.change(search, { target: { value: 'alp' } });
-    // FilterBar debounces at 200ms — fast-forward.
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        expect(screen.getByText('Alpha')).toBeInTheDocument();
-        expect(screen.queryByText('Beta')).toBeNull();
-        resolve();
-      }, 250);
-    });
+    // FilterBar debounces at 200ms — advance fake clock then flush React updates.
+    act(() => { vi.advanceTimersByTime(250); });
+    vi.useRealTimers();
+    expect(screen.getByText('Alpha')).toBeInTheDocument();
+    expect(screen.queryByText('Beta')).toBeNull();
   });
 });
