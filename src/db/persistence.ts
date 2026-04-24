@@ -5,7 +5,7 @@
  */
 import * as idb from './indexedDb';
 import * as firestore from './firestoreDb';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
+import type { Application, Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
@@ -165,4 +165,21 @@ export async function saveInterviewPrep(uid: string | null, prep: InterviewPrep)
 export async function getInterviewPrep(uid: string | null): Promise<InterviewPrep | undefined> {
   if (uid) return firestore.getInterviewPrep(uid);
   return idb.getInterviewPrep();
+}
+
+// --- Applications ---
+
+export async function saveApplication(uid: string | null, app: Application): Promise<void> {
+  if (uid) return firestore.saveApplication(uid, app);
+  return idb.saveApplication(app);
+}
+
+export async function getAllApplications(uid: string | null): Promise<Application[]> {
+  if (uid) return firestore.getAllApplications(uid);
+  return idb.getAllApplications();
+}
+
+export async function deleteApplication(uid: string | null, id: string): Promise<void> {
+  if (uid) return firestore.deleteApplication(uid, id);
+  return idb.deleteApplication(id);
 }

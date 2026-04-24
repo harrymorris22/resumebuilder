@@ -7,6 +7,7 @@ import { buildGenerateResumePrompt } from '../services/systemPrompt';
 import { handleToolCall } from '../services/toolHandler';
 import { createDefaultResume } from '../utils/resumeDefaults';
 import { createPoolEntriesFromTool, isDuplicatePoolEntry } from '../utils/poolSync';
+import { generateId } from '../utils/id';
 
 const MAX_TOOL_ITERATIONS = 15;
 
@@ -32,6 +33,7 @@ export function useGenerateResume() {
   const setGeneratedResumeId = useAppStore((s) => s.setGeneratedResumeId);
   const addContentBankItem = useAppStore((s) => s.addContentBankItem);
   const addPoolEntry = useAppStore((s) => s.addPoolEntry);
+  const addApplication = useAppStore((s) => s.addApplication);
 
   const generate = useCallback(
     async (templateId?: string) => {
@@ -72,6 +74,23 @@ export function useGenerateResume() {
         addResume(newResume);
         setActiveResumeId(newResume.id);
         setGeneratedResumeId(newResume.id);
+
+        // Auto-create the matching Application (1:1 resume↔application).
+        // The idempotency guard lives in addApplication, so a regeneration
+        // race won't create a second row.
+        const nowIso = new Date().toISOString();
+        addApplication({
+          id: generateId(),
+          resumeId: newResume.id,
+          jobDescriptionId: jd.id,
+          company: jd.company,
+          role: jd.title,
+          status: 'draft',
+          appliedAt: null,
+          events: [{ id: generateId(), status: 'draft', date: nowIso }],
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        });
 
         const client = getClient(apiKey);
         const systemPrompt = buildGenerateResumePrompt(state.contentPool, jd);
@@ -225,7 +244,7 @@ export function useGenerateResume() {
         abortRef.current = null;
       }
     },
-    [apiKey, addResume, updateResume, setActiveResumeId, setGeneratedResumeId, addContentBankItem, addPoolEntry]
+    [apiKey, addResume, updateResume, setActiveResumeId, setGeneratedResumeId, addContentBankItem, addPoolEntry, addApplication]
   );
 
   const abort = useCallback(() => {

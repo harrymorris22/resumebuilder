@@ -12,24 +12,45 @@ export function Header() {
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
   const wizardStep = useAppStore((s) => s.wizardStep);
   const resumes = useAppStore((s) => s.resumes);
+  const currentView = useAppStore((s) => s.currentView);
+  const setCurrentView = useAppStore((s) => s.setCurrentView);
   const { user, firebaseAvailable } = useAuth();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [poolOpen, setPoolOpen] = useState(false);
   const [prepOpen, setPrepOpen] = useState(false);
+  const applicationsCount = useAppStore((s) => s.applications.length);
 
   return (
     <>
       <header className="flex items-center justify-between px-4 h-14 border-b border-stone-200 bg-white flex-shrink-0">
         <div className="flex items-center gap-3">
-          <h1
-            className="text-lg font-display font-semibold text-stone-900 tracking-tight"
-            title={`v${__APP_VERSION__} (${__COMMIT_HASH__})`}
-          >
-            Resume Builder
-          </h1>
-          <span className="text-xs text-stone-400 hidden sm:inline">
-            {WIZARD_STEP_LABELS[wizardStep]}
-          </span>
+          {currentView === 'applications' ? (
+            <button
+              onClick={() => setCurrentView('wizard')}
+              className="flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-800 transition-colors"
+              title="Back to Resume Builder"
+              aria-label="Back to Resume Builder"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              <span className="font-display font-semibold text-stone-900 text-lg tracking-tight">Resume Builder</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setCurrentView('applications')}
+              className="text-lg font-display font-semibold text-stone-900 tracking-tight hover:text-stone-600 transition-colors cursor-pointer"
+              title={`v${__APP_VERSION__} (${__COMMIT_HASH__}) — Open Applications`}
+              aria-label="Open Applications"
+            >
+              Resume Builder
+            </button>
+          )}
+          {currentView === 'wizard' && (
+            <span className="text-xs text-stone-400 hidden sm:inline">
+              {WIZARD_STEP_LABELS[wizardStep]}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -43,6 +64,27 @@ export function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125v-3.75" />
             </svg>
             <span className="hidden sm:inline">Content Pool</span>
+          </button>
+
+          {/* Applications button */}
+          <button
+            onClick={() => setCurrentView('applications')}
+            className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
+              currentView === 'applications'
+                ? 'bg-stone-900 text-white'
+                : 'text-stone-600 hover:text-stone-800 hover:bg-stone-100'
+            }`}
+            title="Applications"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.098a2.25 2.25 0 01-2.25 2.25h-12a2.25 2.25 0 01-2.25-2.25v-4.072m16.5 0a2.25 2.25 0 00.659-1.591V9.75a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9.75v2.837c0 .621.255 1.178.659 1.591m16.5 0c.12-.088.236-.183.347-.284a2.25 2.25 0 00-.347-3.72m-16.5 0a2.25 2.25 0 00-.347 3.72c.111.101.228.196.347.284m0 0h16.5m-16.5 0c.283-.3.587-.58.906-.84m14.688.84c-.283-.3-.587-.58-.906-.84M8.25 7.5v-.75A2.25 2.25 0 0110.5 4.5h3a2.25 2.25 0 012.25 2.25v.75" />
+            </svg>
+            <span className="hidden sm:inline">Applications</span>
+            {applicationsCount > 0 && (
+              <span className="text-[10px] bg-stone-200 text-stone-600 px-1.5 rounded-full">
+                {applicationsCount}
+              </span>
+            )}
           </button>
 
           {/* Interview Prep button */}

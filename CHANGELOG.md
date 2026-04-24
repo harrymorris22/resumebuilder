@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0.0] - 2026-04-24
+
+### Added
+- **Applications Dashboard.** Every generated resume now becomes a first-class Application with status tracking through the interview pipeline (`draft` → `applied` → `phone_screen` → `interview` → `final_round` → `offer`, plus terminal `rejected`, `withdrawn`, `ghosted`). New top-nav "Applications" button opens a wide drawer with: 5 stat tiles (active / this week / response rate / offer rate / closed), a pipeline sparkline, a sortable Table view, a drag-and-drop Kanban view, and a per-application detail drawer.
+- **1:1 auto-create on resume generation.** When a tailored resume is generated from a JD, a matching Application is created automatically in `draft` status. The Resume ↔ Application link is enforced via an idempotency guard in `addApplication` so rapid regeneration can't create duplicates.
+- **Event-sourced status.** Each status change appends to an `events` array which is the source of truth; the top-level `status` field is a denormalized cache, always updated atomically via `addApplicationEvent`. `appliedAt` fires once on first transition into an active status (applied/phone_screen/interview/final_round/offer) and is not set on draft→terminal transitions, because the user never actually applied.
+- **Type-level guard against status divergence.** `updateApplication` takes an `ApplicationPatch` type that `Omit`s `status`, `events`, and `appliedAt`. Callers cannot patch those fields directly — they must go through `addApplicationEvent`. One code path for all status changes.
+- **Cascade delete.** Removing a resume deletes its linked application from state and persistence. JD deletion does not cascade — `company` and `role` are snapshotted at application creation, so the row survives a deleted JD (the "View JD" button hides and shows "JD deleted" instead).
+- **Pipeline filters.** Status multi-select, debounced company search, and an "interviews this week" toggle that uses local-day boundaries (not UTC hour-diff) so "this week" matches what the user's calendar shows.
+- **Full detail drawer.** Inline-editable company/role/notes, editable metadata fields (job URL, salary, location, contact, next-step date), an event timeline reverse-chronological, quick "Mark applied" action with double-click guard, "Log event" form with optional note, and delete with confirm.
+- **One-time backfill from existing resumes.** On first load after upgrade, every existing resume with a `targetJobId` whose JD is still around gets a draft Application created automatically (snapshotting the JD's company + role at the resume's `createdAt`). Idempotent: re-runs are no-ops because the existing-application guard catches them. Resumes whose JDs were since deleted are skipped (no company/role to snapshot) and can be tracked manually.
+
+### Changed
+- `useGenerateResume` hook now calls `addApplication` after creating the resume when a JD is attached.
+- `Header` gained an "Applications" button (briefcase SVG) with a live count badge, mounted alongside Content Pool / Interview Prep / My Resumes.
+- IDB `DB_VERSION` bumped 5 → 6, adding an `applications` store (additive, non-destructive migration).
+
+### Tests
+- 47 new tests across 8 new test files covering pure stats utils, the store slice including the compile-time `ApplicationPatch` guard and the hydrate-time backfill (with/without targetJobId, missing-JD skip, idempotency), StatusPill color + dropdown behavior, table sort + row actions, Kanban drag-end with the closed-column mapping, detail drawer inline edits + cascade auto-close + delete, page view toggle + filters, and the `useGenerateResume` auto-create regression.
+
 ## [0.7.0.1] - 2026-04-24
 
 ### Fixed

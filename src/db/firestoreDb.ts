@@ -8,7 +8,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
+import type { Application, Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
@@ -301,5 +301,33 @@ export async function getInterviewPrep(uid: string): Promise<InterviewPrep | und
   } catch {
     showToast("Couldn't load interview prep from cloud.");
     return undefined;
+  }
+}
+
+// --- Applications ---
+
+export async function saveApplication(uid: string, app: Application): Promise<void> {
+  try {
+    await setDoc(userDoc(uid, 'applications', app.id), JSON.parse(JSON.stringify(app)));
+  } catch {
+    showToast("Couldn't save application to cloud.");
+  }
+}
+
+export async function getAllApplications(uid: string): Promise<Application[]> {
+  try {
+    const snap = await getDocs(userCol(uid, 'applications'));
+    return snap.docs.map((d) => d.data() as Application);
+  } catch {
+    showToast("Couldn't load applications from cloud.");
+    return [];
+  }
+}
+
+export async function deleteApplication(uid: string, id: string): Promise<void> {
+  try {
+    await deleteDoc(userDoc(uid, 'applications', id));
+  } catch {
+    showToast("Couldn't delete application from cloud.");
   }
 }

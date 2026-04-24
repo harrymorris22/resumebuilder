@@ -3,6 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from './Header';
 
+const mockSetCurrentView = vi.fn();
+
 // Mock stores / contexts to keep this test focused on nav behaviour.
 vi.mock('../../stores/useAppStore', () => ({
   useAppStore: vi.fn((selector: (s: unknown) => unknown) =>
@@ -10,6 +12,9 @@ vi.mock('../../stores/useAppStore', () => ({
       setSettingsOpen: vi.fn(),
       wizardStep: 'content-pool',
       resumes: [],
+      applications: [],
+      currentView: 'wizard',
+      setCurrentView: mockSetCurrentView,
     }),
   ),
 }));
@@ -65,5 +70,30 @@ describe('Header — Interview Prep nav', () => {
     expect(screen.getByRole('button', { name: /Content Pool/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /My Resumes/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Interview Prep/i })).toBeInTheDocument();
+  });
+});
+
+describe('Header — Resume Builder title → Applications', () => {
+  it('renders the Resume Builder title as an accessible button in wizard view', () => {
+    render(<Header />);
+    expect(screen.getByRole('button', { name: /Open Applications/i })).toBeInTheDocument();
+  });
+
+  it('calls setCurrentView("applications") when the title is clicked', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    await user.click(screen.getByRole('button', { name: /Open Applications/i }));
+
+    expect(mockSetCurrentView).toHaveBeenCalledWith('applications');
+  });
+
+  it('calls setCurrentView("applications") when the Applications nav button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<Header />);
+
+    await user.click(screen.getByRole('button', { name: /^Applications$/i }));
+
+    expect(mockSetCurrentView).toHaveBeenCalledWith('applications');
   });
 });
