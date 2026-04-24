@@ -46,7 +46,10 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
     if (applicationId && !application) onClose();
   }, [applicationId, application, onClose]);
 
-  // Sync local fields when a new application is shown.
+  // Sync local fields when a new application is shown. Calling setState
+  // synchronously inside useEffect is intentional here (sync-from-prop pattern):
+  // we want to reset controlled inputs whenever the user opens a different application.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (application) {
       setCompanyLocal(application.company);
@@ -57,6 +60,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
       setLogNote('');
     }
   }, [application?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!applicationId || !application) return null;
 
@@ -325,7 +329,7 @@ function MetaField({
   onSave: (v: string) => void;
 }) {
   const [local, setLocal] = useState(value);
-  useEffect(() => setLocal(value), [value]);
+  useEffect(() => setLocal(value), [value]); // eslint-disable-line react-hooks/set-state-in-effect
   return (
     <label className="block text-xs">
       <span className="text-stone-500">{label}</span>

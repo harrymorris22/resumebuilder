@@ -13,6 +13,7 @@ const PILL_CLASSES: Record<ApplicationStatus, string> = {
   ghosted: 'bg-red-50 text-red-800',
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   draft: 'Draft',
   applied: 'Applied',
@@ -25,6 +26,7 @@ export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   ghosted: 'Ghosted',
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ALL_STATUSES: ApplicationStatus[] = [
   'draft',
   'applied',

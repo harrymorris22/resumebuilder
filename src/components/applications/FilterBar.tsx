@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import type { ApplicationStatus } from '../../types/resume';
 import { ALL_STATUSES, STATUS_LABELS } from './StatusPill';
 
@@ -8,6 +8,7 @@ export interface Filters {
   interviewsThisWeekOnly: boolean;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const EMPTY_FILTERS: Filters = {
   statuses: [],
   companyQuery: '',
@@ -28,9 +29,14 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
   // state when it fires — without these, typing then immediately ticking a
   // status checkbox within 200ms would silently clobber the status selection.
   const filtersRef = useRef(filters);
-  filtersRef.current = filters;
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  // Keep refs in sync with latest props so the debounce closure always reads
+  // current values — without this, typing then ticking a status checkbox within
+  // 200ms would silently clobber the status selection.
+  useLayoutEffect(() => {
+    filtersRef.current = filters;
+    onChangeRef.current = onChange;
+  });
 
   // Debounce company search by 200ms.
   useEffect(() => {
