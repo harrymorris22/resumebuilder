@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0.1] - 2026-04-24
+
+### Fixed
+- **Interview questions no longer leak across resumes.** Creating a second resume after generating questions for a first resume would show the first resume's questions under the second (even though they were for a different job). Root cause: questions were keyed by `jobDescriptionId` only, and the UI read a stale mirrored field (`activeInterviewQuestions`) that never got cleared on resume switch. Questions are now scoped by `(resumeId, jobDescriptionId)`, so two resumes targeting the same JD keep their own question sets. The mirrored field is gone — the active set is derived from the list + current JD + generated resume on every render.
+- **No more accumulating orphan rows in IDB/Firestore.** Pre-fix, regenerating questions for the same JD wrote a new record with a new `id` every time (keyPath was `id`, not `jobDescriptionId`), so IDB silently collected duplicates. Upsert now reuses the existing record's id so the persistence layer overwrites cleanly.
+- **One-time migration on app load** cleans up any legacy corrupt data from previous versions: rows without a `resumeId` are dropped (ambiguous under the new key — forcing regeneration is safer than guessing and re-leaking), and duplicates for the same `(resumeId, jobDescriptionId)` pair are deduplicated, keeping the newest by `createdAt`. Losers are deleted from IDB/Firestore so they don't drag back on next load.
+
+### Changed
+- `InterviewQuestions` type gained a required `resumeId` field.
+- `deleteInterviewQuestions` added to the IDB, Firestore, and persistence-router layers.
+- Store action `addInterviewQuestions` now upserts by `(resumeId, jobDescriptionId)` and reuses existing ids.
+- `InterviewQuestionsPanel` and `RightPanel` derive the active question set from the store list instead of reading a mirrored field.
+
+### Tests
+- 9 new tests (417 total, from 408): cross-resume upsert isolation, hydration migration for legacy rows, hydration dedup for duplicate `(resumeId, jobDescriptionId)` pairs, distinct-pair preservation, and render-flow regressions proving the exact user-reported bug (resume B active, resume A's questions must not render).
+
 ## [0.7.0.0] - 2026-04-23
 
 ### Added

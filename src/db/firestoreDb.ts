@@ -276,6 +276,14 @@ export async function getAllInterviewQuestions(uid: string): Promise<InterviewQu
   }
 }
 
+export async function deleteInterviewQuestions(uid: string, id: string): Promise<void> {
+  try {
+    await deleteDoc(userDoc(uid, 'interviewQuestions', id));
+  } catch {
+    showToast("Couldn't delete interview questions from cloud.");
+  }
+}
+
 // --- Interview Prep ---
 
 export async function saveInterviewPrep(uid: string, prep: InterviewPrep): Promise<void> {

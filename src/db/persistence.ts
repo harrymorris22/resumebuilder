@@ -150,6 +150,11 @@ export async function getAllInterviewQuestions(uid: string | null): Promise<Inte
   return idb.getAllInterviewQuestions();
 }
 
+export async function deleteInterviewQuestions(uid: string | null, id: string): Promise<void> {
+  if (uid) return firestore.deleteInterviewQuestions(uid, id);
+  return idb.deleteInterviewQuestions(id);
+}
+
 // --- Interview Prep ---
 
 export async function saveInterviewPrep(uid: string | null, prep: InterviewPrep): Promise<void> {

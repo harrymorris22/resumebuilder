@@ -225,6 +225,11 @@ export async function getAllInterviewQuestions(): Promise<InterviewQuestions[]> 
   return db.getAll('interviewQuestions');
 }
 
+export async function deleteInterviewQuestions(id: string): Promise<void> {
+  const db = await getDb();
+  if (db) await db.delete('interviewQuestions', id);
+}
+
 // --- Interview Prep ---
 
 export async function saveInterviewPrep(prep: InterviewPrep): Promise<void> {
