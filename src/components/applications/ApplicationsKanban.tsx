@@ -106,6 +106,11 @@ export function ApplicationsKanban({
     // Dropping into "closed" collapses to rejected by default — otherwise
     // we'd have to pick between rejected/withdrawn/ghosted arbitrarily.
     // User can refine via detail drawer.
+    // Exception: block offer→Closed drag to prevent accidental demotion of a
+    // hard-won offer. The user should set terminal status explicitly via the
+    // detail drawer if an offer falls through.
+    if (destCol === 'closed' && app.status === 'offer') return;
+
     const nextStatus: ApplicationStatus =
       destCol === 'closed' ? 'rejected' : (destCol as ApplicationStatus);
 

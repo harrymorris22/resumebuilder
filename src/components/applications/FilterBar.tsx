@@ -24,21 +24,25 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
   const [queryLocal, setQueryLocal] = useState(filters.companyQuery);
   const debounceRef = useRef<number | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
+  // Refs always hold the latest values so the debounce closure reads current
+  // state when it fires — without these, typing then immediately ticking a
+  // status checkbox within 200ms would silently clobber the status selection.
+  const filtersRef = useRef(filters);
+  filtersRef.current = filters;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   // Debounce company search by 200ms.
   useEffect(() => {
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
     debounceRef.current = window.setTimeout(() => {
-      if (queryLocal !== filters.companyQuery) {
-        onChange({ ...filters, companyQuery: queryLocal });
+      if (queryLocal !== filtersRef.current.companyQuery) {
+        onChangeRef.current({ ...filtersRef.current, companyQuery: queryLocal });
       }
     }, 200);
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
-    // Intentionally omit filters/onChange from deps — closing over stale values
-    // IS the debounce mechanism. Updating on every keystroke would reset the timer.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryLocal]);
 
   // Close status popover on outside click.
