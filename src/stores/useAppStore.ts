@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Resume, ResumeSection, ContentPoolEntry, ContentPoolItemData, JobDescription } from '../types/resume';
-import type { ContentBankItem, CoverLetter, InterviewQuestions, InterviewPrep } from '../types/resume';
+import type { ContentBankItem, CoverLetter, InterviewQuestions, InterviewPrep, Application, ApplicationEvent, ApplicationPatch } from '../types/resume';
+import { ACTIVE_STATUSES } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 import type { WizardStep } from '../types/wizard';
@@ -29,6 +30,9 @@ import {
   getAllRecommendations,
   clearRecommendations as clearRecsFromDb,
   getAllInterviewQuestions,
+  saveApplication,
+  getAllApplications,
+  deleteApplication,
 } from '../db/persistence';
 import { createDefaultResume, cloneResume, createDefaultSections } from '../utils/resumeDefaults';
 import { generateId } from '../utils/id';
@@ -63,6 +67,8 @@ interface AppState {
   activeCoverLetter: CoverLetter | null;
   interviewQuestions: InterviewQuestions[];
   interviewPrep: InterviewPrep | null;
+  applications: Application[];
+  currentView: 'wizard' | 'applications';
   pendingAutoMessage: string | null;
   latestCoachSuggestion: { text: string; prompt: string } | null;
   diffSnapshot: ResumeSection[] | null;
@@ -115,6 +121,15 @@ interface AppState {
   updateInterviewPrepAnswer: (questionId: string, bullets: string[]) => void;
   clearInterviewPrepAnswer: (questionId: string) => void;
   clearAllInterviewPrepAnswers: () => void;
+
+  // Actions — navigation
+  setCurrentView: (view: 'wizard' | 'applications') => void;
+
+  // Actions — applications
+  addApplication: (app: Application) => void;
+  updateApplication: (id: string, patch: ApplicationPatch) => void;
+  removeApplication: (id: string) => void;
+  addApplicationEvent: (appId: string, event: ApplicationEvent) => void;
 
   // Actions — ATS
   setAtsKeywords: (keywords: string[]) => void;
@@ -176,6 +191,8 @@ export const useAppStore = create<AppState>()(
       activeCoverLetter: null,
       interviewQuestions: [],
       interviewPrep: null,
+      applications: [],
+      currentView: 'wizard' as const,
       pendingAutoMessage: null,
       latestCoachSuggestion: null,
       diffSnapshot: null,
@@ -206,14 +223,21 @@ export const useAppStore = create<AppState>()(
       },
 
       removeResume: (id) => {
-        const { resumes } = get();
+        const { resumes, applications } = get();
         if (resumes.length <= 1) return; // prevent deleting last resume
         const remaining = resumes.filter((r) => r.id !== id);
+        // Cascade: delete the application for this resume (1:1). An orphan
+        // application with a dead resumeId is worse UX than losing tracking.
+        const appsToDelete = applications.filter((a) => a.resumeId === id);
+        const appsRemaining = applications.filter((a) => a.resumeId !== id);
         set((s) => ({
           resumes: remaining,
+          applications: appsRemaining,
           activeResumeId: s.activeResumeId === id ? remaining[0]?.id ?? null : s.activeResumeId,
         }));
-        deleteResumeFromDb(get().userId, id);
+        const uid = get().userId;
+        deleteResumeFromDb(uid, id);
+        for (const app of appsToDelete) deleteApplication(uid, app.id);
       },
 
       duplicateResume: (id) => {
@@ -544,6 +568,63 @@ export const useAppStore = create<AppState>()(
         saveInterviewPrep(get().userId, next);
       },
 
+      // Navigation
+      setCurrentView: (view) => set({ currentView: view }),
+
+      // Applications
+      // Idempotent: if an application already exists for this resumeId, the
+      // call is a no-op. This handles resume-regeneration races without
+      // creating duplicates — the guard lives in the action so call-sites
+      // stay simple.
+      addApplication: (app) => {
+        if (get().applications.some((a) => a.resumeId === app.resumeId)) return;
+        set((s) => ({ applications: [...s.applications, app] }));
+        saveApplication(get().userId, app);
+      },
+
+      // Takes ApplicationPatch (not Partial<Application>) — status/events/
+      // appliedAt are compile-time forbidden; callers must go through
+      // addApplicationEvent for those transitions.
+      updateApplication: (id, patch) => {
+        set((s) => ({
+          applications: s.applications.map((a) =>
+            a.id === id
+              ? { ...a, ...patch, updatedAt: new Date().toISOString() }
+              : a,
+          ),
+        }));
+        const updated = get().applications.find((a) => a.id === id);
+        if (updated) saveApplication(get().userId, updated);
+      },
+
+      removeApplication: (id) => {
+        set((s) => ({ applications: s.applications.filter((a) => a.id !== id) }));
+        deleteApplication(get().userId, id);
+      },
+
+      addApplicationEvent: (appId, event) => {
+        set((s) => ({
+          applications: s.applications.map((a) => {
+            if (a.id !== appId) return a;
+            // appliedAt fires once, only on first transition into an ACTIVE
+            // status (applied/phone_screen/interview/final_round/offer).
+            // draft→terminal (rejected/withdrawn/ghosted) does NOT set
+            // appliedAt because the user never actually applied.
+            const shouldSetApplied =
+              a.appliedAt === null && ACTIVE_STATUSES.includes(event.status);
+            return {
+              ...a,
+              events: [...a.events, event],
+              status: event.status,
+              appliedAt: shouldSetApplied ? event.date : a.appliedAt,
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+        const updated = get().applications.find((a) => a.id === appId);
+        if (updated) saveApplication(get().userId, updated);
+      },
+
       // ATS
       setAtsKeywords: (keywords) => set({ atsKeywords: keywords }),
 
@@ -601,7 +682,7 @@ export const useAppStore = create<AppState>()(
         const effectiveUid = uid ?? get().userId;
         if (uid !== undefined) set({ userId: uid ?? null });
 
-        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations, interviewQuestions, interviewPrep] = await Promise.all([
+        const [resumes, chatSessions, contentBankItems, contentPool, jobDescriptions, recommendations, interviewQuestions, interviewPrep, applications] = await Promise.all([
           getAllResumes(effectiveUid),
           getAllChatSessions(effectiveUid),
           getAllContentBankItems(effectiveUid),
@@ -610,6 +691,7 @@ export const useAppStore = create<AppState>()(
           getAllRecommendations(effectiveUid),
           getAllInterviewQuestions(effectiveUid),
           getInterviewPrep(effectiveUid),
+          getAllApplications(effectiveUid),
         ]);
 
         // Migrate persisted data: deduplicate bullets + strip location from experience items
@@ -671,6 +753,40 @@ export const useAppStore = create<AppState>()(
         for (const iq of iqByKey.values()) iqCleaned.push(iq);
         for (const id of iqToDelete) deleteInterviewQuestions(effectiveUid, id);
 
+        // Backfill: every existing resume with a targetJobId should have a
+        // matching Application (1:1). Pre-v0.8.0.0 resumes were generated
+        // before the Applications feature shipped, so we walk the resume
+        // list, find the ones without a linked application, and create a
+        // draft application using the JD's company + role snapshot.
+        //
+        // Idempotent: re-running on next load is a no-op because the
+        // hasApp guard sees the existing application. Resumes whose JD has
+        // since been deleted are skipped — we don't have company/role to
+        // snapshot, and the user can manage those resumes manually.
+        const existingResumeIds = new Set(applications.map((a) => a.resumeId));
+        for (const resume of resumes) {
+          if (!resume.targetJobId) continue;
+          if (existingResumeIds.has(resume.id)) continue;
+          const jd = jobDescriptions.find((j) => j.id === resume.targetJobId);
+          if (!jd) continue;
+          const ts = resume.createdAt;
+          const newApp: Application = {
+            id: generateId(),
+            resumeId: resume.id,
+            jobDescriptionId: jd.id,
+            company: jd.company,
+            role: jd.title,
+            status: 'draft',
+            appliedAt: null,
+            events: [{ id: generateId(), status: 'draft', date: ts }],
+            createdAt: ts,
+            updatedAt: ts,
+          };
+          applications.push(newApp);
+          existingResumeIds.add(resume.id);
+          saveApplication(effectiveUid, newApp);
+        }
+
         // Create default master resume if none exist
         if (resumes.length === 0) {
           const defaultResume = createDefaultResume();
@@ -706,6 +822,7 @@ export const useAppStore = create<AppState>()(
           recommendations,
           interviewQuestions: iqCleaned,
           interviewPrep: interviewPrep ?? null,
+          applications,
           hydrated: true,
           activeResumeId,
           wizardStep,

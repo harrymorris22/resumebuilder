@@ -7,12 +7,17 @@ import { WizardShell } from './components/wizard/WizardShell';
 import { FirestoreToast } from './components/layout/FirestoreToast';
 import { LandingPage } from './components/landing/LandingPage';
 import { MigrationModal } from './components/auth/MigrationModal';
+import { ApplicationsPage } from './components/applications/ApplicationsPage';
 import { isMigrationDone, hasLocalData, isFirestoreEmpty, markMigrationDone } from './utils/migration';
 
 function AppContent() {
   const { uid, loading: authLoading, firebaseAvailable } = useAuth();
   const hydrated = useAppStore((s) => s.hydrated);
   const hydrateFromIdb = useAppStore((s) => s.hydrateFromIdb);
+  const currentView = useAppStore((s) => s.currentView);
+  const setCurrentView = useAppStore((s) => s.setCurrentView);
+  const setWizardStep = useAppStore((s) => s.setWizardStep);
+  const setActiveResumeId = useAppStore((s) => s.setActiveResumeId);
 
   // Track whether the user chose to continue without an account
   const [continueLocal, setContinueLocal] = useState(false);
@@ -80,7 +85,20 @@ function AppContent() {
   return (
     <div className="flex flex-col h-screen bg-stone-50 text-stone-900">
       <Header />
-      <WizardShell />
+      {currentView === 'applications' ? (
+        <main className="flex-1 overflow-y-auto">
+          <ApplicationsPage
+            onClose={() => setCurrentView('wizard')}
+            onOpenResume={(resumeId) => {
+              setActiveResumeId(resumeId);
+              setWizardStep('refine');
+              setCurrentView('wizard');
+            }}
+          />
+        </main>
+      ) : (
+        <WizardShell />
+      )}
       <SettingsModal />
       <FirestoreToast />
       {migrationState === 'needed' && uid && (

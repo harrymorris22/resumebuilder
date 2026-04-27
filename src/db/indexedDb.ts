@@ -1,10 +1,10 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
+import type { Application, Resume, ContentBankItem, ContentPoolEntry, CoverLetter, InterviewQuestions, InterviewPrep, JobDescription } from '../types/resume';
 import type { ChatSession } from '../types/chat';
 import type { Recommendation } from '../types/recommendation';
 
 const DB_NAME = 'resume-builder';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 interface ResumeBuilderDB {
   resumes: Resume;
@@ -16,6 +16,7 @@ interface ResumeBuilderDB {
   recommendations: Recommendation;
   interviewQuestions: InterviewQuestions;
   interviewPrep: InterviewPrep;
+  applications: Application;
 }
 
 let dbInstance: IDBPDatabase<ResumeBuilderDB> | null = null;
@@ -56,6 +57,9 @@ async function getDb(): Promise<IDBPDatabase<ResumeBuilderDB> | null> {
         }
         if (!db.objectStoreNames.contains('interviewPrep')) {
           db.createObjectStore('interviewPrep', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('applications')) {
+          db.createObjectStore('applications', { keyPath: 'id' });
         }
       },
     });
@@ -241,4 +245,22 @@ export async function getInterviewPrep(): Promise<InterviewPrep | undefined> {
   const db = await getDb();
   if (!db) return undefined;
   return db.get('interviewPrep', 'default');
+}
+
+// --- Applications ---
+
+export async function saveApplication(app: Application): Promise<void> {
+  const db = await getDb();
+  if (db) await db.put('applications', app);
+}
+
+export async function getAllApplications(): Promise<Application[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.getAll('applications');
+}
+
+export async function deleteApplication(id: string): Promise<void> {
+  const db = await getDb();
+  if (db) await db.delete('applications', id);
 }

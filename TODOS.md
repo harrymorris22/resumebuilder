@@ -16,6 +16,9 @@ Collapsible "Completed (N)" section at bottom of action panel showing what the A
 
 ## Completed
 
+### Applications Dashboard ✓
+Shipped in v0.8.0.0. Every generated resume becomes a first-class Application tracked through the interview pipeline (draft → applied → phone_screen → interview → final_round → offer, plus terminal rejected/withdrawn/ghosted). New top-nav "Applications" button opens a wide drawer with 5 stat tiles + pipeline sparkline, sortable Table view, drag-drop Kanban view, per-application detail drawer with inline edits and event timeline. 1:1 Resume ↔ Application with auto-create on generate, event-sourced status (events array is truth), cascade delete on resume removal, and a type-level guard (`ApplicationPatch`) that forbids status mutations outside `addApplicationEvent`. 43 new tests.
+
 ### Prompt Injection Mitigation ✓
 Shipped in v0.5.2.0. XML boundary tags around all user content in prompts, defense preamble on every system prompt, sanitization of common injection patterns (role markers, tag escapes, code fence breakouts). 21 tests. Covers all 5 prompt builders + 3 inline prompts.
 

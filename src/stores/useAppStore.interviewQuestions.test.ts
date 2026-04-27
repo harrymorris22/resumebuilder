@@ -19,6 +19,7 @@ vi.mock('../db/persistence', async () => {
     getAllJobDescriptions: vi.fn().mockResolvedValue([]),
     getAllRecommendations: vi.fn().mockResolvedValue([]),
     getAllInterviewQuestions: vi.fn().mockResolvedValue([]),
+    getAllApplications: vi.fn().mockResolvedValue([]),
     getInterviewPrep: vi.fn().mockResolvedValue(undefined),
     saveResume: vi.fn(),
     saveChatSession: vi.fn(),

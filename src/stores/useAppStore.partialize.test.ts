@@ -44,4 +44,30 @@ describe('useAppStore — partialize allowlist (regression)', () => {
       expect(raw).not.toContain('"resumes":[');
     }
   });
+
+  it('does not write applications to localStorage (regression)', () => {
+    useAppStore.setState({
+      apiKey: 'touch-again',
+      applications: [
+        {
+          id: 'app-1',
+          resumeId: 'res-1',
+          jobDescriptionId: 'jd-1',
+          company: 'Acme',
+          role: 'SWE',
+          status: 'draft',
+          appliedAt: null,
+          events: [{ id: 'ev-0', status: 'draft', date: '2026-04-01T00:00:00.000Z' }],
+          createdAt: '2026-04-01T00:00:00.000Z',
+          updatedAt: '2026-04-01T00:00:00.000Z',
+        },
+      ],
+    } as never);
+
+    const raw = localStorage.getItem('resume-builder-settings');
+    if (raw) {
+      expect(raw).not.toContain('"applications":');
+      expect(raw).not.toContain('"Acme"');
+    }
+  });
 });

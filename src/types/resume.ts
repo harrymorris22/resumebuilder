@@ -184,3 +184,82 @@ export interface InterviewPrep {
   answers: Record<string, string[]>;       // questionId → array of bullets
   updatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Applications — each generated resume becomes a first-class Application with
+// status tracking through the interview pipeline. 1:1 resume↔application.
+// ---------------------------------------------------------------------------
+
+export type ApplicationStatus =
+  | 'draft'
+  | 'applied'
+  | 'phone_screen'
+  | 'interview'
+  | 'final_round'
+  | 'offer'
+  | 'rejected'
+  | 'withdrawn'
+  | 'ghosted';
+
+export const TERMINAL_STATUSES: readonly ApplicationStatus[] = [
+  'rejected',
+  'withdrawn',
+  'ghosted',
+] as const;
+
+// Active (non-terminal, post-draft) statuses. First transition into one of these
+// sets `appliedAt`. Transitions into terminal statuses do NOT set `appliedAt`
+// because the user never actually applied.
+export const ACTIVE_STATUSES: readonly ApplicationStatus[] = [
+  'applied',
+  'phone_screen',
+  'interview',
+  'final_round',
+  'offer',
+] as const;
+
+// Ordered non-terminal pipeline stages, used by kanban and sparkline.
+export const PIPELINE_STAGES: readonly ApplicationStatus[] = [
+  'draft',
+  'applied',
+  'phone_screen',
+  'interview',
+  'final_round',
+  'offer',
+] as const;
+
+export interface ApplicationEvent {
+  id: string;
+  status: ApplicationStatus;
+  date: string; // ISO
+  note?: string;
+}
+
+export interface Application {
+  id: string;
+  resumeId: string; // → Resume.id (1:1)
+  jobDescriptionId: string; // → JobDescription.id (denormalized)
+  company: string; // snapshot, editable
+  role: string; // snapshot, editable
+  status: ApplicationStatus; // == events[events.length-1].status
+  appliedAt: string | null; // set on first transition into an ACTIVE status
+  jobUrl?: string;
+  salary?: string;
+  location?: string;
+  contact?: string;
+  nextStepDate?: string | null;
+  events: ApplicationEvent[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Patch type for updateApplication — excludes fields that must flow through
+// addApplicationEvent (status/events/appliedAt) or are immutable (id/resumeId/
+// createdAt) or managed by the store (updatedAt).
+export type ApplicationPatch = Partial<
+  Omit<
+    Application,
+    'id' | 'resumeId' | 'status' | 'events' | 'appliedAt' | 'updatedAt' | 'createdAt'
+  >
+>;
