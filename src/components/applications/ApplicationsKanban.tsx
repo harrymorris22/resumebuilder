@@ -111,6 +111,8 @@ export function ApplicationsKanban({
     // detail drawer if an offer falls through.
     if (destCol === 'closed' && app.status === 'offer') return;
 
+    // Guard against unknown column IDs (e.g., stale drag state from deleted columns).
+    if (destCol !== 'closed' && !PIPELINE_STAGES.includes(destCol as ApplicationStatus)) return;
     const nextStatus: ApplicationStatus =
       destCol === 'closed' ? 'rejected' : (destCol as ApplicationStatus);
 

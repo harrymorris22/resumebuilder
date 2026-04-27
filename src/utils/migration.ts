@@ -69,18 +69,20 @@ export interface MigrationResult {
   coverLetters: number;
   jobDescriptions: number;
   recommendations: number;
+  applications: number;
 }
 
 /** Copy all data from IndexedDB to Firestore for the given user. */
 export async function migrateIdbToFirestore(uid: string): Promise<MigrationResult> {
   // Read everything from IDB
-  const [resumes, contentPool, chatSessions, contentBankItems, jobDescriptions, recommendations] = await Promise.all([
+  const [resumes, contentPool, chatSessions, contentBankItems, jobDescriptions, recommendations, applications] = await Promise.all([
     idb.getAllResumes(),
     idb.getAllContentPoolEntries(),
     idb.getAllChatSessions(),
     idb.getAllContentBankItems(),
     idb.getAllJobDescriptions(),
     idb.getAllRecommendations(),
+    idb.getAllApplications(),
   ]);
 
   // Write everything to Firestore (fire all writes in parallel)
@@ -103,6 +105,9 @@ export async function migrateIdbToFirestore(uid: string): Promise<MigrationResul
   }
   for (const rec of recommendations) {
     writes.push(firestore.saveRecommendation(uid, rec));
+  }
+  for (const app of applications) {
+    writes.push(firestore.saveApplication(uid, app));
   }
 
   // Note: cover letters are queried by resumeId, not getAllCoverLetters.
@@ -128,5 +133,6 @@ export async function migrateIdbToFirestore(uid: string): Promise<MigrationResul
     coverLetters: coverLetterCount,
     jobDescriptions: jobDescriptions.length,
     recommendations: recommendations.length,
+    applications: applications.length,
   };
 }

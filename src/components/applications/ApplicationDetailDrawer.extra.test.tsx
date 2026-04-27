@@ -44,9 +44,9 @@ function mkJd(id = 'jd-1'): JobDescription {
     id,
     title: 'SWE',
     company: 'Acme',
-    fullText: 'job description',
+    rawText: 'job description',
+    keywords: [],
     createdAt: '2026-04-01T00:00:00.000Z',
-    updatedAt: '2026-04-01T00:00:00.000Z',
   };
 }
 

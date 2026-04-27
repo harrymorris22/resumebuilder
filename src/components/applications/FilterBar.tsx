@@ -25,9 +25,6 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
   const [queryLocal, setQueryLocal] = useState(filters.companyQuery);
   const debounceRef = useRef<number | null>(null);
   const popoverRef = useRef<HTMLDivElement | null>(null);
-  // Refs always hold the latest values so the debounce closure reads current
-  // state when it fires — without these, typing then immediately ticking a
-  // status checkbox within 200ms would silently clobber the status selection.
   const filtersRef = useRef(filters);
   const onChangeRef = useRef(onChange);
   // Keep refs in sync with latest props so the debounce closure always reads

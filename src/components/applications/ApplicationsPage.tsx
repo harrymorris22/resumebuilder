@@ -57,11 +57,12 @@ export function ApplicationsPage({ onClose, onOpenResume }: ApplicationsPageProp
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const now = useMemo(() => new Date(), []);
+  const now = new Date();
 
   const visible = useMemo(
     () => applications.filter((a) => matchesFilters(a, filters, now)),
-    [applications, filters, now],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [applications, filters],
   );
 
   const stats = useMemo(
@@ -79,7 +80,8 @@ export function ApplicationsPage({ onClose, onOpenResume }: ApplicationsPageProp
         '',
       ),
     }),
-    [applications, now],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [applications],
   );
 
   const handleOpenResume = useCallback(

@@ -7,6 +7,7 @@ const mockIdbGetAllChatSessions = vi.fn();
 const mockIdbGetAllJobDescriptions = vi.fn();
 const mockIdbGetAllContentBankItems = vi.fn();
 const mockIdbGetAllRecommendations = vi.fn();
+const mockIdbGetAllApplications = vi.fn();
 const mockIdbGetCoverLetter = vi.fn();
 
 vi.mock('../db/indexedDb', () => ({
@@ -16,6 +17,7 @@ vi.mock('../db/indexedDb', () => ({
   getAllJobDescriptions: (...args: unknown[]) => mockIdbGetAllJobDescriptions(...args),
   getAllContentBankItems: (...args: unknown[]) => mockIdbGetAllContentBankItems(...args),
   getAllRecommendations: (...args: unknown[]) => mockIdbGetAllRecommendations(...args),
+  getAllApplications: (...args: unknown[]) => mockIdbGetAllApplications(...args),
   getCoverLetter: (...args: unknown[]) => mockIdbGetCoverLetter(...args),
 }));
 
@@ -29,6 +31,7 @@ const mockFsSaveContentBankItem = vi.fn();
 const mockFsSaveJobDescription = vi.fn();
 const mockFsSaveRecommendation = vi.fn();
 const mockFsSaveCoverLetter = vi.fn();
+const mockFsSaveApplication = vi.fn();
 
 vi.mock('../db/firestoreDb', () => ({
   getAllResumes: (...args: unknown[]) => mockFsGetAllResumes(...args),
@@ -40,6 +43,7 @@ vi.mock('../db/firestoreDb', () => ({
   saveJobDescription: (...args: unknown[]) => mockFsSaveJobDescription(...args),
   saveRecommendation: (...args: unknown[]) => mockFsSaveRecommendation(...args),
   saveCoverLetter: (...args: unknown[]) => mockFsSaveCoverLetter(...args),
+  saveApplication: (...args: unknown[]) => mockFsSaveApplication(...args),
 }));
 
 import {
@@ -61,6 +65,7 @@ beforeEach(() => {
   mockIdbGetAllJobDescriptions.mockResolvedValue([]);
   mockIdbGetAllContentBankItems.mockResolvedValue([]);
   mockIdbGetAllRecommendations.mockResolvedValue([]);
+  mockIdbGetAllApplications.mockResolvedValue([]);
   mockIdbGetCoverLetter.mockResolvedValue(undefined);
 
   mockFsGetAllResumes.mockResolvedValue([]);
@@ -72,6 +77,7 @@ beforeEach(() => {
   mockFsSaveJobDescription.mockResolvedValue(undefined);
   mockFsSaveRecommendation.mockResolvedValue(undefined);
   mockFsSaveCoverLetter.mockResolvedValue(undefined);
+  mockFsSaveApplication.mockResolvedValue(undefined);
 });
 
 describe('isMigrationDone / markMigrationDone', () => {
@@ -176,6 +182,7 @@ describe('migrateIdbToFirestore', () => {
     const contentBankItem = { id: 'cb1' };
     const jobDescription = { id: 'jd1', text: 'Software Engineer' };
     const recommendation = { id: 'rec1', text: 'Add more details' };
+    const application = { id: 'app1', resumeId: 'r1', status: 'draft' };
 
     mockIdbGetAllResumes.mockResolvedValue([resume]);
     mockIdbGetAllContentPoolEntries.mockResolvedValue([poolEntry]);
@@ -183,6 +190,7 @@ describe('migrateIdbToFirestore', () => {
     mockIdbGetAllContentBankItems.mockResolvedValue([contentBankItem]);
     mockIdbGetAllJobDescriptions.mockResolvedValue([jobDescription]);
     mockIdbGetAllRecommendations.mockResolvedValue([recommendation]);
+    mockIdbGetAllApplications.mockResolvedValue([application]);
     mockIdbGetCoverLetter.mockResolvedValue(undefined);
 
     const result = await migrateIdbToFirestore('user-1');
@@ -193,6 +201,7 @@ describe('migrateIdbToFirestore', () => {
     expect(mockFsSaveContentBankItem).toHaveBeenCalledWith('user-1', contentBankItem);
     expect(mockFsSaveJobDescription).toHaveBeenCalledWith('user-1', jobDescription);
     expect(mockFsSaveRecommendation).toHaveBeenCalledWith('user-1', recommendation);
+    expect(mockFsSaveApplication).toHaveBeenCalledWith('user-1', application);
 
     expect(result).toEqual({
       resumes: 1,
@@ -202,6 +211,7 @@ describe('migrateIdbToFirestore', () => {
       coverLetters: 0,
       jobDescriptions: 1,
       recommendations: 1,
+      applications: 1,
     });
   });
 
@@ -235,6 +245,7 @@ describe('migrateIdbToFirestore', () => {
       coverLetters: 0,
       jobDescriptions: 0,
       recommendations: 0,
+      applications: 0,
     });
     expect(isMigrationDone('user-1')).toBe(true);
   });

@@ -32,6 +32,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
   const addApplicationEvent = useAppStore((s) => s.addApplicationEvent);
   const removeApplication = useAppStore((s) => s.removeApplication);
   const setActiveJobDescriptionId = useAppStore((s) => s.setActiveJobDescriptionId);
+  const setCurrentView = useAppStore((s) => s.setCurrentView);
 
   const [companyLocal, setCompanyLocal] = useState('');
   const [roleLocal, setRoleLocal] = useState('');
@@ -58,6 +59,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
       setMarkingApplied(false);
       setShowLogForm(false);
       setLogNote('');
+      setLogStatus('applied');
     }
   }, [application?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -157,6 +159,7 @@ export function ApplicationDetailDrawer({ applicationId, onClose, onOpenResume }
                 type="button"
                 onClick={() => {
                   setActiveJobDescriptionId(application.jobDescriptionId);
+                  setCurrentView('wizard');
                 }}
                 className="px-3 py-1.5 text-xs font-medium text-stone-700 border border-stone-200 rounded-md hover:bg-stone-50"
               >

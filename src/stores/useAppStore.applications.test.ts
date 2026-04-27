@@ -194,6 +194,7 @@ describe('useAppStore — addApplicationEvent', () => {
     expect(useAppStore.getState().applications[0].events).toHaveLength(1);
     // find() returns undefined for an unknown appId, so saveApplication is NOT
     // called — the no-op is clean. State remains unchanged.
+    expect(mockSave).not.toHaveBeenCalled();
   });
 });
 
