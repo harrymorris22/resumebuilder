@@ -147,4 +147,31 @@ describe('ApplicationsKanban', () => {
     capturedOnDragEnd!({ active: { id: 'app-1' }, over: null });
     expect(onStatusChange).not.toHaveBeenCalled();
   });
+
+  it('drag offer app into Closed column is blocked (offer-protection guard)', () => {
+    const onStatusChange = vi.fn();
+    render(
+      <ApplicationsKanban
+        apps={[mkApp({ id: 'app-offer', status: 'offer' })]}
+        onOpen={vi.fn()}
+        onStatusChange={onStatusChange}
+      />,
+    );
+    capturedOnDragEnd!({ active: { id: 'app-offer' }, over: { id: 'closed' } });
+    // offer → closed drag must be silently blocked
+    expect(onStatusChange).not.toHaveBeenCalled();
+  });
+
+  it('drag with unknown app id does nothing', () => {
+    const onStatusChange = vi.fn();
+    render(
+      <ApplicationsKanban
+        apps={[mkApp({ id: 'app-1', status: 'draft' })]}
+        onOpen={vi.fn()}
+        onStatusChange={onStatusChange}
+      />,
+    );
+    capturedOnDragEnd!({ active: { id: 'nonexistent' }, over: { id: 'applied' } });
+    expect(onStatusChange).not.toHaveBeenCalled();
+  });
 });
