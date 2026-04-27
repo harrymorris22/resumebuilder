@@ -86,7 +86,7 @@ export function responseRate(apps: Application[]): number {
     const everApplied = a.events.some((e) => e.status === 'applied');
     if (!everApplied) continue;
     denom += 1;
-    const gotResponse = a.events.some((e) => BEYOND_APPLIED.includes(e.status));
+    const gotResponse = a.events.some((e) => (BEYOND_APPLIED as readonly ApplicationStatus[]).includes(e.status));
     if (gotResponse) numer += 1;
   }
   if (denom === 0) return 0;
