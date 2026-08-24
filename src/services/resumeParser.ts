@@ -180,7 +180,7 @@ export async function parseResumeWithClaude(text: string, apiKey: string): Promi
   const client = getClient(apiKey);
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5',
     max_tokens: 4096,
     system: `${DEFENSE_PREAMBLE}You are a resume parser. Extract all information from the provided resume text into a structured format. Be thorough — capture every detail. Use the create_resume tool to return the structured data. If a field is not present in the resume, use an empty string or empty array.`,
     messages: [

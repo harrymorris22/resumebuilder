@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0.1] - 2026-08-24
+
+### Fixed
+- All AI features now work again. The Anthropic model ID used for every API call (`claude-sonnet-4-20250514`) was invalid; corrected to `claude-sonnet-4-5`. Affects: job description analysis, resume generation, cover letter generation, interview question generation, interview answer generation, recommendations, chat, and resume parsing.
+
 ## [0.8.0.0] - 2026-04-24
 
 ### Added

@@ -107,7 +107,7 @@ describe('useGenerateInterviewAnswer', () => {
 
     expect(mockClient.messages.stream).toHaveBeenCalledOnce();
     const args = mockClient.messages.stream.mock.calls[0][0];
-    expect(args.model).toBe('claude-sonnet-4-20250514');
+    expect(args.model).toBe('claude-sonnet-4-5');
     expect(args.max_tokens).toBe(2048);
     expect(args.tools).toBeDefined();
     expect(args.tools).toHaveLength(1);

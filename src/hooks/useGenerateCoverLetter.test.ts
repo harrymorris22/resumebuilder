@@ -134,7 +134,7 @@ describe('useGenerateCoverLetter', () => {
 
     expect(mockClient.messages.stream).toHaveBeenCalledOnce()
     const callArgs = mockClient.messages.stream.mock.calls[0][0]
-    expect(callArgs.model).toBe('claude-sonnet-4-20250514')
+    expect(callArgs.model).toBe('claude-sonnet-4-5')
     expect(callArgs.tools).toBeDefined()
     expect(callArgs.max_tokens).toBe(4096)
   })
