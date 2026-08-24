@@ -33,7 +33,7 @@ export function useAnalyzeJobDescription() {
         let analyzedJob: JobDescription | null = null;
 
         const stream = client.messages.stream({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 4096,
           system: `${DEFENSE_PREAMBLE}You are a job description analyzer. Extract the job title, company name, and important keywords from the job description. Call the analyze_job_description tool with the extracted information. Keywords should include: required skills, technologies, frameworks, soft skills, certifications, and any other important terms a resume should match.`,
           messages: [

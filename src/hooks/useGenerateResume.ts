@@ -117,7 +117,7 @@ export function useGenerateResume() {
           if (controller.signal.aborted) break;
 
           const stream = client.messages.stream({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5',
             max_tokens: 4096,
             system: systemPrompt,
             messages: currentMessages,

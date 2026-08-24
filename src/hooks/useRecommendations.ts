@@ -57,7 +57,7 @@ export function useRecommendations() {
           if (controller.signal.aborted) break;
 
           const stream = client.messages.stream({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5',
             max_tokens: 4096,
             system: systemPrompt,
             messages: currentMessages,
@@ -213,7 +213,7 @@ export function useRecommendations() {
           }
 
           const stream = client.messages.stream({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5',
             max_tokens: 4096,
             system: `${DEFENSE_PREAMBLE}You are an expert career coach. Execute this specific recommendation on the resume.\n\n${wrapUserData('user-resume', JSON.stringify(resume, null, 2))}`,
             messages: [{ role: 'user', content: executionMessage }],
